@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+#conf/
 develop-eggs/
 dist/
 downloads/
@@ -18,6 +19,7 @@ lib/
 lib64/
 parts/
 sdist/
+tmp/
 var/
 wheels/
 pip-wheel-metadata/

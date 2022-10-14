@@ -1,0 +1,30 @@
+chat.freenode.net
+sapo.pt
+abola.pt
+record.pt
+google.pt
+microsoft.com
+#smalcobaca.pt	
+#149.28.246.185
+#207.148.28.126
+#192.168.123.1 # localhost
+#192.168.123.2 # jammy
+#192.168.123.3 # focal
+192.168.122.18 # jammy
+192.168.122.51 #  focal
+192.168.122.120 #  bionic
+192.168.122.203 # win2022
+#2a01:7c8:aab5:4cd::2 # jammy
+#2a01:7c8:aab5:4cd::20 # jammy
+#2a01:7c8:aab5:4cd::3 # focal
+#2a01:7c8:aab5:4cd::30 # focal
+#2a01:7c8:ffff:4cd::3 
+#2reata01:7c8:ffff:4cd::2
+#face book.com  
+#  34.102.136.180
+#2001:4860:4860::8888
+#192.168.1.64
+#aerear
+#i do not exist
+#1344.3.3.3
+#192.168.122.51
