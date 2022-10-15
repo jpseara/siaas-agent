@@ -2,9 +2,9 @@
 
 _Intelligent System for Automation of Security Audits (SIAAS) - Agent Module_
 
-In the context of the MSc in Telecommunications and Computer Engineering, at ISCTE - Instituto Universitário de Lisboa
+In the context of the MSc in Telecommunications and Computer Engineering, at ISCTE - Instituto Universitário de Lisboa.
 
-By João Pedro Seara, supervised by teacher Carlos Serrão (PhD)
+By João Pedro Seara, supervised by teacher Carlos Serrão (PhD).
 
 __
 
