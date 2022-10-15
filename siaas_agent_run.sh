@@ -8,6 +8,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 cd ${SCRIPT_DIR}
+
 mkdir -p conf
 mkdir -p tmp
 mkdir -p var

@@ -12,13 +12,9 @@ mkdir -p tmp
 mkdir -p conf
 
 apt-get update
-apt-get install -y python3 python3-pip python3-venv git nmap mongodb
+apt-get install -y python3 python3-pip python3-venv git nmap
+
 python3 -m venv ./venv
-
-sed -i 's|bind_ip[[:space:]]*=[[:space:]]*127.0.0.1|bind_ip = 0.0.0.0|g' /etc/mongodb.conf
-systemctl restart mongodb
-systemctl enable mongodb
-
 source ./venv/bin/activate
 pip3 install wheel==0.37.1
 pip3 install -r ./requirements.txt
@@ -26,4 +22,3 @@ pip3 install -e git+https://github.com/jpseara/python3-nmap.git#egg=python3-nmap
 
 ln -fs ${SCRIPT_DIR}/siaas_agent_run.sh /usr/local/bin/
 ln -fs ${SCRIPT_DIR}/siaas_agent_kill.sh /usr/local/bin/
-ln -fs ${SCRIPT_DIR}/siaas_agent_archive.sh /usr/local/bin/

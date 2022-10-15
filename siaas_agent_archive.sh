@@ -15,6 +15,7 @@ now=`date +%Y%m%d%H%M%S`
 cd ${SCRIPT_DIR}
 ./venv/bin/pip3 freeze > ./requirements.txt
 chmod 664 ./requirements.txt
+rm -rf ./venv
 rm -rf ./__pycache__
 rm -rf ./tmp/*
 rm -f ./var/uuid
@@ -22,7 +23,7 @@ rm -rf ./frontend/node_modules/.cache
 sudo chown -R ${bak_user}:${bak_group} .
 
 cd ..
-tar -cpzf ./siaas-agent-${now}.tgz siaas
+tar -cpzf ./siaas-agent-${now}.tgz siaas-agent
 chown ${bak_user}:${bak_group} siaas-agent-${now}.tgz
 chmod 664 siaas-agent-${now}.tgz
 
