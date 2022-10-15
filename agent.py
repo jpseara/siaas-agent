@@ -143,7 +143,7 @@ def main(version="N/A"):
 def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", version=""):
 
     #try:
-       #os.remove(os.path.join(sys.path[0],'tmp/agent.tmp'))
+       #os.remove(os.path.join(sys.path[0],'var/agent.db'))
     #except OSError:
        #pass
     
@@ -161,7 +161,7 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", version=""):
        logger.debug("Information that will now be written to the database:\n" + pprint.pformat(agent_dict))
 
        # Writing in local database
-       siaas_aux.write_to_local_file(os.path.join(sys.path[0],'tmp/agent.tmp'), agent_dict)
+       siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/agent.db'), agent_dict)
        
        time.sleep(LOOP_INTERVAL_SEC)
 

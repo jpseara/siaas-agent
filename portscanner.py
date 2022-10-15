@@ -202,7 +202,7 @@ def main(target_ip="127.0.0.1", nmap_script="vulners"):
 def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", nmap_script="vulners"):
 
     #try:
-       #os.remove(os.path.join(sys.path[0],'tmp/portscanner.tmp'))
+       #os.remove(os.path.join(sys.path[0],'var/portscanner.db'))
     #except OSError:
        #pass
 
@@ -216,9 +216,9 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", nmap_script="vulners
        logger.debug("Loop running ...")
 
        # Read hosts in the neighbourhood
-       hosts = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'tmp/neighbourhood.tmp'))
+       hosts = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'))
 
-       if hosts == None or len(hosts) == 0:
+       if len(hosts or '') == 0:
            logger.warning("Couldn't read neighbourhood data. Either it's still being populated, or no neighbours exist at the moment. Trying again ...")
            time.sleep(5)
            continue
@@ -234,7 +234,7 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", nmap_script="vulners
        portscanner_dict[siaas_uuid]["portscanner"]=scan_results_all
 
        # Writing in local database
-       siaas_aux.write_to_local_file(os.path.join(sys.path[0],'tmp/portscanner.tmp'), portscanner_dict)
+       siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/portscanner.db'), portscanner_dict)
 
        time.sleep(LOOP_INTERVAL_SEC)
 

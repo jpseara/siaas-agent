@@ -21,22 +21,22 @@ def upload_agent_data(siaas_uuid="00000000-0000-0000-0000-000000000000", db_coll
    current_dict[siaas_uuid]={}
 
    # Grab agent data
-   agent = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'tmp/agent.tmp'))
-   if agent == None or len(agent) ==0:
+   agent = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/agent.db'))
+   if len(agent or '') ==0:
       agent={}
       agent[siaas_uuid]={}
       agent[siaas_uuid]["agent"]={}
 
    # Grab neighbourhood data
-   neighbourhood = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'tmp/neighbourhood.tmp'))
-   if agent == None or len(neighbourhood) ==0:
+   neighbourhood = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'))
+   if len(neighbourhood or '') ==0:
       neighbourhood={}
       neighbourhood[siaas_uuid]={}
       neighbourhood[siaas_uuid]["neighbourhood"]={}
 
    # Grab portscanner data
-   portscanner = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'tmp/portscanner.tmp'))
-   if portscanner == None or len(portscanner) ==0:
+   portscanner = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/portscanner.db'))
+   if len(portscanner or '') ==0:
       portscanner={}
       portscanner[siaas_uuid]={}
       portscanner[siaas_uuid]["portscanner"]={}

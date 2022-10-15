@@ -1,0 +1,10 @@
+#AGENT_ID=00000000-0000-0000-0000-000000000001 # this should be kept empty except for testing purposes
+#AGENT_ID=""
+NMAP_SCRIPT = vulners
+MONGO_USER = siaas
+MONGO_PWD = siaas
+MONGO_HOST = 127.0.0.1:27017
+MONGO_DB = siaas
+MONGO_COLLECTION = agents
+#NMAP_SCRIPT = os.path.join(sys.path[0],"tmp/nmap-vulners")
+LOG_LEVEL = debug

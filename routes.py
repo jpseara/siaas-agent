@@ -29,7 +29,7 @@ def index():
 def agent():
     agent = {}
     try:
-        with open(os.path.join(sys.path[0],'tmp/agent.tmp'), 'r') as file:
+        with open(os.path.join(sys.path[0],'var/agent.db'), 'r') as file:
             content = file.read()
             agent = eval(content)
     except:
@@ -47,7 +47,7 @@ def agent():
 def neighbourhood():
     neigh = {}
     try:
-        with open(os.path.join(sys.path[0],'tmp/neighbourhood.tmp'), 'r') as file:
+        with open(os.path.join(sys.path[0],'var/neighbourhood.db'), 'r') as file:
             content = file.read()
             neigh = eval(content)
     except:
@@ -65,7 +65,7 @@ def neighbourhood():
 def portscanner():
     portscan = {}
     try:
-        with open(os.path.join(sys.path[0],'tmp/portscanner.tmp'), 'r') as file:
+        with open(os.path.join(sys.path[0],'var/portscanner.db'), 'r') as file:
            content = file.read()
            portscan = eval(content)
     except:

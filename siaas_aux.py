@@ -17,6 +17,53 @@ from urllib.parse import quote_plus
 
 logger = logging.getLogger(__name__)
 
+def get_config_from_configs_db(config_name=None):
+
+    if config_name==None:
+    
+       logger.debug("Getting configuration dictionary from local DB ...")
+       config_dict=read_from_local_file(os.path.join(sys.path[0],'var/config.db'))
+       if len(config_dict or '') > 0:
+           return config_dict
+
+       logger.error("Couldn't get configuration dictionary from local DB!")
+       return {}
+
+    else:
+       
+       logger.debug("Getting configuration value '"+config_name+"' from local DB ...")
+       config_dict=read_from_local_file(os.path.join(sys.path[0],'var/config.db'))
+       if len(config_dict or '') > 0:
+           if config_name in config_dict.keys():
+               return config_dict[config_name]
+       
+       logger.error("Couldn't get configuration named '"+config_name+"' from local DB")
+       return None
+
+def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0],'conf/siaas_agent.cnf')):
+
+    logger.debug("Writing configuration local DB, from local file: "+conf_file)
+
+    config_dict={}
+
+    local_conf_file = read_from_local_file(conf_file)
+    if len(local_conf_file or '') == 0:
+          return False
+
+    for line in local_conf_file.splitlines():
+       try:
+          line_uncommented=line.split('#')[0].rstrip().lstrip()
+          if len(line_uncommented)==0:
+             continue
+          config_name=line_uncommented.split("=",1)[0].lower().rstrip().lstrip()
+          config_value=line_uncommented.split("=",1)[1].rstrip().lstrip()
+          config_dict[config_name]=config_value
+       except:
+          logger.warning("Invalid line from local config file: "+str(line))
+          continue
+
+    return write_to_local_file(os.path.join(sys.path[0],'var/config.db'), config_dict)
+
 def read_mongodb_collection(collection, siaas_uuid="00000000-0000-0000-0000-000000000000"):
    logger.info("Reading data from the remote DB server ...")
    try:
@@ -232,3 +279,10 @@ def to_cidr_notation(bytes_network, bytes_netmask):
 
     return net
 
+if __name__ == "__main__":
+
+    log_level = logging.INFO
+    logging.basicConfig(format='%(asctime)s %(levelname)-5s %(filename)s [%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_level)
+
+    print(str(write_local_configs_db_from_conf_file()))
+    print(str(get_config_from_configs_db("nmap_script")))

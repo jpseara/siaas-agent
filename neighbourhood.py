@@ -285,7 +285,7 @@ def main(interface_to_scan=None):
 def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", interface_to_scan=None):
 
    #try:
-      #os.remove(os.path.join(sys.path[0],'tmp/neighbourhood.tmp'))
+      #os.remove(os.path.join(sys.path[0],'var/neighbourhood.db'))
    #except OSError:
       #pass
 
@@ -301,7 +301,7 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", interface_to_scan=No
       neighbourhood_dict[siaas_uuid]["neighbourhood"]=main(interface_to_scan)
 
       # Writing in local database
-      siaas_aux.write_to_local_file(os.path.join(sys.path[0],'tmp/neighbourhood.tmp'), neighbourhood_dict)
+      siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'), neighbourhood_dict)
 
       time.sleep(LOOP_INTERVAL_SEC)
 
