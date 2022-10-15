@@ -24,10 +24,14 @@ import data_uploader
 SIAAS_VERSION="0.0.1"
 
 if __name__ == "__main__":
-
+   
    print('\n')
 
-   # Read local configuration file
+   # Some default values for some well known variables that can't be changed during runtime
+   AGENT_ID = None
+   LOG_LEVEL = "info"
+
+   # Read local configuration file and insert in local database
    if not siaas_aux.write_config_db_from_conf_file():
        logger.fatal("Can't find or use local configuration file. Exiting.")
        sys.exit(1)
@@ -46,9 +50,9 @@ if __name__ == "__main__":
       logging.basicConfig(format='%(asctime)s.%(msecs)03d %(levelname)-5s %(filename)s [%(processName)s|%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
    # Grabbing a unique system ID before proceeding
-   try:
+   if len(AGENT_ID or ''):
       logger.debug("Using hard configured ID: "+str(AGENT_ID))
-   except:
+   else:
       AGENT_ID=siaas_aux.get_or_create_unique_system_id()
       if AGENT_ID=="00000000-0000-0000-0000-000000000000":
          logger.fatal("Can't proceed without an unique system ID. Exiting.")
@@ -62,11 +66,11 @@ if __name__ == "__main__":
    siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/portscanner.db'), {})
 
    # Main logic
-   agent = Process(target=agent.loop, args=(AGENT_ID,SIAAS_VERSION,))
-   #neighbourhood = Process(target=neighbourhood.loop, args=(AGENT_ID,"enp1s0",))
-   neighbourhood = Process(target=neighbourhood.loop, args=(AGENT_ID,))
-   portscanner = Process(target=portscanner.loop, args=(AGENT_ID,NMAP_SCRIPT,))
-   data_uploader = Process(target=data_uploader.loop, args=(AGENT_ID,MONGO_USER,MONGO_PWD,MONGO_HOST,MONGO_DB,MONGO_COLLECTION,))
+   agent = Process(target=agent.loop, args=(SIAAS_VERSION,))
+   #neighbourhood = Process(target=neighbourhood.loop, args=("enp1s0",))
+   neighbourhood = Process(target=neighbourhood.loop, args=())
+   portscanner = Process(target=portscanner.loop, args=())
+   data_uploader = Process(target=data_uploader.loop, args=(AGENT_ID,))
    agent.start()
    neighbourhood.start()
    portscanner.start()

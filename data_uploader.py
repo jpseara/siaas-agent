@@ -9,8 +9,6 @@ from copy import copy
 
 logger = logging.getLogger(__name__)
 
-LOOP_INTERVAL_SEC=300
-
 def upload_agent_data(siaas_uuid="00000000-0000-0000-0000-000000000000", db_collection=None, last_uploaded_dict={}):
    
    if db_collection == None:
@@ -24,26 +22,20 @@ def upload_agent_data(siaas_uuid="00000000-0000-0000-0000-000000000000", db_coll
    agent = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/agent.db'))
    if len(agent or '') ==0:
       agent={}
-      agent[siaas_uuid]={}
-      agent[siaas_uuid]["agent"]={}
 
    # Grab neighbourhood data
    neighbourhood = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'))
    if len(neighbourhood or '') ==0:
       neighbourhood={}
-      neighbourhood[siaas_uuid]={}
-      neighbourhood[siaas_uuid]["neighbourhood"]={}
 
    # Grab portscanner data
    portscanner = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/portscanner.db'))
    if len(portscanner or '') ==0:
       portscanner={}
-      portscanner[siaas_uuid]={}
-      portscanner[siaas_uuid]["portscanner"]={}
 
-   current_dict[siaas_uuid]["agent"]=agent[siaas_uuid]["agent"]
-   current_dict[siaas_uuid]["neighbourhood"]=neighbourhood[siaas_uuid]["neighbourhood"]
-   current_dict[siaas_uuid]["portscanner"]=portscanner[siaas_uuid]["portscanner"]
+   current_dict[siaas_uuid]["agent"]=agent
+   current_dict[siaas_uuid]["neighbourhood"]=neighbourhood
+   current_dict[siaas_uuid]["portscanner"]=portscanner
 
    if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict)==0:
       logger.info("No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
@@ -63,11 +55,23 @@ def upload_agent_data(siaas_uuid="00000000-0000-0000-0000-000000000000", db_coll
 
    #siaas_aux.read_mongodb_collection(db_collection, siaas_uuid)
 
-def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", mongo_user="siaas", mongo_password="siaas", mongo_host="127.0.0.1", mongo_db="siaas", mongo_collection="agents"):
+def loop(siaas_uuid="00000000-0000-0000-0000-000000000000"):
 
    db_collection=None
    last_uploaded_dict={}
    last_downloaded_dict={}
+
+   # Some default values for some well known variables that can't be changed during runtime
+   MONGO_USER = "siaas"
+   MONGO_PWD = "siaas"
+   MONGO_HOST = "127.0.0.1:27017"
+   MONGO_DB = "siaas"
+   MONGO_COLLECTION = "agents"
+
+   # Generate global variables from the configuration file
+   config_dict=siaas_aux.get_config_from_configs_db()
+   for config_name in config_dict.keys():
+       globals()[config_name.upper()]=config_dict[config_name]
 
    while True:
 
@@ -75,7 +79,7 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", mongo_user="siaas", 
 
      if db_collection == None:
         # Create connection to MongoDB if it doesn't exist
-        db_collection=siaas_aux.connect_mongodb_collection(mongo_user, mongo_password, mongo_host, mongo_db, mongo_collection)
+        db_collection=siaas_aux.connect_mongodb_collection(MONGO_USER, MONGO_PWD, MONGO_HOST, MONGO_DB, MONGO_COLLECTION)
 
      if db_collection != None:
         # Upload agent data
@@ -83,7 +87,14 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", mongo_user="siaas", 
         # Download agent data
         #last_downloaded_dict=download_agent_data(siaas_uuid, db_collection, last_downloaded_dict)
 
-     time.sleep(LOOP_INTERVAL_SEC)
+        # Sleep before next loop
+        try:
+           sleep_time=int(siaas_aux.get_config_from_configs_db("data_uploader_loop_interval_sec"))
+           logger.debug("Sleeping for "+str(sleep_time)+" seconds before next loop ...")
+           time.sleep(sleep_time)
+        except:
+           logger.debug("The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
+           time.sleep(60)
 
 if __name__ == "__main__":
 

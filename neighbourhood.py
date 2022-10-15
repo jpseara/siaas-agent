@@ -22,9 +22,6 @@ import pprint
 
 logger = logging.getLogger(__name__)
 
-ARP_TIMEOUT_SEC=5
-LOOP_INTERVAL_SEC=15
-
 def get_arp_ndp_known_hosts():
 
     logger.info("Grabbing known hosts from local ARP/NDP tables ...")
@@ -149,28 +146,19 @@ def scan_and_print_neighbors(net, interface, timeout=5):
 
     return ip_mac_host
 
-def add_manual_hosts(manual_hosts_file=os.path.join(sys.path[0],'conf/manual_hosts.txt')):
+def add_manual_hosts(manual_hosts_string=""):
     
     logger.info("Starting host discovery for manually configured entries ...")
 
     ip_mac_host={}
 
-    #try:
-    #   with open(file, 'r') as file:
-    #      content = file.read().splitlines()
-    #except:
-    #   logger.warning("No manual hosts file was found.")
-    #   return(ip_mac_host)
+    if len(manual_hosts_string or '') == 0:
+       logger.warning("No manual hosts were found.")
+       return ip_mac_host
 
-    # Grab manual configured hosts
-    manual_hosts = siaas_aux.read_from_local_file(manual_hosts_file)
-    try:
-       manual_host_list=manual_hosts.splitlines()
-    except:
-       logger.warning("No manual hosts file was found.")
-       manual_host_list=[]
+    manual_hosts_list=manual_hosts_string.split(",")
 
-    for host_raw in manual_host_list:
+    for host_raw in manual_hosts_list:
       
        all_ips = {}
        host_uncommented=host_raw.split('#')[0]
@@ -266,7 +254,12 @@ def main(interface_to_scan=None):
         mask=net.split('/')[1]
 
         if int(mask) > 16:
-            auto_hosts=dict(list(auto_hosts.items())+list(scan_and_print_neighbors(net, interface, timeout=ARP_TIMEOUT_SEC).items()))
+            try:
+              arp_timeout=int(siaas_aux.get_config_from_configs_db("neighbourhood_arp_timeout_sec"))
+            except:
+              arp_timeout=5
+              logger.warning("Invalid or undefined timeout configuration for ARP timeout. Defaulting to \"5\".")
+            auto_hosts=dict(list(auto_hosts.items())+list(scan_and_print_neighbors(net, interface, timeout=arp_timeout).items()))
             auto_scanned_interfaces+=1
         else:
             logger.warning("Skipping network "+net+" as the subnet size is too big.")
@@ -275,14 +268,14 @@ def main(interface_to_scan=None):
         logger.warning("Automatic neighbourhood discovery found no interfaces with a valid network configuration to work on.")
 
     # Grab manual configured hosts
-    manual_hosts=add_manual_hosts(os.path.join(sys.path[0],'conf/manual_hosts.txt'))
+    manual_hosts=add_manual_hosts(siaas_aux.get_config_from_configs_db("manual_hosts"))
 
     # Merge all hosts (give priority to automatically found hosts in the neighbourhood, as they have more info)
     all_hosts = dict(list(manual_hosts.items())+list(auto_hosts.items())+list(arp_ndp_hosts.items()))
 
     return all_hosts
 
-def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", interface_to_scan=None):
+def loop(interface_to_scan=None):
 
    #try:
       #os.remove(os.path.join(sys.path[0],'var/neighbourhood.db'))
@@ -292,18 +285,23 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", interface_to_scan=No
    while True:
 
       neighbourhood_dict={}
-      neighbourhood_dict[siaas_uuid]={}
-      neighbourhood_dict[siaas_uuid]["neighbourhood"]={}
 
       logger.debug("Loop running ...")
 
       # Creating neighbourhood dict
-      neighbourhood_dict[siaas_uuid]["neighbourhood"]=main(interface_to_scan)
+      neighbourhood_dict=main(interface_to_scan)
 
       # Writing in local database
       siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'), neighbourhood_dict)
 
-      time.sleep(LOOP_INTERVAL_SEC)
+      # Sleep before next loop
+      try:
+         sleep_time=int(siaas_aux.get_config_from_configs_db("neighbourhood_loop_interval_sec"))
+         logger.debug("Sleeping for "+str(sleep_time)+" seconds before next loop ...")
+         time.sleep(sleep_time)
+      except:
+         logger.debug("The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
+         time.sleep(60)
 
 if __name__ == "__main__":
     

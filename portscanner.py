@@ -17,16 +17,20 @@ import pprint
 
 logger = logging.getLogger(__name__)
 
-NMAP_SYSINFO_TIMEOUT_SEC=600
-NMAP_PORTSCAN_TIMEOUT_SEC=300
-LOOP_INTERVAL_SEC=15
-
-def vulnerabilities_per_port(target_ip, port, protocol, nmap_script="vulners", timeout=30):
+def vulnerabilities_per_port(target_ip, port, protocol, nmap_script="vulners", timeout=300):
 
     logger.info("Scanning vulnerabilities for " + target_ip + " at " + str(port) + "/" + protocol+" ...")
     
     vuln_list=[]
     vuln_dict={}
+
+    if len(timeout or '') == 0:
+        timeout=300
+        logger.warning("Invalid or undefined timeout configuration for Nmap portscan. Defaulting to \"300\".")
+
+    if len(nmap_script or '') == 0:
+        nmap_script="vulners"
+        logger.warning("Invalid or undefined Nmap script configuration. Defaulting to \"vulners\".")
 
     ipv=siaas_aux.is_ipv4_or_ipv6(target_ip)
     if ipv==None:
@@ -92,6 +96,10 @@ def get_system_info(target_ip, timeout=30):
     
     sysinfo_dict={}
     detected_ports={}
+
+    if len(timeout or '') == 0:
+        timeout=600
+        logger.warning("Invalid or undefined timeout configuration for Nmap sysinfo scan. Defaulting to \"600\".")
 
     ipv=siaas_aux.is_ipv4_or_ipv6(target_ip)
     if ipv==None:
@@ -172,7 +180,7 @@ def get_system_info(target_ip, timeout=30):
 
     return (sysinfo_dict, detected_ports)
 
-def main(target_ip="127.0.0.1", nmap_script="vulners"):
+def main(target_ip="127.0.0.1"):
 
     timeout=15
     target_info={}
@@ -184,7 +192,7 @@ def main(target_ip="127.0.0.1", nmap_script="vulners"):
     #if target_ip != "192.168.122.51": return (target_ip, target_info)
 
     # Grab system information and detected ports
-    system_info_output=get_system_info(target_ip, timeout=NMAP_SYSINFO_TIMEOUT_SEC)
+    system_info_output=get_system_info(target_ip, timeout=siaas_aux.get_config_from_configs_db("nmap_sysinfo_timeout_sec"))
     target_info["system_info"] = system_info_output[0]
     detected_ports = system_info_output[1]
 
@@ -193,13 +201,13 @@ def main(target_ip="127.0.0.1", nmap_script="vulners"):
         target_info["detected_ports"][port]={}
         target_info["detected_ports"][port]["vulnerabilities"]={}
         target_info["detected_ports"][port]=detected_ports[port]
-        target_info["detected_ports"][port]["vulnerabilities"]=vulnerabilities_per_port(target_ip, port.split("/")[0], port.split("/")[1], nmap_script=nmap_script, timeout=NMAP_PORTSCAN_TIMEOUT_SEC)
+        target_info["detected_ports"][port]["vulnerabilities"]=vulnerabilities_per_port(target_ip, port.split("/")[0], port.split("/")[1], nmap_script=siaas_aux.get_config_from_configs_db("nmap_script"), timeout=siaas_aux.get_config_from_configs_db("nmap_portscan_timeout_sec"))
     
     target_info["last_scan"]=siaas_aux.get_now_utc_str()
 
     return (target_ip, target_info)
 
-def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", nmap_script="vulners"):
+def loop():
 
     #try:
        #os.remove(os.path.join(sys.path[0],'var/portscanner.db'))
@@ -209,8 +217,6 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", nmap_script="vulners
     while True:
        
        portscanner_dict={}
-       portscanner_dict[siaas_uuid]={}
-       portscanner_dict[siaas_uuid]["portscanner"]={}
        scan_results_all={}
 
        logger.debug("Loop running ...")
@@ -225,18 +231,25 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", nmap_script="vulners
 
        with concurrent.futures.ThreadPoolExecutor() as executor:
            futures = []
-           for ip in hosts[siaas_uuid]["neighbourhood"].keys():
-              futures.append(executor.submit(main, target_ip=ip, nmap_script=nmap_script))
+           for ip in hosts.keys():
+              futures.append(executor.submit(main, target_ip=ip))
            for future in concurrent.futures.as_completed(futures):
               scan_results_all[future.result()[0]]=(future.result()[1])
       
        # Creating portscanner dict
-       portscanner_dict[siaas_uuid]["portscanner"]=scan_results_all
+       portscanner_dict=scan_results_all
 
        # Writing in local database
        siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/portscanner.db'), portscanner_dict)
 
-       time.sleep(LOOP_INTERVAL_SEC)
+       # Sleep before next loop
+       try:
+          sleep_time=int(siaas_aux.get_config_from_configs_db("portscanner_loop_interval_sec"))
+          logger.debug("Sleeping for "+str(sleep_time)+" seconds before next loop ...")
+          time.sleep(sleep_time)
+       except:
+          logger.debug("The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
+          time.sleep(60)
 
 if __name__ == "__main__":
 

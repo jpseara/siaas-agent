@@ -6,7 +6,6 @@ import psutil
 import platform
 import cpuinfo
 import socket
-import uuid
 import re
 import time
 import sys
@@ -14,13 +13,10 @@ import os
 import json
 import ipaddress
 import logging
-import uuid
 import pprint
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
-
-LOOP_INTERVAL_SEC=120
 
 def main(version="N/A"):
 
@@ -140,7 +136,7 @@ def main(version="N/A"):
 
     return agent
 
-def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", version=""):
+def loop(version=""):
 
     #try:
        #os.remove(os.path.join(sys.path[0],'var/agent.db'))
@@ -150,20 +146,25 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000", version=""):
     while True:
 
        agent_dict={}
-       agent_dict[siaas_uuid]={}
-       agent_dict[siaas_uuid]["agent"]={}
 
        logger.debug("Loop running ...")
 
-       agent_dict[siaas_uuid]["agent"] = main(version)
+       agent_dict = main(version)
 
        # Creating agent dict
        logger.debug("Information that will now be written to the database:\n" + pprint.pformat(agent_dict))
 
        # Writing in local database
        siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/agent.db'), agent_dict)
-       
-       time.sleep(LOOP_INTERVAL_SEC)
+
+       # Sleep before next loop
+       try: 
+          sleep_time=int(siaas_aux.get_config_from_configs_db("agent_info_loop_interval_sec"))
+          logger.debug("Sleeping for "+str(sleep_time)+" seconds before next loop ...")
+          time.sleep(sleep_time)
+       except:
+          logger.debug("The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
+          time.sleep(60)
 
 if __name__ == "__main__":
 
