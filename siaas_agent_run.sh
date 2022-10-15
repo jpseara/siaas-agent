@@ -13,7 +13,7 @@ mkdir -p conf
 mkdir -p tmp
 mkdir -p var
 
-#git clone https://github.com/vulnersCom/nmap-vulners.git tmp/nmap-vulners
+#rm -rf tmp/nmap-vulners && git clone https://github.com/vulnersCom/nmap-vulners.git tmp/nmap-vulners
 
 source ./venv/bin/activate
 python3 ./siaas_agent.py
