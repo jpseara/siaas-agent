@@ -284,5 +284,5 @@ if __name__ == "__main__":
     log_level = logging.INFO
     logging.basicConfig(format='%(asctime)s %(levelname)-5s %(filename)s [%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_level)
 
-    print(str(write_local_configs_db_from_conf_file()))
-    print(str(get_config_from_configs_db("nmap_script")))
+    #print(str(write_config_db_from_conf_file()))
+    print(str(get_config_from_configs_db()))

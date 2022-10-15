@@ -27,6 +27,12 @@ if __name__ == "__main__":
    
    print('\n')
 
+   # Initializing local databases
+   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/agent.db'), {})
+   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/config.db'), {})
+   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'), {})
+   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/portscanner.db'), {})
+
    # Some default values for some well known variables that can't be changed during runtime
    AGENT_ID = None
    LOG_LEVEL = "info"
@@ -59,11 +65,6 @@ if __name__ == "__main__":
          sys.exit(2)
 
    logger.info("SIAAS Agent v"+SIAAS_VERSION+" starting ["+AGENT_ID+"]")
-
-   # Initializing local databases
-   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/agent.db'), {})
-   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'), {})
-   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/portscanner.db'), {})
 
    # Main logic
    agent = Process(target=agent.loop, args=(SIAAS_VERSION,))
