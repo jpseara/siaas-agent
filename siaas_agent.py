@@ -58,7 +58,10 @@ if __name__ == "__main__":
 
    # Grabbing a unique system ID before proceeding
    if len(AGENT_ID or '') != 0:
-      logger.debug("Using hard configured ID: "+str(AGENT_ID))
+       if AGENT_ID == "ffffffff-ffff-ffff-ffff-ffffffffffff" or AGENT_ID == "00000000-0000-0000-0000-000000000000":
+          logger.warning("The hard configured ID '"+AGENT_ID+"' is reserved for internal use. Aborting !")
+          sys.exit(2)
+       logger.debug("Using hard configured ID: "+str(AGENT_ID))
    else:
       AGENT_ID=siaas_aux.get_or_create_unique_system_id()
       if AGENT_ID=="00000000-0000-0000-0000-000000000000":

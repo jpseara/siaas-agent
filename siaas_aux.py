@@ -69,7 +69,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0],'conf/siaa
           if len(line_uncommented)==0:
              continue
           config_name=line_uncommented.split("=",1)[0].lower().rstrip().lstrip().replace("\"","").replace("\'","")
-          config_value=line_uncommented.split("=",1)[1].rstrip().lstrip().replace("\"","").replace("\'","")
+          config_value=line_uncommented.split("=",1)[1].rstrip().lstrip()
           config_dict[config_name]=config_value
        except:
           logger.warning("Invalid line from local config file: "+str(line))
@@ -156,8 +156,11 @@ def get_or_create_unique_system_id():
    try:
       with open(os.path.join(sys.path[0],'var/uuid'), 'r') as file:
           content = file.read()
-          if len(content) == 0:
+          if len(content or '') == 0:
               raise
+          if content.split('\n')[0] == "ffffffff-ffff-ffff-ffff-ffffffffffff":
+              logger.warning("Invalid ID, reserved for broadcast. Returning a nil UUID.")
+              return "00000000-0000-0000-0000-000000000000"
           logger.debug("Reusing existing UUID: "+str(content))
           return content.split('\n')[0]
    except:

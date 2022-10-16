@@ -162,10 +162,10 @@ def add_manual_hosts(manual_hosts_string=""):
       
        all_ips = {}
        host_uncommented=host_raw.split('#')[0]
-       host=host_uncommented.split('\t')[0].split('\n')[0].split(' ')[0]
+       host=host_uncommented.split('\t')[0].split('\n')[0].rstrip().lstrip()
 
        if len(host_uncommented) > 0 and len(host) == 0:
-           logger.warning("Manually configured host '"+host_uncommented+"' is invalid. Make sure there are no spaces or tabs at the beginning of the line. Skipped.") 
+           logger.warning("Manually configured host '"+host_uncommented+"' is invalid. Skipped.") 
        
        else:
 

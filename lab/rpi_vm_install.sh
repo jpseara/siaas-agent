@@ -28,7 +28,7 @@ sudo virt-install \
   --video vga  \
   --graphics spice \
   --boot 'dtb=qemu-rpi-kernel/versatile-pb-buster.dtb,kernel=qemu-rpi-kernel/kernel-qemu-4.19.50-buster,kernel_args=root=/dev/vda2 panic=1' \
-  --events on_reboot=destroy \
+  --events on_reboot=restart \
   --osinfo detect=on,require=off
 
 rm -f $ZIP_FILE
