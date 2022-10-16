@@ -19,7 +19,7 @@ import routes
 import agent
 import neighbourhood
 import portscanner
-import data_uploader
+import data_transfer
 
 SIAAS_VERSION="0.0.1"
 
@@ -72,14 +72,14 @@ if __name__ == "__main__":
    #neighbourhood = Process(target=neighbourhood.loop, args=("enp1s0",))
    neighbourhood = Process(target=neighbourhood.loop, args=())
    portscanner = Process(target=portscanner.loop, args=())
-   data_uploader = Process(target=data_uploader.loop, args=(AGENT_ID,))
+   data_transfer = Process(target=data_transfer.loop, args=())
    agent.start()
    neighbourhood.start()
    portscanner.start()
-   data_uploader.start()
+   data_transfer.start()
    app.run(debug=True, use_reloader=False, host="0.0.0.0")
    #serve(app, host="0.0.0.0", port=5000)
    agent.join()
    neighbourhood.join()
    portscanner.join()
-   data_uploader.join()
+   data_transfer.join()

@@ -1,7 +1,7 @@
 #agent_id = 00000000-0000-0000-0000-000000000001 # this should be kept commented except for testing purposes
 agent_info_loop_interval_sec = 60
 neighbourhood_arp_timeout_sec = 5
-data_uploader_loop_interval_sec = 15
+data_transfer_loop_interval_sec = 60
 log_level = debug
 manual_hosts = 192.168.122.51,irc.freenode.net,abola.pt
 mongo_collection = agents

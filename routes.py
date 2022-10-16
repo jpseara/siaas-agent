@@ -25,7 +25,7 @@ def index():
         }
     )
 
-@app.route('/siaas_agent', methods=['GET'])
+@app.route('/siaas-agent', methods=['GET'])
 def siaas_agent():
     module = request.args.get('module', default = '*', type = str)
     siaas_uuid = siaas_aux.get_or_create_unique_system_id()

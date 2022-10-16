@@ -9,41 +9,25 @@ from copy import copy
 
 logger = logging.getLogger(__name__)
 
-def upload_agent_data(siaas_uuid="00000000-0000-0000-0000-000000000000", db_collection=None, last_uploaded_dict={}):
+def upload_agent_data(db_collection=None, last_uploaded_dict={}):
    
    if db_collection == None:
       logger.error("No valid DB collection object received. Bypassed remote DB data upload.")
       return last_uploaded_dict
 
-   current_dict={}
-   current_dict[siaas_uuid]={}
+   siaas_uuid = siaas_aux.get_or_create_unique_system_id()
 
-   # Grab agent data
-   agent = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/agent.db'))
-   if len(agent or '') ==0:
-      agent={}
-
-   # Grab neighbourhood data
-   neighbourhood = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'))
-   if len(neighbourhood or '') ==0:
-      neighbourhood={}
-
-   # Grab portscanner data
-   portscanner = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/portscanner.db'))
-   if len(portscanner or '') ==0:
-      portscanner={}
-
-   current_dict[siaas_uuid]["agent"]=agent
-   current_dict[siaas_uuid]["neighbourhood"]=neighbourhood
-   current_dict[siaas_uuid]["portscanner"]=portscanner
+   all_modules = "agent,config,neighbourhood,portscanner"
+   current_dict = siaas_aux.merge_module_dicts_under_uuid(siaas_uuid,all_modules.split(','))
 
    if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict)==0:
       logger.info("No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
       return last_uploaded_dict
 
-   # Creating a new dict with a date object so we can easily filter it and order entries in MongoDB
+   # Creating a new dict with a date object and date transfer direction so we can easily filter it and order entries in MongoDB
    complete_dict=dict(current_dict)
    complete_dict["timestamp"] = siaas_aux.get_now_utc_obj()
+   complete_dict["direction"] = "upstream"
 
    ret_db=False
    if db_collection != None:
@@ -55,7 +39,7 @@ def upload_agent_data(siaas_uuid="00000000-0000-0000-0000-000000000000", db_coll
 
    #siaas_aux.read_mongodb_collection(db_collection, siaas_uuid)
 
-def loop(siaas_uuid="00000000-0000-0000-0000-000000000000"):
+def loop():
 
    db_collection=None
    last_uploaded_dict={}
@@ -93,13 +77,13 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000"):
 
      if db_collection != None:
         # Upload agent data
-        last_uploaded_dict=upload_agent_data(siaas_uuid, db_collection, last_uploaded_dict)
+        last_uploaded_dict=upload_agent_data(db_collection, last_uploaded_dict)
         # Download agent data
-        #last_downloaded_dict=download_agent_data(siaas_uuid, db_collection, last_downloaded_dict)
+        #last_downloaded_dict=download_agent_data(db_collection, last_downloaded_dict)
 
         # Sleep before next loop
         try:
-           sleep_time=int(siaas_aux.get_config_from_configs_db("data_uploader_loop_interval_sec"))
+           sleep_time=int(siaas_aux.get_config_from_configs_db("data_transfer_loop_interval_sec"))
            logger.debug("Sleeping for "+str(sleep_time)+" seconds before next loop ...")
            time.sleep(sleep_time)
         except:
@@ -114,7 +98,7 @@ if __name__ == "__main__":
     print('\nThis script is being directly run, so it will just read data from the DB!\n')
 
     siaas_uuid=siaas_aux.get_or_create_unique_system_id()
-    siaas_uuid="00000000-0000-0000-0000-000000000000" # hack to show all
+    #siaas_uuid="00000000-0000-0000-0000-000000000000" # hack to show all
 
     try:
        collection=siaas_aux.connect_mongodb_collection()

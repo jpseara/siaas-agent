@@ -84,14 +84,14 @@ def read_mongodb_collection(collection, siaas_uuid="00000000-0000-0000-0000-0000
       if(siaas_uuid=="00000000-0000-0000-0000-000000000000"):
           #cursor = collection.find() # show all raw
           cursor = collection.find().sort("_id", -1).limit(5) # show only most recent raw
-          #cursor = collection.find({},{'_id': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent, without object id or timestamp
+          #cursor = collection.find({},{'_id': False, 'direction': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent, hide object id, direction and timestamp
       else:
           #cursor = collection.find({siaas_uuid: {'$exists': True}}) # show all
-          #cursor = collection.find({siaas_uuid: {'$exists': True}},{'_id': False, 'timestamp': False}) # show all, hide object id and timestamp
+          #cursor = collection.find({siaas_uuid: {'$exists': True}},{'_id': False, 'direction': False, 'timestamp': False}) # show all, hide object id, direction and timestamp
           cursor = collection.find({siaas_uuid: {'$exists': True}}).sort("_id", -1).limit(5) # show only most recent
-          #cursor = collection.find({siaas_uuid+"."+"portscanner": {'$exists': True}},{'_id': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent that has the subkey 'portscanner', hide object id and timestamp
-          #cursor = collection.find({siaas_uuid+"."+"agent"+"."+"platform"+"."+"system"+"."+"os": "Linux" },{'_id': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent for agents running on Linux, hide object id and timestamp
-          #cursor = collection.find({siaas_uuid: {'$exists': True}},{'_id': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent, hide object id and timestamp
+          #cursor = collection.find({siaas_uuid+"."+"portscanner": {'$exists': True}},{'_id': False, 'direction': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent that has the subkey 'portscanner', hide object id, direction and timestamp
+          #cursor = collection.find({siaas_uuid+"."+"agent"+"."+"platform"+"."+"system"+"."+"os": "Linux" },{'_id': False, 'direction': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent for agents running on Linux, hide object id, direction and timestamp
+          #cursor = collection.find({siaas_uuid: {'$exists': True}},{'_id': False, 'direction': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent, hide object id, direction and timestamp
 
       results=list(cursor)
       for doc in results:
