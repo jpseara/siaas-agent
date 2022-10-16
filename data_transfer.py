@@ -98,7 +98,7 @@ if __name__ == "__main__":
     print('\nThis script is being directly run, so it will just read data from the DB!\n')
 
     siaas_uuid=siaas_aux.get_or_create_unique_system_id()
-    #siaas_uuid="00000000-0000-0000-0000-000000000000" # hack to show all
+    siaas_uuid="00000000-0000-0000-0000-000000000000" # hack to show data from all agents
 
     try:
        collection=siaas_aux.connect_mongodb_collection()

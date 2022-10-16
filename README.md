@@ -8,7 +8,7 @@ By João Pedro Seara, supervised by teacher Carlos Serrão (PhD).
 
 __
 
-**Instructions for Ubuntu 20.04 "Focal"**
+**Instructions (tested on Ubuntu 20.04 "Focal" and Raspberry Pi OS 11 "Bullseye")**
 
  - Set up system and Pyhon packages (Ubuntu 20.04 "Focal"): `sudo ./siaas_agent_install_system_packages.sh`
 
