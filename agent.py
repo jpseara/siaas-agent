@@ -44,7 +44,7 @@ def main(version="N/A"):
        agent["platform"]["system"]["node_name"]=uname.node
        agent["platform"]["system"]["kernel"]=uname.release
        agent["platform"]["system"]["flavor"]=uname.version
-       agent["platform"]["system"]["arch"]=uname.processor
+       agent["platform"]["system"]["arch"]=uname.machine
        agent["platform"]["system"]["processor"]=cpuinfo.get_cpu_info()['brand_raw']
     except:
        logger.warning("Couldn't get platform information. Ignoring.")
