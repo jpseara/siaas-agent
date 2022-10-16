@@ -17,6 +17,19 @@ from urllib.parse import quote_plus
 
 logger = logging.getLogger(__name__)
 
+def merge_module_dicts_under_uuid(siaas_uuid="00000000-0000-0000-0000-000000000000", module_list=[]):
+    merged_dict={}
+    merged_dict[siaas_uuid]={}
+    for module in module_list:
+       try:
+         next_dict_to_merge={}
+         next_dict_to_merge[module]={}
+         next_dict_to_merge[module]=read_from_local_file(os.path.join(sys.path[0],'var/'+str(module)+'.db'))
+         merged_dict[siaas_uuid]=dict(list(merged_dict[siaas_uuid].items())+list(next_dict_to_merge.items()))
+       except:
+            logger.warning("Couldn't merge dict: "+str(next_dict_to_merge))
+    return merged_dict
+
 def get_config_from_configs_db(config_name=None):
 
     if config_name==None:
@@ -26,7 +39,7 @@ def get_config_from_configs_db(config_name=None):
        if len(config_dict or '') > 0:
            return config_dict
 
-       logger.error("Couldn't get configuration dictionary from local DB!")
+       logger.error("Couldn't get configuration dictionary from local DB.")
        return {}
 
     else:
@@ -37,7 +50,7 @@ def get_config_from_configs_db(config_name=None):
            if config_name in config_dict.keys():
                return config_dict[config_name]
        
-       logger.error("Couldn't get configuration named '"+config_name+"' from local DB")
+       logger.warning("Couldn't get configuration named '"+config_name+"' from local DB. Maybe it doesn't exist.")
        return None
 
 def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0],'conf/siaas_agent.cnf')):
@@ -55,8 +68,8 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0],'conf/siaa
           line_uncommented=line.split('#')[0].rstrip().lstrip()
           if len(line_uncommented)==0:
              continue
-          config_name=line_uncommented.split("=",1)[0].lower().rstrip().lstrip()
-          config_value=line_uncommented.split("=",1)[1].rstrip().lstrip()
+          config_name=line_uncommented.split("=",1)[0].lower().rstrip().lstrip().replace("\"","").replace("\'","")
+          config_value=line_uncommented.split("=",1)[1].rstrip().lstrip().replace("\"","").replace("\'","")
           config_dict[config_name]=config_value
        except:
           logger.warning("Invalid line from local config file: "+str(line))
@@ -93,7 +106,7 @@ def insert_in_mongodb_collection(collection, data_to_insert):
    try:
       logger.debug("All data that will now be written to the database:\n" + pprint.pformat(data_to_insert))
       collection.insert_one(copy(data_to_insert))
-      logger.info("Data successfully uploaded to the remote DB server!")
+      logger.info("Data successfully uploaded to the remote DB server.")
       return True
    except Exception as e:
       logger.error("Can't upload data to remote DB server: "+str(e))
@@ -106,7 +119,7 @@ def connect_mongodb_collection(mongo_user="siaas", mongo_password="siaas", mongo
       client = MongoClient(uri)
       db = client[mongo_db]
       collection = db[mongo_collection]
-      logger.info("Correctly connected to the remote DB server!")
+      logger.info("Correctly configured the remote DB server connection to collection '"+mongo_collection+"'.")
       return collection
    except Exception as e:
       logger.error("Can't connect to remote DB server: "+str(e))
@@ -118,7 +131,7 @@ def write_to_local_file(file_to_write, data_to_insert):
        logger.debug("All data that will now be written to the file:\n" + pprint.pformat(data_to_insert))
        with open(file_to_write, 'w') as file:
           file.write(json.dumps(data_to_insert))
-          logger.info("Local file write ended successfully!")
+          logger.info("Local file write ended successfully.")
           return True
     except Exception as e:
        logger.error("There was an error while writing to the local file "+file_to_write+": "+str(e))
@@ -139,6 +152,7 @@ def read_from_local_file(file_to_read):
        return None
 
 def get_or_create_unique_system_id():
+   logger.debug("Searching for an existing UUID and creating a new one if it doesn't exist ...")
    try:
       with open(os.path.join(sys.path[0],'var/uuid'), 'r') as file:
           content = file.read()

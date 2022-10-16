@@ -225,9 +225,9 @@ def loop():
        hosts = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'))
 
        if len(hosts or '') == 0:
-           logger.warning("Couldn't read neighbourhood data. Either it's still being populated, or no neighbours exist at the moment. Trying again ...")
-           time.sleep(5)
-           continue
+          logger.warning("Couldn't read neighbourhood data. Either it's still being populated, or no neighbours exist at the moment. Trying again ...")
+          time.sleep(5)
+          continue
 
        with concurrent.futures.ThreadPoolExecutor() as executor:
            futures = []

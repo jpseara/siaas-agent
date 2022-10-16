@@ -1,5 +1,5 @@
 from __main__ import app
-from flask import jsonify
+from flask import jsonify, request, abort
 import siaas_aux
 import json
 import os
@@ -25,56 +25,25 @@ def index():
         }
     )
 
-@app.route('/agent', methods=['GET'])
-def agent():
-    agent = {}
+@app.route('/siaas_agent', methods=['GET'])
+def siaas_agent():
+    module = request.args.get('module', default = '*', type = str)
+    siaas_uuid = siaas_aux.get_or_create_unique_system_id()
+    if module not in ["*","agent","config","neighbourhood","portscanner"]:
+        abort(404)
+    if module == "*":
+        module="agent,config,neighbourhood,portscanner"
+    output = siaas_aux.merge_module_dicts_under_uuid(siaas_uuid,module.split(','))
     try:
-        with open(os.path.join(sys.path[0],'var/agent.db'), 'r') as file:
-            content = file.read()
-            agent = eval(content)
+        output[siaas_uuid]["config"]["mongo_pwd"]='*' * len(output[siaas_uuid]["config"]["mongo_pwd"])
     except:
         pass
     return jsonify(
         {
             'status': 'success',
-            'total_entries': len(agent),
+            'total_entries': len(output),
             'time': siaas_aux.get_now_utc_str(),
-            'output': agent
+            'output': output
         }
     )
 
-@app.route('/neighbourhood', methods=['GET'])
-def neighbourhood():
-    neigh = {}
-    try:
-        with open(os.path.join(sys.path[0],'var/neighbourhood.db'), 'r') as file:
-            content = file.read()
-            neigh = eval(content)
-    except:
-        pass
-    return jsonify(
-        {
-            'status': 'success',
-            'total_entries': len(neigh),
-            'time': siaas_aux.get_now_utc_str(),
-            'output': neigh
-        }
-    )
-
-@app.route('/portscanner', methods=['GET'])
-def portscanner():
-    portscan = {}
-    try:
-        with open(os.path.join(sys.path[0],'var/portscanner.db'), 'r') as file:
-           content = file.read()
-           portscan = eval(content)
-    except:
-        pass
-    return jsonify(
-        {
-            'status': 'success',
-            'total_entries': len(portscan),
-            'time': siaas_aux.get_now_utc_str(),
-            'output': portscan
-        }
-    )

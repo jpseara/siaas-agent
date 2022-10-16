@@ -64,22 +64,32 @@ def loop(siaas_uuid="00000000-0000-0000-0000-000000000000"):
    # Some default values for some well known variables that can't be changed during runtime
    MONGO_USER = "siaas"
    MONGO_PWD = "siaas"
-   MONGO_HOST = "127.0.0.1:27017"
+   MONGO_HOST = "127.0.0.1"
+   MONGO_PORT = "27017"
    MONGO_DB = "siaas"
    MONGO_COLLECTION = "agents"
-
+   
    # Generate global variables from the configuration file
    config_dict=siaas_aux.get_config_from_configs_db()
    for config_name in config_dict.keys():
-       globals()[config_name.upper()]=config_dict[config_name]
-
+       if config_name.upper() == "MONGO_USER": MONGO_USER = config_dict[config_name]
+       if config_name.upper() == "MONGO_PWD": MONGO_PWD = config_dict[config_name]
+       if config_name.upper() == "MONGO_HOST": MONGO_HOST = config_dict[config_name]
+       if config_name.upper() == "MONGO_PORT": MONGO_PORT = config_dict[config_name]
+       if config_name.upper() == "MONGO_DB": MONGO_DB = config_dict[config_name]
+       if config_name.upper() == "MONGO_COLLECTION": MONGO_COLLECTION = config_dict[config_name]
+   
    while True:
 
      logger.debug("Loop running ...")
 
      if db_collection == None:
         # Create connection to MongoDB if it doesn't exist
-        db_collection=siaas_aux.connect_mongodb_collection(MONGO_USER, MONGO_PWD, MONGO_HOST, MONGO_DB, MONGO_COLLECTION)
+        if len(MONGO_PORT or '') > 0:
+            mongo_host_port = MONGO_HOST+":"+MONGO_PORT
+        else:
+            mongo_host_port = MONGO_HOST
+        db_collection=siaas_aux.connect_mongodb_collection(MONGO_USER, MONGO_PWD, mongo_host_port, MONGO_DB, MONGO_COLLECTION)
 
      if db_collection != None:
         # Upload agent data

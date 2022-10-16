@@ -39,13 +39,14 @@ if __name__ == "__main__":
 
    # Read local configuration file and insert in local database
    if not siaas_aux.write_config_db_from_conf_file():
-       logger.fatal("Can't find or use local configuration file. Exiting.")
+       logger.critical("Can't find or use local configuration file. Aborting !")
        sys.exit(1)
  
    # Generate global variables from the configuration file
    config_dict=siaas_aux.get_config_from_configs_db()
    for config_name in config_dict.keys():
-       globals()[config_name.upper()]=config_dict[config_name]
+       if config_name.upper() == "AGENT_ID": AGENT_ID = config_dict[config_name]
+       if config_name.upper() == "LOG_LEVEL": LOG_LEVEL = config_dict[config_name]
 
    # Redefine logging level according to user config
    for handler in logging.root.handlers[:]:
@@ -56,12 +57,12 @@ if __name__ == "__main__":
       logging.basicConfig(format='%(asctime)s.%(msecs)03d %(levelname)-5s %(filename)s [%(processName)s|%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
    # Grabbing a unique system ID before proceeding
-   if len(AGENT_ID or ''):
+   if len(AGENT_ID or '') != 0:
       logger.debug("Using hard configured ID: "+str(AGENT_ID))
    else:
       AGENT_ID=siaas_aux.get_or_create_unique_system_id()
       if AGENT_ID=="00000000-0000-0000-0000-000000000000":
-         logger.fatal("Can't proceed without an unique system ID. Exiting.")
+         logger.critical("Can't proceed without an unique system ID. Aborting !")
          sys.exit(2)
 
    logger.info("SIAAS Agent v"+SIAAS_VERSION+" starting ["+AGENT_ID+"]")
