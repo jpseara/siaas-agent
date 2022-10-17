@@ -22,208 +22,237 @@ import pprint
 
 logger = logging.getLogger(__name__)
 
+
 def get_arp_ndp_known_hosts():
-    
+
     logger.info("Grabbing known hosts from local ARP/NDP tables ...")
-   
-    ip_mac_host={}
+
+    ip_mac_host = {}
 
     try:
-       cmd = subprocess.run(["ip", "neigh", "show"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-       arp_output=cmd.stdout.decode('utf-8')
-       if cmd.returncode != 0:
-           raise Exception(cmd.stderr.decode('utf-8'))
-       logger.debug("Raw 'ip neigh show' command output: "+str(arp_output.split('\n')))
+        cmd = subprocess.run(["ip", "neigh", "show"],
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        arp_output = cmd.stdout.decode('utf-8')
+        if cmd.returncode != 0:
+            raise OSError(cmd.stderr.decode('utf-8'))
+        logger.debug("Raw 'ip neigh show' command output: " +
+                     str(arp_output.split('\n')))
     except Exception as e:
-       logger.error("'ip' command failed: "+str(e))
-       return ip_mac_host
+        logger.error("'ip' command failed: "+str(e))
+        return ip_mac_host
 
     for arp in arp_output.split('\n'):
 
-       status="up"
+        status = "up"
 
-       try:
-          fields = arp.strip().split()
-          ip_arp=fields[0]
-          mac=fields[4]
-       except:
-          continue
+        try:
+            fields = arp.strip().split()
+            if "FAILED" in fields:
+                raise ValueError("ARP/NDP entry in FAILED state.")
+            ip_arp = fields[0]
+            if ip_arp.startswith("127.") or ip_arp.startswith("fe80::") or ip_arp == "::1":
+                raise ValueError(
+                    "Rejecting ARP/NDP entry which is a link local address.")
+            mac = fields[4]
+        except:
+            continue
 
-       ipv=siaas_aux.is_ipv4_or_ipv6(ip_arp)
-       if ipv==None:
-          logger.warning("The IP "+ip_arp+" found in the local ARP/NDP tables is not from a valid IP protocol. Skipped.")
-          continue
+        ipv = siaas_aux.is_ipv4_or_ipv6(ip_arp)
+        if ipv == None:
+            logger.warning(
+                "The IP "+ip_arp+" found in the local ARP/NDP tables is not from a valid IP protocol. Skipped.")
+            continue
 
-       try:
-          ip=socket.getaddrinfo(ip_arp, None)[0][4][0]
-       except:
-          logger.warning("The host "+ip_arp+" found in the local ARP/NDP tables can't be resolved. Skipped.")
-          continue
+        try:
+            ip = socket.getaddrinfo(ip_arp, None)[0][4][0]
+        except:
+            logger.warning(
+                "The host "+ip_arp+" found in the local ARP/NDP tables can't be resolved. Skipped.")
+            continue
 
-       if(ipv=="6"):
-          host_up = True if os.system("ping6 -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
-       else:
-          host_up = True if os.system("ping -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
-       if not host_up:
-          status="down"
+        if(ipv == "6"):
+            host_up = True if os.system(
+                "ping6 -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
+        else:
+            host_up = True if os.system(
+                "ping -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
+        if not host_up:
+            status = "down"
 
-       try:
-          dns_name=socket.gethostbyaddr(ip)[0]
-       except:
-          dns_name=""
+        try:
+            dns_name = socket.gethostbyaddr(ip)[0]
+        except:
+            dns_name = ""
 
-       dns_entry=ip
-       ip_mac_host[ip]={}
-       ip_mac_host[ip]["macaddress"]=mac
-       if len(dns_name) > 0:
-          ip_mac_host[ip]["domain_name"]=dns_name
-          dns_entry=ip+" ("+dns_name+")"
-       ip_mac_host[ip]["discovery_type"]="arp_ndp"
-       ip_mac_host[ip]["ping_status"]=status
-       ip_mac_host[ip]["ip_version"]=ipv
+        dns_entry = ip
+        ip_mac_host[ip] = {}
+        ip_mac_host[ip]["macaddress"] = mac
+        if len(dns_name) > 0:
+            ip_mac_host[ip]["domain_name"] = dns_name
+            dns_entry = ip+" ("+dns_name+")"
+        ip_mac_host[ip]["discovery_type"] = "arp_ndp"
+        ip_mac_host[ip]["ping_status"] = status
+        ip_mac_host[ip]["ip_version"] = ipv
 
-       ip_mac_host[ip]["last_check"]=siaas_aux.get_now_utc_str()
+        ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 
-       logger.info("Host existing in the local ARP/NDP tables: "+dns_entry)
+        logger.info("Host existing in the local ARP/NDP tables: "+dns_entry)
 
-       if not host_up:
-          logger.warning("The host "+ip+" found in the local ARP/NDP tables didn't respond to ping.")
+        if not host_up:
+            logger.warning(
+                "The host "+ip+" found in the local ARP/NDP tables didn't respond to ping.")
 
     return ip_mac_host
 
+
 def scan_and_print_neighbors(net, interface, timeout=5):
-    
+
     logger.info("Arping %s in the neighbourhood of %s ..." % (net, interface))
-    
-    ip_mac_host={}
-    
+
+    ip_mac_host = {}
+
     try:
-        ans, unans = scapy.layers.l2.arping(net, iface=interface, timeout=timeout, verbose=False)
+        ans, unans = scapy.layers.l2.arping(
+            net, iface=interface, timeout=timeout, verbose=False)
     except Exception as e:
         logger.error("Arping failed for interface "+interface+": "+str(e))
         return(ip_mac_host)
 
     for s, r in ans.res:
 
-       status="up"
+        status = "up"
 
-       ipv=siaas_aux.is_ipv4_or_ipv6(r.psrc)
-       if ipv == None:
-          logger.warning("The automatically found host "+r.psrc+" in the neighbourhood of "+interface+" is not from a valid IP protocol. Skipped.")
-          continue
+        ipv = siaas_aux.is_ipv4_or_ipv6(r.psrc)
+        if ipv == None:
+            logger.warning("The automatically found host "+r.psrc+" in the neighbourhood of " +
+                           interface+" is not from a valid IP protocol. Skipped.")
+            continue
 
-       try:
-          ip=socket.getaddrinfo(r.psrc, None)[0][4][0]
-       except:
-          logger.warning("The automatically found host "+host+" in the neighbourhood of "+interface+" can't be resolved. Skipped.")
-          continue
+        try:
+            ip = socket.getaddrinfo(r.psrc, None)[0][4][0]
+        except:
+            logger.warning("The automatically found host "+host +
+                           " in the neighbourhood of "+interface+" can't be resolved. Skipped.")
+            continue
 
-       host_up = True if os.system("ping -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
-       if not host_up:
-          status="down"
+        host_up = True if os.system(
+            "ping -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
+        if not host_up:
+            status = "down"
 
-       try:
-          dns_name=socket.gethostbyaddr(ip)[0]
-       except:
-          dns_name=""
+        try:
+            dns_name = socket.gethostbyaddr(ip)[0]
+        except:
+            dns_name = ""
 
-       dns_entry=ip
-       ip_mac_host[ip]={}
-       ip_mac_host[ip]["macaddress"]=r.src
-       if len(dns_name) > 0:
-          ip_mac_host[ip]["domain_name"]=dns_name
-          dns_entry=ip+" ("+dns_name+")"
-       ip_mac_host[ip]["discovery_type"]="auto"
-       ip_mac_host[ip]["ping_status"]=status
-       ip_mac_host[ip]["ip_version"]=ipv
+        dns_entry = ip
+        ip_mac_host[ip] = {}
+        ip_mac_host[ip]["macaddress"] = r.src
+        if len(dns_name) > 0:
+            ip_mac_host[ip]["domain_name"] = dns_name
+            dns_entry = ip+" ("+dns_name+")"
+        ip_mac_host[ip]["discovery_type"] = "auto"
+        ip_mac_host[ip]["ping_status"] = status
+        ip_mac_host[ip]["ip_version"] = ipv
 
-       ip_mac_host[ip]["last_check"]=siaas_aux.get_now_utc_str()
+        ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 
-       logger.info("Host automatically found in the neighbourhood of "+interface+": "+dns_entry)
+        logger.info(
+            "Host automatically found in the neighbourhood of "+interface+": "+dns_entry)
 
-       if not host_up:
-           logger.warning("The automatically found host "+ip+" didn't respond to ping.")
+        if not host_up:
+            logger.warning("The automatically found host " +
+                           ip+" didn't respond to ping.")
 
     return ip_mac_host
 
+
 def add_manual_hosts(manual_hosts_string=""):
-    
+
     logger.info("Starting host discovery for manually configured entries ...")
 
-    ip_mac_host={}
+    ip_mac_host = {}
 
     if len(manual_hosts_string or '') == 0:
-       logger.warning("No manual hosts were found.")
-       return ip_mac_host
+        logger.warning("No manual hosts were found.")
+        return ip_mac_host
 
-    manual_hosts_list=manual_hosts_string.split(",")
+    manual_hosts_list = manual_hosts_string.split(",")
 
     for host_raw in manual_hosts_list:
-      
-       all_ips = {}
-       host_uncommented=host_raw.split('#')[0]
-       host=host_uncommented.split('\t')[0].split('\n')[0].rstrip().lstrip()
 
-       if len(host_uncommented) > 0 and len(host) == 0:
-           logger.warning("Manually configured host '"+host_uncommented+"' is invalid. Skipped.") 
-       
-       else:
+        all_ips = {}
+        host_uncommented = host_raw.split('#')[0]
+        host = host_uncommented.split('\t')[0].split('\n')[0].rstrip().lstrip()
 
-         try:
-           socket.getaddrinfo("192.168.122.51", None)[0][4][0]
-         except:
-           logger.warning("Manually configured host '"+host+"' can't be resolved. Skipped.")
-           continue
+        if len(host_uncommented) > 0 and len(host) == 0:
+            logger.warning("Manually configured host '" +
+                           host_uncommented+"' is invalid. Skipped.")
 
-         all_ips=siaas_aux.get_all_ips_for_name(host)
-
-         for ip in all_ips:
-
-            status="up"
-
-            ipv=siaas_aux.is_ipv4_or_ipv6(ip)
-            if ipv==None:
-               logger.warning("The IP "+ip+" for manually configured host '"+host+"' is not from a valid IP protocol. Skipped.")
-               continue
-
-            if(ipv=="6"):
-                host_up = True if os.system("ping6 -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
-            else:
-                host_up = True if os.system("ping -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
-            if not host_up:
-              status="down"
+        else:
 
             try:
-              dns_name=socket.gethostbyaddr(ip)[0]
+                socket.getaddrinfo("192.168.122.51", None)[0][4][0]
             except:
-              dns_name=""
+                logger.warning("Manually configured host '" +
+                               host+"' can't be resolved. Skipped.")
+                continue
 
-            dns_entry=ip
-            ip_mac_host[ip]={}
-            ip_mac_host[ip]["discovery_type"]="manual"
-            if len(dns_name) > 0:
-               ip_mac_host[ip]["domain_name"]=dns_name
-               dns_entry=ip+" ("+dns_name+")"
-            ip_mac_host[ip]["ping_status"]=status
-            ip_mac_host[ip]["manual_entry_address"]=host
-            ip_mac_host[ip]["ip_version"]=ipv
+            all_ips = siaas_aux.get_all_ips_for_name(host)
 
-            ip_mac_host[ip]["last_check"]=siaas_aux.get_now_utc_str()
+            for ip in all_ips:
 
-            logger.info("Found host for manually configured entry '"+host+"': "+dns_entry)
+                status = "up"
 
-            if not host_up:
-               logger.warning("The IP "+ip+" for manually configured host '"+host+"' didn't respond to ping.")
+                ipv = siaas_aux.is_ipv4_or_ipv6(ip)
+                if ipv == None:
+                    logger.warning("The IP "+ip+" for manually configured host '" +
+                                   host+"' is not from a valid IP protocol. Skipped.")
+                    continue
+
+                if(ipv == "6"):
+                    host_up = True if os.system(
+                        "ping6 -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
+                else:
+                    host_up = True if os.system(
+                        "ping -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
+                if not host_up:
+                    status = "down"
+
+                try:
+                    dns_name = socket.gethostbyaddr(ip)[0]
+                except:
+                    dns_name = ""
+
+                dns_entry = ip
+                ip_mac_host[ip] = {}
+                ip_mac_host[ip]["discovery_type"] = "manual"
+                if len(dns_name) > 0:
+                    ip_mac_host[ip]["domain_name"] = dns_name
+                    dns_entry = ip+" ("+dns_name+")"
+                ip_mac_host[ip]["ping_status"] = status
+                ip_mac_host[ip]["manual_entry_address"] = host
+                ip_mac_host[ip]["ip_version"] = ipv
+
+                ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
+
+                logger.info(
+                    "Found host for manually configured entry '"+host+"': "+dns_entry)
+
+                if not host_up:
+                    logger.warning(
+                        "The IP "+ip+" for manually configured host '"+host+"' didn't respond to ping.")
 
     return(ip_mac_host)
 
+
 def main(interface_to_scan=None):
 
-    auto_hosts={}
-    manual_hosts={}
-    arp_ndp_hosts={}
-    all_hosts={}
-    auto_scanned_interfaces=0
+    auto_hosts = {}
+    manual_hosts = {}
+    arp_ndp_hosts = {}
+    all_hosts = {}
+    auto_scanned_interfaces = 0
 
     # Grab known hosts by ARP/NDP
     arp_ndp_hosts = get_arp_ndp_known_hosts()
@@ -251,61 +280,76 @@ def main(interface_to_scan=None):
             continue
 
         net = siaas_aux.to_cidr_notation(network, netmask)
-        mask=net.split('/')[1]
+        mask = net.split('/')[1]
 
         if int(mask) > 16:
             try:
-              arp_timeout=int(siaas_aux.get_config_from_configs_db("neighbourhood_arp_timeout_sec"))
+                arp_timeout = int(siaas_aux.get_config_from_configs_db(
+                    "neighbourhood_arp_timeout_sec"))
             except:
-              arp_timeout=5
-              logger.warning("Invalid or undefined timeout configuration for ARP timeout. Defaulting to \"5\".")
-            auto_hosts=dict(list(auto_hosts.items())+list(scan_and_print_neighbors(net, interface, timeout=arp_timeout).items()))
-            auto_scanned_interfaces+=1
+                arp_timeout = 5
+                logger.warning(
+                    "Invalid or undefined timeout configuration for ARP timeout. Defaulting to \"5\".")
+            auto_hosts = dict(list(auto_hosts.items(
+            ))+list(scan_and_print_neighbors(net, interface, timeout=arp_timeout).items()))
+            auto_scanned_interfaces += 1
         else:
-            logger.warning("Skipping network "+net+" as the subnet size is too big.")
+            logger.warning("Skipping network "+net +
+                           " as the subnet size is too big.")
 
     if auto_scanned_interfaces == 0:
-        logger.warning("Automatic neighbourhood discovery found no interfaces with a valid network configuration to work on.")
+        logger.warning(
+            "Automatic neighbourhood discovery found no interfaces with a valid network configuration to work on.")
 
     # Grab manual configured hosts
-    manual_hosts=add_manual_hosts(siaas_aux.get_config_from_configs_db("manual_hosts"))
+    manual_hosts = add_manual_hosts(
+        siaas_aux.get_config_from_configs_db("manual_hosts"))
 
     # Merge all hosts (give priority to automatically found hosts in the neighbourhood, as they have more info)
-    all_hosts = dict(list(manual_hosts.items())+list(auto_hosts.items())+list(arp_ndp_hosts.items()))
+    all_hosts = dict(list(manual_hosts.items()) +
+                     list(auto_hosts.items())+list(arp_ndp_hosts.items()))
 
     return all_hosts
 
+
 def loop(interface_to_scan=None):
-   
-   # Initializing the neighbourhood local DB
-   os.makedirs(os.path.join(sys.path[0],'var'), exist_ok=True)
-   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'), {})
 
-   while True:
+    # Initializing the neighbourhood local DB
+    os.makedirs(os.path.join(sys.path[0], 'var'), exist_ok=True)
+    siaas_aux.write_to_local_file(os.path.join(
+        sys.path[0], 'var/neighbourhood.db'), {})
 
-      neighbourhood_dict={}
+    while True:
 
-      logger.debug("Loop running ...")
+        neighbourhood_dict = {}
 
-      # Creating neighbourhood dict
-      neighbourhood_dict=main(interface_to_scan)
+        logger.debug("Loop running ...")
 
-      # Writing in local database
-      siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'), neighbourhood_dict)
+        # Creating neighbourhood dict
+        neighbourhood_dict = main(interface_to_scan)
 
-      # Sleep before next loop
-      try:
-         sleep_time=int(siaas_aux.get_config_from_configs_db("neighbourhood_loop_interval_sec"))
-         logger.debug("Sleeping for "+str(sleep_time)+" seconds before next loop ...")
-         time.sleep(sleep_time)
-      except:
-         logger.debug("The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
-         time.sleep(60)
+        # Writing in local database
+        siaas_aux.write_to_local_file(os.path.join(
+            sys.path[0], 'var/neighbourhood.db'), neighbourhood_dict)
+
+        # Sleep before next loop
+        try:
+            sleep_time = int(siaas_aux.get_config_from_configs_db(
+                "neighbourhood_loop_interval_sec"))
+            logger.debug("Sleeping for "+str(sleep_time) +
+                         " seconds before next loop ...")
+            time.sleep(sleep_time)
+        except:
+            logger.debug(
+                "The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
+            time.sleep(60)
+
 
 if __name__ == "__main__":
-    
+
     log_level = logging.INFO
-    logging.basicConfig(format='%(asctime)s %(levelname)-5s %(filename)s [%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_level)
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-5s %(filename)s [%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_level)
 
     if os.geteuid() != 0:
         print("You need to be root to run this script!", file=sys.stderr)
@@ -328,7 +372,7 @@ if __name__ == "__main__":
             interface = a
         else:
             assert False, 'Unhandled option'
-    
+
     print('\n')
 
     main(interface_to_scan=interface)

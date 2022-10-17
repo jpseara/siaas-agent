@@ -16,8 +16,9 @@ cd ${SCRIPT_DIR}
 ./venv/bin/pip3 freeze > ./requirements.txt
 chmod 664 ./requirements.txt
 rm -rf ./__pycache__
-rm -rf ./tmp/*
-rm -rf ./var/*
+rm -rf ./log
+rm -rf ./tmp
+rm -rf ./var
 sudo chown -R ${bak_user}:${bak_group} .
 
 cd ..
