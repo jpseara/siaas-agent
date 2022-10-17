@@ -161,7 +161,7 @@ def main(version="N/A"):
 
 def loop(version=""):
 
-    # Initializing the agent local
+    # Initializing the agent local DB
     os.makedirs(os.path.join(sys.path[0], 'var'), exist_ok=True)
     siaas_aux.write_to_local_file(
         os.path.join(sys.path[0], 'var/agent.db'), {})
