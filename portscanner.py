@@ -29,7 +29,7 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
         logger.warning("Invalid or undefined timeout configuration for Nmap portscan. Defaulting to \"300\".")
 
     if len(nmap_scripts_string or '') == 0:
-        nmap_script="vulners"
+        nmap_scripts_string="vulners"
         logger.warning("Invalid or undefined Nmap script configuration. Defaulting to \"vulners\".")
 
     ipv=siaas_aux.is_ipv4_or_ipv6(target_ip)

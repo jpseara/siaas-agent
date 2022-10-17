@@ -162,7 +162,6 @@ def write_to_local_file(file_to_write, data_to_insert):
     """
     logger.info("Inserting data to local file "+file_to_write+" ...")
     try:
-       # Create output dir
        os.makedirs(os.path.dirname(os.path.join(sys.path[0],file_to_write)), exist_ok=True)
        logger.debug("All data that will now be written to the file:\n" + pprint.pformat(data_to_insert))
        with open(file_to_write, 'w') as file:
@@ -242,9 +241,10 @@ def get_or_create_unique_system_id():
           logger.error("There was an error while generating a new UUID. Returning a nil UUID.")
           return "00000000-0000-0000-0000-000000000000"
    try:
+      os.makedirs(os.path.join(sys.path[0],'var'), exist_ok=True)
       with open(os.path.join(sys.path[0],'var/uuid'), 'w') as file:
-          file.write(new_uuid)
-          logger.debug("Wrote new UUID to a local file: "+new_uuid)
+           file.write(new_uuid)
+           logger.debug("Wrote new UUID to a local file: "+new_uuid)
    except Exception as e:
       logger.error("There was an error while writing to the local UUID file: "+str(e)+". Returning a nil UUID.")
       return "00000000-0000-0000-0000-000000000000"
