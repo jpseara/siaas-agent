@@ -94,7 +94,7 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
 
        for vuln in vuln_list:
           try:
-             logger.info("VULNERABILITY FOUND! Using script '"+nmap_script+"' in "+target_ip+" at "+str(port)+"/"+protocol+": "+str(vuln["id"]))
+             logger.info("VULNERABILITY FOUND! While using script '"+nmap_script+"' in "+target_ip+" at "+str(port)+"/"+protocol+": "+str(vuln["id"]))
              vuln_dict[nmap_script][vuln["id"]]=vuln
              vuln_dict[nmap_script][vuln["id"]].pop("id",None)
           except:

@@ -45,7 +45,8 @@ def loop():
    last_uploaded_dict={}
    last_downloaded_dict={}
 
-   # Some default values for some well known variables that can't be changed during runtime
+   # Some default values for some well known variables that can't be changed during runtime (these will be overwritten if there's a config file key for them)
+
    MONGO_USER = "siaas"
    MONGO_PWD = "siaas"
    MONGO_HOST = "127.0.0.1"

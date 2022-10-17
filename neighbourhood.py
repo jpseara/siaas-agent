@@ -23,7 +23,7 @@ import pprint
 logger = logging.getLogger(__name__)
 
 def get_arp_ndp_known_hosts():
-
+    
     logger.info("Grabbing known hosts from local ARP/NDP tables ...")
    
     ip_mac_host={}
