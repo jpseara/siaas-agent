@@ -70,6 +70,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0],'conf/siaa
     The actual value is just stripped of spaces from the beginning and the end
     Writes the resulting dict in the DB file of config.db. This means it will return True if things go fine, or False if it fails
     """
+    
     logger.debug("Writing configuration local DB, from local file: "+conf_file)
 
     config_dict={}
@@ -161,6 +162,8 @@ def write_to_local_file(file_to_write, data_to_insert):
     """
     logger.info("Inserting data to local file "+file_to_write+" ...")
     try:
+       # Create output dir
+       os.makedirs(os.path.dirname(os.path.join(sys.path[0],file_to_write)), exist_ok=True)
        logger.debug("All data that will now be written to the file:\n" + pprint.pformat(data_to_insert))
        with open(file_to_write, 'w') as file:
           file.write(json.dumps(data_to_insert))

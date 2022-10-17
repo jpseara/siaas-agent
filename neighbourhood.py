@@ -276,11 +276,10 @@ def main(interface_to_scan=None):
     return all_hosts
 
 def loop(interface_to_scan=None):
-
-   #try:
-      #os.remove(os.path.join(sys.path[0],'var/neighbourhood.db'))
-   #except OSError:
-      #pass
+   
+   # Initializing the neighbourhood local DB
+   os.makedirs(os.path.join(sys.path[0],'var'), exist_ok=True)
+   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'), {})
 
    while True:
 

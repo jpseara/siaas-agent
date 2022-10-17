@@ -221,10 +221,9 @@ def main(target_ip="127.0.0.1"):
 
 def loop():
 
-    #try:
-       #os.remove(os.path.join(sys.path[0],'var/portscanner.db'))
-    #except OSError:
-       #pass
+    # Initializing the portscanner local DB
+    os.makedirs(os.path.join(sys.path[0],'var'), exist_ok=True)
+    siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/portscanner.db'), {})
 
     while True:
        
@@ -233,21 +232,26 @@ def loop():
 
        logger.debug("Loop running ...")
 
-       # Read hosts in the neighbourhood
+       enabled=siaas_aux.get_config_from_configs_db("portscanner_enabled")
+       if len(enabled or '') >  0:
+          if enabled.lower() == "false":
+             logger.info("Portscanner is disabled in the config. Not running. Will check again in a bit ...")
+             time.sleep(60)
+             continue
+           
        hosts = siaas_aux.read_from_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'))
-
        if len(hosts or '') == 0:
           logger.warning("Couldn't read neighbourhood data. Either it's still being populated, or no neighbours exist at the moment. Trying again ...")
-          time.sleep(5)
+          time.sleep(60)
           continue
 
        with concurrent.futures.ThreadPoolExecutor() as executor:
-           futures = []
-           for ip in hosts.keys():
-              futures.append(executor.submit(main, target_ip=ip))
-           for future in concurrent.futures.as_completed(futures):
-              scan_results_all[future.result()[0]]=(future.result()[1])
-      
+          futures = []
+          for ip in hosts.keys():
+             futures.append(executor.submit(main, target_ip=ip))
+          for future in concurrent.futures.as_completed(futures):
+             scan_results_all[future.result()[0]]=(future.result()[1])
+          
        # Creating portscanner dict
        portscanner_dict=scan_results_all
 
@@ -256,35 +260,35 @@ def loop():
 
        # Sleep before next loop
        try:
-          sleep_time=int(siaas_aux.get_config_from_configs_db("portscanner_loop_interval_sec"))
-          logger.debug("Sleeping for "+str(sleep_time)+" seconds before next loop ...")
-          time.sleep(sleep_time)
+           sleep_time=int(siaas_aux.get_config_from_configs_db("portscanner_loop_interval_sec"))
+           logger.debug("Sleeping for "+str(sleep_time)+" seconds before next loop ...")
+           time.sleep(sleep_time)
        except:
-          logger.debug("The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
-          time.sleep(60)
+           logger.debug("The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
+           time.sleep(60)
 
 if __name__ == "__main__":
 
-    log_level = logging.INFO
-    logging.basicConfig(format='%(asctime)s %(levelname)-5s %(filename)s [%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_level)
+        log_level = logging.INFO
+        logging.basicConfig(format='%(asctime)s %(levelname)-5s %(filename)s [%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_level)
 
-    if os.geteuid() != 0:
-        print("You need to be root to run this script!", file=sys.stderr)
-        sys.exit(1)
+        if os.geteuid() != 0:
+            print("You need to be root to run this script!", file=sys.stderr)
+            sys.exit(1)
 
-    target_host = input('\nEnter target to scan for vulnerable open ports: ')
+        target_host = input('\nEnter target to scan for vulnerable open ports: ')
 
-    if target_host=="":
-        target_host="127.0.0.1"
+        if target_host=="":
+            target_host="127.0.0.1"
 
-    try:
-       target_ip=socket.getaddrinfo(target_host, None)[0][4][0]
-    except:
-       print("Host "+target_host+" is invalid. It can't be pinged and neither can it be resolved. Exiting!")
-       sys.exit(2)
+        try:
+           target_ip=socket.getaddrinfo(target_host, None)[0][4][0]
+        except:
+           print("Host "+target_host+" is invalid. It can't be pinged and neither can it be resolved. Exiting!")
+           sys.exit(2)
 
-    print('\n')
+        print('\n')
 
-    main(target_ip)
+        main(target_ip)
 
-    print('\nAll done. Bye!\n')
+        print('\nAll done. Bye!\n')

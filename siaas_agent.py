@@ -42,10 +42,7 @@ if __name__ == "__main__":
    os.makedirs(os.path.join(sys.path[0],'var'), exist_ok=True)
 
    # Initializing local databases
-   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/agent.db'), {})
    siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/config.db'), {})
-   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/neighbourhood.db'), {})
-   siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/portscanner.db'), {})
 
    # Some default values for some well known variables that can't be changed during runtime (these will be overwritten if there's a config file key for them)
    AGENT_ID = None

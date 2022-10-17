@@ -15,4 +15,5 @@ nmap_portscan_timeout_sec = 300
 nmap_script = vulners
 #nmap_script = /home/ubuntu/siaas-agent/tmp/nmap-vulners
 nmap_sysinfo_timeout_sec = 600
-portscanner_loop_interval_sec = 60
+#portscanner_enabled = false
+portscanner_loop_interval_sec = 1

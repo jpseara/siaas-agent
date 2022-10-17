@@ -138,11 +138,10 @@ def main(version="N/A"):
 
 def loop(version=""):
 
-    #try:
-       #os.remove(os.path.join(sys.path[0],'var/agent.db'))
-    #except OSError:
-       #pass
-    
+    # Initializing the agent local
+    os.makedirs(os.path.join(sys.path[0],'var'), exist_ok=True)
+    siaas_aux.write_to_local_file(os.path.join(sys.path[0],'var/agent.db'), {})
+
     while True:
 
        agent_dict={}
