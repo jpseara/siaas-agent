@@ -192,7 +192,7 @@ def add_manual_hosts(manual_hosts_string=""):
         else:
 
             try:
-                socket.getaddrinfo("192.168.122.51", None)[0][4][0]
+                socket.getaddrinfo(host, None)[0][4][0]
             except:
                 logger.warning("Manually configured host '" +
                                host+"' can't be resolved. Skipped.")
