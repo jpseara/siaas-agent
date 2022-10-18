@@ -18,21 +18,20 @@ from urllib.parse import quote_plus
 logger = logging.getLogger(__name__)
 
 
-def merge_module_dicts_under_uuid(siaas_uuid="00000000-0000-0000-0000-000000000000", module_list=[]):
+def merge_module_dicts(module_list=[]):
     """
-    Grabs all DB files from the module list and concatenate them in a dir under the agent's UUID
+    Grabs all DB files from the module list and concatenate them
     Returns an empty dict if it fails 
     """
     merged_dict = {}
-    merged_dict[siaas_uuid] = {}
     for module in module_list:
         try:
             next_dict_to_merge = {}
             next_dict_to_merge[module] = {}
             next_dict_to_merge[module] = read_from_local_file(
                 os.path.join(sys.path[0], 'var/'+str(module)+'.db'))
-            merged_dict[siaas_uuid] = dict(
-                list(merged_dict[siaas_uuid].items())+list(next_dict_to_merge.items()))
+            merged_dict = dict(
+                list(merged_dict.items())+list(next_dict_to_merge.items()))
         except:
             logger.warning("Couldn't merge dict: "+str(next_dict_to_merge))
     return merged_dict
@@ -115,16 +114,13 @@ def read_mongodb_collection(collection, siaas_uuid="00000000-0000-0000-0000-0000
 
         if(siaas_uuid == "00000000-0000-0000-0000-000000000000"):
             # cursor = collection.find() # show all raw
-            cursor = collection.find().sort("_id", -1).limit(5)  # show only most recent raw
-            # cursor = collection.find({},{'_id': False, 'direction': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent, hide object id, direction and timestamp
+            cursor = collection.find().sort('_id', -1).limit(5)  # show only most recent raw
+            # cursor = collection.find({},{'_id': False}).sort('_id', -1).limit(5) # show only most recent, hide object id, direction and timestamp
         else:
-            # cursor = collection.find({siaas_uuid: {'$exists': True}}) # show all
-            # cursor = collection.find({siaas_uuid: {'$exists': True}},{'_id': False, 'direction': False, 'timestamp': False}) # show all, hide object id, direction and timestamp
-            cursor = collection.find({siaas_uuid: {'$exists': True}}).sort(
-                "_id", -1).limit(5)  # show only most recent
-            # cursor = collection.find({siaas_uuid+"."+"portscanner": {'$exists': True}},{'_id': False, 'direction': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent that has the subkey 'portscanner', hide object id, direction and timestamp
-            # cursor = collection.find({siaas_uuid+"."+"agent"+"."+"platform"+"."+"system"+"."+"os": "Linux" },{'_id': False, 'direction': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent for agents running on Linux, hide object id, direction and timestamp
-            # cursor = collection.find({siaas_uuid: {'$exists': True}},{'_id': False, 'direction': False, 'timestamp': False}).sort("_id", -1).limit(5) # show only most recent, hide object id, direction and timestamp
+            #cursor = collection.find({"payload": {'$exists': True}}).sort('_id', -1) # show most recent first
+            cursor = collection.find({"payload": {'$exists': True}}).sort('_id', -1).limit(5)  # show only the 5 most recent
+            #cursor = collection.find({"payload": {'$exists': True}, "origin":"agent_"+siaas_uuid},{'_id': False}).sort('_id', -1).limit(5) # same, but only for the UUID of this agent
+            #cursor = collection.find({"payload.agent.platform.system.os": "Linux" },{'_id': False}).sort('_id', -1).limit(5) # show only most recent for agents running on Linux
 
         results = list(cursor)
         for doc in results:
@@ -152,7 +148,7 @@ def insert_in_mongodb_collection(collection, data_to_insert):
         return False
 
 
-def connect_mongodb_collection(mongo_user="siaas", mongo_password="siaas", mongo_host="127.0.0.1:27017", mongo_db="siaas", mongo_collection="agents"):
+def connect_mongodb_collection(mongo_user="siaas", mongo_password="siaas", mongo_host="127.0.0.1:27017", mongo_db="siaas", mongo_collection="siaas"):
     """
     Set up a MongoDB collection connection based on the inputs
     Returns the collection obj if succeeded. Returns None if it failed

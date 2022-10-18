@@ -20,8 +20,7 @@ def upload_agent_data(db_collection=None, last_uploaded_dict={}):
     siaas_uuid = siaas_aux.get_or_create_unique_system_id()
 
     all_modules = "agent,config,neighbourhood,portscanner"
-    current_dict = siaas_aux.merge_module_dicts_under_uuid(
-        siaas_uuid, all_modules.split(','))
+    current_dict = siaas_aux.merge_module_dicts(all_modules.split(','))
 
     if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict) == 0:
         logger.info(
@@ -29,9 +28,12 @@ def upload_agent_data(db_collection=None, last_uploaded_dict={}):
         return last_uploaded_dict
 
     # Creating a new dict with a date object and date transfer direction so we can easily filter it and order entries in MongoDB
-    complete_dict = dict(current_dict)
+    complete_dict = {}
+    complete_dict["payload"] = dict(current_dict)
     complete_dict["timestamp"] = siaas_aux.get_now_utc_obj()
-    complete_dict["direction"] = "upstream"
+    complete_dict["origin"] = "agent_"+siaas_uuid
+    complete_dict["destiny"] = "*"
+    complete_dict["scope"] = "agent_data"
 
     ret_db = False
     if db_collection != None:
@@ -57,7 +59,7 @@ def loop():
     MONGO_HOST = "127.0.0.1"
     MONGO_PORT = "27017"
     MONGO_DB = "siaas"
-    MONGO_COLLECTION = "agents"
+    MONGO_COLLECTION = "siaas"
 
     # Generate global variables from the configuration file
     config_dict = siaas_aux.get_config_from_configs_db()
@@ -116,12 +118,18 @@ if __name__ == "__main__":
 
     print('\nThis script is being directly run, so it will just read data from the DB!\n')
 
+    MONGO_USER = "siaas"
+    MONGO_PWD = "siaas"
+    MONGO_HOST = "127.0.0.1"
+    MONGO_PORT = "27017"
+    MONGO_DB = "siaas"
+    MONGO_COLLECTION = "siaas"
+
     siaas_uuid = siaas_aux.get_or_create_unique_system_id()
-    # hack to show data from all agents
-    siaas_uuid = "00000000-0000-0000-0000-000000000000"
+    #siaas_uuid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
 
     try:
-        collection = siaas_aux.connect_mongodb_collection()
+        collection = siaas_aux.connect_mongodb_collection(MONGO_USER, MONGO_PWD, MONGO_HOST+":"+MONGO_PORT, MONGO_DB, MONGO_COLLECTION)
         cursor = siaas_aux.read_mongodb_collection(collection, siaas_uuid)
     except:
         print("Can't connect to DB!")

@@ -26,6 +26,7 @@ def main(version="N/A"):
     agent = {}
 
     agent["version"] = version
+    agent["uuid"] = siaas_aux.get_or_create_unique_system_id()
     agent["last_check"] = siaas_aux.get_now_utc_str()
     agent["platform"] = {}
 

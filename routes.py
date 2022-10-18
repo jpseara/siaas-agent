@@ -34,8 +34,7 @@ def siaas_agent():
         abort(404)
     if module == "*":
         module = "agent,config,neighbourhood,portscanner"
-    output = siaas_aux.merge_module_dicts_under_uuid(
-        siaas_uuid, module.split(','))
+    output = siaas_aux.merge_module_dicts(module.split(','))
     try:
         output[siaas_uuid]["config"]["mongo_pwd"] = '*' * \
             len(output[siaas_uuid]["config"]["mongo_pwd"])
