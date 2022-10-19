@@ -10,6 +10,21 @@ from copy import copy
 logger = logging.getLogger(__name__)
 
 
+def download_agent_data(db_collection=None, scope="agent_configs"):
+
+    if db_collection == None:
+        logger.error(
+            "No valid DB collection object received. Bypassed remote DB data upload.")
+        return False
+
+    siaas_uuid = siaas_aux.get_or_create_unique_system_id()
+    downloaded_configs = siaas_aux.read_published_data_for_agents_mongodb(
+        db_collection, siaas_uuid, scope)
+    siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs)
+
+    return True
+
+
 def upload_agent_data(db_collection=None, last_uploaded_dict={}):
 
     if db_collection == None:
@@ -69,6 +84,7 @@ def loop():
     MONGO_PORT = "27017"
     MONGO_DB = "siaas"
     MONGO_COLLECTION = "siaas"
+    OFFLINE_MODE = "false"
 
     # Generate global variables from the configuration file
     config_dict = siaas_aux.get_config_from_configs_db()
@@ -85,8 +101,16 @@ def loop():
             MONGO_DB = config_dict[config_name]
         if config_name.upper() == "MONGO_COLLECTION":
             MONGO_COLLECTION = config_dict[config_name]
+        if config_name.upper() == "OFFLINE_MODE":
+            OFFLINE_MODE = str(config_dict[config_name])
 
-    while True:
+    run = True
+    if OFFLINE_MODE.lower() == "true":
+        logger.warning(
+            "Offline mode is on! No data will be transferred. If you want to change this behavior, change the configuration and restart the application.")
+        run = False
+
+    while run:
 
         logger.debug("Loop running ...")
 
@@ -100,23 +124,39 @@ def loop():
                 MONGO_USER, MONGO_PWD, mongo_host_port, MONGO_DB, MONGO_COLLECTION)
 
         if db_collection != None:
-            # Upload agent data
-            last_uploaded_dict = upload_agent_data(
-                db_collection, last_uploaded_dict)
-            # Download agent data
-            #last_downloaded_dict=download_agent_data(db_collection, last_downloaded_dict)
 
-            # Sleep before next loop
-            try:
-                sleep_time = int(siaas_aux.get_config_from_configs_db(
-                    "data_transfer_loop_interval_sec"))
-                logger.debug("Sleeping for "+str(sleep_time) +
-                             " seconds before next loop ...")
-                time.sleep(sleep_time)
-            except:
-                logger.debug(
-                    "The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
-                time.sleep(60)
+            # Upload agent data
+            silent_mode = str(siaas_aux.get_config_from_configs_db(
+                config_name="silent_mode"))
+            dont_upload = False
+            if len(silent_mode or '') > 0:
+                if silent_mode.lower() == "true":
+                    dont_upload = True
+                    logger.warning(
+                        "Silent mode is on! This means no data is sent to the server. Will check again later ...")
+            if dont_upload != True:
+                last_uploaded_dict = upload_agent_data(
+                    db_collection, last_uploaded_dict)
+
+            # Download agent data
+            download_agent_data(db_collection, "agent_configs")
+        else:
+            logger.error(
+                "The DB connection is not OK. Sleeping for some seconds and retrying ...")
+            time.sleep(60)
+            # continue
+
+        # Sleep before next loop
+        try:
+            sleep_time = int(siaas_aux.get_config_from_configs_db(
+                config_name="data_transfer_loop_interval_sec"))
+            logger.debug("Sleeping for "+str(sleep_time) +
+                         " seconds before next loop ...")
+            time.sleep(sleep_time)
+        except:
+            logger.debug(
+                "The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
+            time.sleep(60)
 
 
 if __name__ == "__main__":
@@ -135,18 +175,15 @@ if __name__ == "__main__":
     MONGO_COLLECTION = "siaas"
 
     siaas_uuid = siaas_aux.get_or_create_unique_system_id()
-    #siaas_uuid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
+    # siaas_uuid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
 
     try:
-        collection = siaas_aux.connect_mongodb_collection(MONGO_USER, MONGO_PWD, MONGO_HOST+":"+MONGO_PORT, MONGO_DB, MONGO_COLLECTION)
-        cursor = siaas_aux.read_mongodb_collection(collection, siaas_uuid)
+        collection = siaas_aux.connect_mongodb_collection(
+            MONGO_USER, MONGO_PWD, MONGO_HOST+":"+MONGO_PORT, MONGO_DB, MONGO_COLLECTION)
     except:
         print("Can't connect to DB!")
         sys.exit(1)
 
-    if cursor != None:
-        for doc in cursor:
-            # print('\n'+str(pprint.pformat(doc)))
-            print('\n'+str(doc))
+    print(str(siaas_aux.read_mongodb_collection(collection, siaas_uuid)))
 
     print('\nAll done. Bye!\n')

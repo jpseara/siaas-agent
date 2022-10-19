@@ -173,7 +173,12 @@ def add_manual_hosts(manual_hosts_string=""):
 
     ip_mac_host = {}
 
-    if len(manual_hosts_string or '') == 0:
+    if type(manual_hosts_string) is not str:
+        logger.error(
+            "The manual hosts input is not a string. Not adding any manual host.")
+        return ip_mac_host
+
+    if len(manual_hosts_string) == 0:
         logger.warning("No manual hosts were found.")
         return ip_mac_host
 
@@ -246,7 +251,7 @@ def add_manual_hosts(manual_hosts_string=""):
     return(ip_mac_host)
 
 
-def main(interface_to_scan=None):
+def main(interface_to_scan=None, ignore_neighbourhood=False):
 
     auto_hosts = {}
     manual_hosts = {}
@@ -254,56 +259,63 @@ def main(interface_to_scan=None):
     all_hosts = {}
     auto_scanned_interfaces = 0
 
-    # Grab known hosts by ARP/NDP
-    arp_ndp_hosts = get_arp_ndp_known_hosts()
+    if ignore_neighbourhood:
 
-    # Grab automatically discovered hosts
-    logger.info("Starting automatic neighbourhood discovery ...")
-    for network, netmask, _, interface, address, _ in scapy.config.conf.route.routes:
-
-        if interface_to_scan and interface_to_scan != interface:
-            continue
-
-        # Skip loopback network and default GW
-        if network == 0 or interface == 'lo' or address == '127.0.0.1' or address == '0.0.0.0':
-            continue
-
-        if netmask <= 0 or netmask == 0xFFFFFFFF:
-            continue
-
-        # Skip docker interfaces
-        if interface != interface_to_scan \
-                and (interface.startswith('docker')
-                     or interface.startswith('br-')
-                     or interface.startswith('tun')):
-            logger.warning("Skipped interface %s." % interface)
-            continue
-
-        net = siaas_aux.to_cidr_notation(network, netmask)
-        mask = net.split('/')[1]
-
-        if int(mask) > 16:
-            try:
-                arp_timeout = int(siaas_aux.get_config_from_configs_db(
-                    "neighbourhood_arp_timeout_sec"))
-            except:
-                arp_timeout = 5
-                logger.warning(
-                    "Invalid or undefined timeout configuration for ARP timeout. Defaulting to \"5\".")
-            auto_hosts = dict(list(auto_hosts.items(
-            ))+list(scan_and_print_neighbors(net, interface, timeout=arp_timeout).items()))
-            auto_scanned_interfaces += 1
-        else:
-            logger.warning("Skipping network "+net +
-                           " as the subnet size is too big.")
-
-    if auto_scanned_interfaces == 0:
         logger.warning(
-            "Automatic neighbourhood discovery found no interfaces with a valid network configuration to work on.")
+            "Bypassing discovery of hosts in the neighbourhood as per configuration. To change the behavior, set the configuration accordingly.")
+
+    else:
+
+        # Grab known hosts by ARP/NDP
+        arp_ndp_hosts = get_arp_ndp_known_hosts()
+
+        # Grab automatically discovered hosts
+        logger.info("Starting automatic neighbourhood discovery ...")
+        for network, netmask, _, interface, address, _ in scapy.config.conf.route.routes:
+
+            if interface_to_scan and interface_to_scan != interface:
+                continue
+
+            # Skip loopback network and default GW
+            if network == 0 or interface == 'lo' or address == '127.0.0.1' or address == '0.0.0.0':
+                continue
+
+            if netmask <= 0 or netmask == 0xFFFFFFFF:
+                continue
+
+            # Skip docker interfaces
+            if interface != interface_to_scan \
+                    and (interface.startswith('docker')
+                         or interface.startswith('br-')
+                         or interface.startswith('tun')):
+                logger.warning("Skipped interface %s." % interface)
+                continue
+
+            net = siaas_aux.to_cidr_notation(network, netmask)
+            mask = net.split('/')[1]
+
+            if int(mask) > 16:
+                try:
+                    arp_timeout = int(siaas_aux.get_config_from_configs_db(
+                        config_name="neighbourhood_arp_timeout_sec"))
+                except:
+                    arp_timeout = 5
+                    logger.warning(
+                        "Invalid or undefined timeout configuration for ARP timeout. Defaulting to \"5\".")
+                auto_hosts = dict(list(auto_hosts.items(
+                ))+list(scan_and_print_neighbors(net, interface, timeout=arp_timeout).items()))
+                auto_scanned_interfaces += 1
+            else:
+                logger.warning("Skipping network "+net +
+                               " as the subnet size is too big.")
+
+        if auto_scanned_interfaces == 0:
+            logger.warning(
+                "Automatic neighbourhood discovery found no interfaces with a valid network configuration to work on.")
 
     # Grab manual configured hosts
     manual_hosts = add_manual_hosts(
-        siaas_aux.get_config_from_configs_db("manual_hosts"))
+        siaas_aux.get_config_from_configs_db(config_name="manual_hosts"))
 
     # Merge all hosts (give priority to automatically found hosts in the neighbourhood, as they have more info)
     all_hosts = dict(list(manual_hosts.items()) +
@@ -325,8 +337,16 @@ def loop(interface_to_scan=None):
 
         logger.debug("Loop running ...")
 
+        ignore_neighbourhood = str(siaas_aux.get_config_from_configs_db(
+            config_name="ignore_neighbourhood"))
+        dont_neighbourhood = False
+        if len(ignore_neighbourhood or '') > 0:
+            if ignore_neighbourhood.lower() == "true":
+                dont_neighbourhood = True
+
         # Creating neighbourhood dict
-        neighbourhood_dict = main(interface_to_scan)
+        neighbourhood_dict = main(
+            interface_to_scan=interface_to_scan, ignore_neighbourhood=dont_neighbourhood)
 
         # Writing in local database
         siaas_aux.write_to_local_file(os.path.join(
@@ -335,7 +355,7 @@ def loop(interface_to_scan=None):
         # Sleep before next loop
         try:
             sleep_time = int(siaas_aux.get_config_from_configs_db(
-                "neighbourhood_loop_interval_sec"))
+                config_name="neighbourhood_loop_interval_sec"))
             logger.debug("Sleeping for "+str(sleep_time) +
                          " seconds before next loop ...")
             time.sleep(sleep_time)

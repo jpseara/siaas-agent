@@ -26,10 +26,17 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
     vuln_list = []
     vuln_dict = {}
 
-    if len(timeout or '') == 0:
+    if type(nmap_scripts_string) is not str:
+        logger.error(
+            "The Nmap scripts input is not a string. Not scanning anything.")
+        return vuln_dict
+
+    try:
+        timeout = int(timeout)
+    except:
         timeout = 300
         logger.warning(
-            "Invalid or undefined timeout configuration for Nmap portscan. Defaulting to \"300\".")
+            "Input timeout for port scanning is in an invalid format. Defaulting to \"300\".")
 
     if len(nmap_scripts_string or '') == 0:
         nmap_scripts_string = "vulners"
@@ -127,10 +134,12 @@ def get_system_info(target_ip, timeout=30):
     sysinfo_dict = {}
     detected_ports = {}
 
-    if len(timeout or '') == 0:
-        timeout = 600
+    try:
+        timeout = int(timeout)
+    except:
+        timeout = 300
         logger.warning(
-            "Invalid or undefined timeout configuration for Nmap sysinfo scan. Defaulting to \"600\".")
+            "Input timeout for system information scanning is in an invalid format. Defaulting to \"600\".")
 
     ipv = siaas_aux.is_ipv4_or_ipv6(target_ip)
     if ipv == None:
@@ -235,7 +244,7 @@ def main(target_ip="127.0.0.1"):
 
     # Grab system information and detected ports
     system_info_output = get_system_info(
-        target_ip, timeout=siaas_aux.get_config_from_configs_db("nmap_sysinfo_timeout_sec"))
+        target_ip, timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_sysinfo_timeout_sec"))
     target_info["system_info"] = system_info_output[0]
     detected_ports = system_info_output[1]
 
@@ -245,7 +254,7 @@ def main(target_ip="127.0.0.1"):
         target_info["detected_ports"][port]["vulnerabilities"] = {}
         target_info["detected_ports"][port] = detected_ports[port]
         target_info["detected_ports"][port]["vulnerabilities"] = vulnerabilities_per_port(target_ip, port.split("/")[0], port.split(
-            "/")[1], nmap_scripts_string=siaas_aux.get_config_from_configs_db("nmap_script"), timeout=siaas_aux.get_config_from_configs_db("nmap_portscan_timeout_sec"))
+            "/")[1], nmap_scripts_string=siaas_aux.get_config_from_configs_db(config_name="nmap_script"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_portscan_timeout_sec"))
 
     target_info["last_scan"] = siaas_aux.get_now_utc_str()
 
@@ -266,9 +275,10 @@ def loop():
 
         logger.debug("Loop running ...")
 
-        enabled = siaas_aux.get_config_from_configs_db("portscanner_enabled")
-        if len(enabled or '') > 0:
-            if enabled.lower() == "false":
+        disable_portscanner = str(siaas_aux.get_config_from_configs_db(
+            config_name="disable_portscanner"))
+        if len(disable_portscanner or '') > 0:
+            if disable_portscanner.lower() == "true":
                 logger.info(
                     "Portscanner is disabled in the config. Not running. Will check again in a bit ...")
                 time.sleep(60)
@@ -299,7 +309,7 @@ def loop():
         # Sleep before next loop
         try:
             sleep_time = int(siaas_aux.get_config_from_configs_db(
-                "portscanner_loop_interval_sec"))
+                config_name="portscanner_loop_interval_sec"))
             logger.debug("Sleeping for "+str(sleep_time) +
                          " seconds before next loop ...")
             time.sleep(sleep_time)

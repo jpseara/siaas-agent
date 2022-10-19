@@ -1,6 +1,11 @@
 # SIAAS - Sistema Inteligente para Automação de Auditorias de Segurança
 # By João Pedro Seara
 
+import data_transfer
+import portscanner
+import neighbourhood
+import agent
+import siaas_aux
 import os
 import sys
 import logging
@@ -17,12 +22,7 @@ os.makedirs(os.path.dirname(log_file), exist_ok=True)
 logging.basicConfig(handlers=[RotatingFileHandler(os.path.join(sys.path[0], log_file), maxBytes=10240000, backupCount=5)],
                     format='%(asctime)s.%(msecs)03d %(levelname)-5s %(filename)s [%(processName)s|%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
-import siaas_aux
 import routes
-import agent
-import neighbourhood
-import portscanner
-import data_transfer
 
 SIAAS_VERSION = "0.0.1"
 
@@ -44,13 +44,15 @@ if __name__ == "__main__":
     # Initializing local databases
     siaas_aux.write_to_local_file(
         os.path.join(sys.path[0], 'var/config.db'), {})
+    siaas_aux.write_to_local_file(os.path.join(
+        sys.path[0], 'var/config_orig.db'), {})
 
     # Some default values for some well known variables that can't be changed during runtime (these will be overwritten if there's a config file key for them)
     AGENT_ID = None
     LOG_LEVEL = "info"
 
     # Read local configuration file and insert in local database
-    if not siaas_aux.write_config_db_from_conf_file():
+    if not siaas_aux.write_config_db_from_conf_file() or not siaas_aux.write_config_db_from_conf_file(output=os.path.join(sys.path[0], 'var/config_orig.db')):
         logger.critical(
             "Can't find or use local configuration file. Aborting !")
         print("\nCan't find or use local configuration file. Aborting !\n")

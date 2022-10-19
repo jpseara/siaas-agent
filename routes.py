@@ -7,6 +7,7 @@ import sys
 
 app.config['JSON_AS_ASCII'] = False
 
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -29,15 +30,14 @@ def index():
 @app.route('/siaas-agent', methods=['GET'])
 def siaas_agent():
     module = request.args.get('module', default='*', type=str)
-    siaas_uuid = siaas_aux.get_or_create_unique_system_id()
     if module not in ["*", "agent", "config", "neighbourhood", "portscanner"]:
         abort(404)
     if module == "*":
         module = "agent,config,neighbourhood,portscanner"
     output = siaas_aux.merge_module_dicts(module.split(','))
     try:
-        output[siaas_uuid]["config"]["mongo_pwd"] = '*' * \
-            len(output[siaas_uuid]["config"]["mongo_pwd"])
+        output["config"]["mongo_pwd"] = '*' * \
+            len(output["config"]["mongo_pwd"])
     except:
         pass
     return jsonify(

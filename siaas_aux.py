@@ -33,11 +33,27 @@ def merge_module_dicts(module_list=[]):
             merged_dict = dict(
                 list(merged_dict.items())+list(next_dict_to_merge.items()))
         except:
-            logger.warning("Couldn't merge dict: "+str(next_dict_to_merge))
+            logger.warning("Couldn't merge upstream dict: " +
+                           str(next_dict_to_merge))
     return merged_dict
 
 
-def get_config_from_configs_db(config_name=None):
+def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_orig.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict={}):
+    """
+    Merges the configs downloaded from the server to the current configs DB
+    """
+    merged_config_dict = {}
+    try:
+        current_config_dict = get_config_from_configs_db(local_dict=local_dict)
+        merged_config_dict = dict(
+            list(current_config_dict.items())+list(upstream_dict.items()))
+    except:
+        logger.error(
+            "Could not merge configurations from remote server with the local configs.")
+    return write_to_local_file(output, merged_config_dict)
+
+
+def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.db'), config_name=None):
     """
     Reads a configuration value from the configs db
     If the intput is "None" it returns an entire dict with all the values. Returns an empty dict if there are no configs
@@ -47,7 +63,7 @@ def get_config_from_configs_db(config_name=None):
 
         logger.debug("Getting configuration dictionary from local DB ...")
         config_dict = read_from_local_file(
-            os.path.join(sys.path[0], 'var/config.db'))
+            local_dict)
         if len(config_dict or '') > 0:
             return config_dict
 
@@ -59,17 +75,17 @@ def get_config_from_configs_db(config_name=None):
         logger.debug("Getting configuration value '" +
                      config_name+"' from local DB ...")
         config_dict = read_from_local_file(
-            os.path.join(sys.path[0], 'var/config.db'))
+            local_dict)
         if len(config_dict or '') > 0:
             if config_name in config_dict.keys():
                 return config_dict[config_name]
 
-        logger.warning("Couldn't get configuration named '" +
-                       config_name+"' from local DB. Maybe it doesn't exist.")
+        logger.debug("Couldn't get configuration named '" +
+                     config_name+"' from local DB. Maybe it doesn't exist.")
         return None
 
 
-def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/siaas_agent.cnf')):
+def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/siaas_agent.cnf'), output=os.path.join(sys.path[0], 'var/config.db')):
     """
     Writes the configuration DB (dict) from the config file. If the file is empty or does not exist, returns False
     It will strip all characters after '#', and then strip the spaces from the beginning or end of the resulting string. If the resulting string is empty, it will ignore it
@@ -100,7 +116,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
             logger.warning("Invalid line from local config file: "+str(line))
             continue
 
-    return write_to_local_file(os.path.join(sys.path[0], 'var/config.db'), config_dict)
+    return write_to_local_file(output, config_dict)
 
 
 def read_mongodb_collection(collection, siaas_uuid="00000000-0000-0000-0000-000000000000"):
@@ -117,10 +133,11 @@ def read_mongodb_collection(collection, siaas_uuid="00000000-0000-0000-0000-0000
             cursor = collection.find().sort('_id', -1).limit(5)  # show only most recent raw
             # cursor = collection.find({},{'_id': False}).sort('_id', -1).limit(5) # show only most recent, hide object id, direction and timestamp
         else:
-            #cursor = collection.find({"payload": {'$exists': True}}).sort('_id', -1) # show most recent first
-            cursor = collection.find({"payload": {'$exists': True}}).sort('_id', -1).limit(5)  # show only the 5 most recent
-            #cursor = collection.find({"payload": {'$exists': True}, "origin":"agent_"+siaas_uuid},{'_id': False}).sort('_id', -1).limit(5) # same, but only for the UUID of this agent
-            #cursor = collection.find({"payload.agent.platform.system.os": "Linux" },{'_id': False}).sort('_id', -1).limit(5) # show only most recent for agents running on Linux
+            # cursor = collection.find({"payload": {'$exists': True}}).sort('_id', -1) # show most recent first
+            cursor = collection.find({"payload": {'$exists': True}}).sort(
+                '_id', -1).limit(5)  # show only the 5 most recent
+            # cursor = collection.find({"payload": {'$exists': True}, "origin":"agent_"+siaas_uuid},{'_id': False}).sort('_id', -1).limit(5) # same, but only for the UUID of this agent
+            # cursor = collection.find({"payload.agent.platform.system.os": "Linux" },{'_id': False}).sort('_id', -1).limit(5) # show only most recent for agents running on Linux
 
         results = list(cursor)
         for doc in results:
@@ -129,6 +146,34 @@ def read_mongodb_collection(collection, siaas_uuid="00000000-0000-0000-0000-0000
     except Exception as e:
         logger.error("Can't read data from remote DB server: "+str(e))
         return None
+
+
+def read_published_data_for_agents_mongodb(collection, siaas_uuid="00000000-0000-0000-0000-000000000000", scope="agent_configs"):
+    """
+    Reads data from the Mongo DB collection, specifically published by the server, for agents
+    Returns a config dict. Returns an empty dict if anything failed
+    """
+    my_configs = {}
+    broadcasted_configs = {}
+    final_results = {}
+    logger.info("Reading data from the remote DB server ...")
+    try:
+        cursor = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+siaas_uuid, "scope": scope}, {'_id': False,
+                                                                                                                  'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)  # show most recent first
+        results1 = list(cursor)
+        for doc in results1:
+            my_configs = doc["payload"]
+        cursor = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+"ffffffff-ffff-ffff-ffff-ffffffffffff", "scope": scope}, {
+                                 '_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)  # show most recent first
+        results2 = list(cursor)
+        for doc in results2:
+            broadcasted_configs = doc["payload"]
+        final_results = dict(
+            list(broadcasted_configs.items())+list(my_configs.items()))
+        logger.debug("Records read from the server: "+str(final_results))
+    except Exception as e:
+        logger.error("Can't read data from remote DB server: "+str(e))
+    return final_results
 
 
 def insert_in_mongodb_collection(collection, data_to_insert):

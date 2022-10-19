@@ -186,7 +186,7 @@ def loop(version=""):
         # Sleep before next loop
         try:
             sleep_time = int(siaas_aux.get_config_from_configs_db(
-                "agent_info_loop_interval_sec"))
+                config_name="agent_info_loop_interval_sec"))
             logger.debug("Sleeping for "+str(sleep_time) +
                          " seconds before next loop ...")
             time.sleep(sleep_time)
