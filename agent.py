@@ -26,7 +26,7 @@ def main(version="N/A"):
     agent = {}
 
     agent["version"] = version
-    agent["uuid"] = siaas_aux.get_or_create_unique_system_id()
+    agent["uid"] = siaas_aux.get_or_create_unique_system_id()
     agent["last_check"] = siaas_aux.get_now_utc_str()
     agent["platform"] = {}
 
@@ -200,6 +200,10 @@ if __name__ == "__main__":
     log_level = logging.INFO
     logging.basicConfig(
         format='%(asctime)s %(levelname)-5s %(filename)s [%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_level)
+
+    if os.geteuid() != 0:
+        print("You need to be root to run this script!", file=sys.stderr)
+        sys.exit(1)
 
     print('\n')
     output = main()

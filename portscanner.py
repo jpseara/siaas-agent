@@ -17,13 +17,51 @@ import pprint
 
 logger = logging.getLogger(__name__)
 
+def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
 
-def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vulners", timeout=300):
+   out_dict={}
+
+   if type(script_name) is not str or type(raw_data) is not str:
+
+      logger.error("Invalid input was provided. Not parsing nmap raw data.")
+      return out_dict
+   
+   if script_name.endswith("vulners") or script_name.endswith("vulscan"):
+
+      logger.debug("Parsing raw data using vulners/vulscan parser ...")
+
+      current_section=""
+      for line in raw_data.splitlines():
+         if len(line or '') > 0:
+            clean_line=line.lstrip().rstrip()
+            if clean_line.endswith(":"):
+               current_section=clean_line.rstrip(":")
+               out_dict[current_section]={}
+            else:
+               if current_section != "":
+                  out_dict[current_section][clean_line.split(maxsplit=1)[0].lstrip("[").rstrip("]")]=clean_line.split(maxsplit=1)[1].split("\t")
+
+   else:
+
+      logger.debug("Parsing raw nmap data using a generic parser ...")
+
+      out_list=[]
+      for line in raw_data.splitlines():
+         if len(line or '') > 0:
+            clean_line=line.lstrip().rstrip()
+            try:
+                out_list.append(clean_line.lstrip().rstrip().replace("\t", " | "))
+            except:
+                logger.warning("Couldn't append line to list of vulnerabilities: "+str(clean_line))
+      out_dict["output"]=out_list
+
+   return out_dict
+
+def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vuln", timeout=300):
 
     logger.info("Scanning vulnerabilities for " + target_ip +
                 " at " + str(port) + "/" + protocol+" ...")
 
-    vuln_list = []
     vuln_dict = {}
 
     if type(nmap_scripts_string) is not str:
@@ -39,9 +77,9 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
             "Input timeout for port scanning is in an invalid format. Defaulting to \"300\".")
 
     if len(nmap_scripts_string or '') == 0:
-        nmap_scripts_string = "vulners"
+        nmap_scripts_string = "vuln"
         logger.warning(
-            "Invalid or undefined Nmap script configuration. Defaulting to \"vulners\".")
+            "Invalid or undefined Nmap script configuration. Defaulting to \"vuln\".")
 
     ipv = siaas_aux.is_ipv4_or_ipv6(target_ip)
     if ipv == None:
@@ -86,21 +124,21 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
 
             host_results = results[target_ip]
 
-            script_list = []
-            for c in host_results["ports"][0]["cpe"]:
-                script_list.append(c["cpe"])
-
+            #script_list = []
+            #for c in host_results["ports"][0]["cpe"]:
+            #    script_list.append(c["cpe"])
+           
             for d in host_results["ports"][0]["scripts"]:
-                for script_name in script_list:
-                    if script_name in d["data"].keys():
-                        if "children" in d["data"][script_name].keys():
-                            vuln_list = vuln_list + \
-                                d["data"][script_name]["children"]
+                raw=""
+                if "raw" in d.keys():
+                   raw=d["raw"]
+                vuln_dict[nmap_script]=parse_raw_output_from_nmap_scan(nmap_script,raw)
+                #vuln_dict[nmap_script]["raw"]=raw
 
         except TimeoutError as e:
             logger.warning("Nmap timed out while scanning vulnerabilities using script '"+nmap_script+"' for " +
                            target_ip+" at "+str(port)+"/"+protocol+": "+str(e)+" sec. Maybe it needs to be increased?")
-            return vuln_dict
+            return vuln_dic
         except LookupError as e:
             logger.warning("Nmap returned an empty reply while scanning vulnerabilities using script '"+nmap_script +
                            "' in "+target_ip+" at "+str(port)+"/"+protocol+". Possible timeout, or maybe the host or port are down?")
@@ -110,19 +148,12 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
                          nmap_script+"' in "+target_ip+" at "+str(port)+"/"+protocol+": "+str(e))
             return vuln_dict
 
-        if len(vuln_list) == 0:
+        if len(vuln_dict[nmap_script]) == 0:
             logger.info("No vulnerabilities found using script '" +
                         nmap_script+"' for "+target_ip+" at "+str(port)+"/"+protocol)
-
-        for vuln in vuln_list:
-            try:
-                logger.info("VULNERABILITY FOUND! While using script '"+nmap_script +
-                            "' in "+target_ip+" at "+str(port)+"/"+protocol+": "+str(vuln["id"]))
-                vuln_dict[nmap_script][vuln["id"]] = vuln
-                vuln_dict[nmap_script][vuln["id"]].pop("id", None)
-            except:
-                logger.error("Invalid vulnerability detected and ignored when running script '" +
-                             nmap_script+"' for "+target_ip+": "+str(vuln))
+        else:
+            logger.info(str(len(vuln_dict[nmap_script]))+" VULNERABILITIES WERE FOUND! While using script '"+nmap_script +
+                            "' in "+target_ip+" at "+str(port)+"/"+protocol+".")
 
     return vuln_dict
 
@@ -254,7 +285,7 @@ def main(target_ip="127.0.0.1"):
         target_info["detected_ports"][port]["vulnerabilities"] = {}
         target_info["detected_ports"][port] = detected_ports[port]
         target_info["detected_ports"][port]["vulnerabilities"] = vulnerabilities_per_port(target_ip, port.split("/")[0], port.split(
-            "/")[1], nmap_scripts_string=siaas_aux.get_config_from_configs_db(config_name="nmap_script"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_portscan_timeout_sec"))
+            "/")[1], nmap_scripts_string=siaas_aux.get_config_from_configs_db(config_name="nmap_scripts"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_portscan_timeout_sec"))
 
     target_info["last_scan"] = siaas_aux.get_now_utc_str()
 

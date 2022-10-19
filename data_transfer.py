@@ -17,9 +17,9 @@ def download_agent_data(db_collection=None, scope="agent_configs"):
             "No valid DB collection object received. Bypassed remote DB data upload.")
         return False
 
-    siaas_uuid = siaas_aux.get_or_create_unique_system_id()
+    siaas_uid = siaas_aux.get_or_create_unique_system_id()
     downloaded_configs = siaas_aux.read_published_data_for_agents_mongodb(
-        db_collection, siaas_uuid, scope)
+        db_collection, siaas_uid, scope)
     siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs)
 
     return True
@@ -32,7 +32,7 @@ def upload_agent_data(db_collection=None, last_uploaded_dict={}):
             "No valid DB collection object received. Bypassed remote DB data upload.")
         return last_uploaded_dict
 
-    siaas_uuid = siaas_aux.get_or_create_unique_system_id()
+    siaas_uid = siaas_aux.get_or_create_unique_system_id()
 
     all_modules = "agent,config,neighbourhood,portscanner"
     current_dict = siaas_aux.merge_module_dicts(all_modules.split(','))
@@ -55,7 +55,7 @@ def upload_agent_data(db_collection=None, last_uploaded_dict={}):
     complete_dict = {}
     complete_dict["payload"] = dict(current_dict)
     complete_dict["timestamp"] = siaas_aux.get_now_utc_obj()
-    complete_dict["origin"] = "agent_"+siaas_uuid
+    complete_dict["origin"] = "agent_"+siaas_uid
     complete_dict["destiny"] = "*"
     complete_dict["scope"] = "agent_data"
 
@@ -68,7 +68,7 @@ def upload_agent_data(db_collection=None, last_uploaded_dict={}):
 
     return last_uploaded_dict
 
-    #siaas_aux.read_mongodb_collection(db_collection, siaas_uuid)
+    #siaas_aux.read_mongodb_collection(db_collection, siaas_uid)
 
 
 def loop():
@@ -165,6 +165,10 @@ if __name__ == "__main__":
     logging.basicConfig(
         format='%(asctime)s %(levelname)-5s %(filename)s [%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_level)
 
+    if os.geteuid() != 0:
+        print("You need to be root to run this script!", file=sys.stderr)
+        sys.exit(1)
+
     print('\nThis script is being directly run, so it will just read data from the DB!\n')
 
     MONGO_USER = "siaas"
@@ -174,8 +178,8 @@ if __name__ == "__main__":
     MONGO_DB = "siaas"
     MONGO_COLLECTION = "siaas"
 
-    siaas_uuid = siaas_aux.get_or_create_unique_system_id()
-    # siaas_uuid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
+    siaas_uid = siaas_aux.get_or_create_unique_system_id()
+    # siaas_uid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
 
     try:
         collection = siaas_aux.connect_mongodb_collection(
@@ -184,6 +188,6 @@ if __name__ == "__main__":
         print("Can't connect to DB!")
         sys.exit(1)
 
-    print(str(siaas_aux.read_mongodb_collection(collection, siaas_uuid)))
+    print(str(siaas_aux.read_mongodb_collection(collection, siaas_uid)))
 
     print('\nAll done. Bye!\n')

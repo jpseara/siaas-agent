@@ -1,6 +1,6 @@
 # Protected configurations (last for the whole run and can't be changed remotely)
 
-#agent_id = 00000000-0000-0000-0000-000000000001 # this should be kept commented except for testing purposes
+agent_id = 00000000-0000-0000-0000-000000000001 # this should be kept commented except for testing purposes
 log_level = debug
 mongo_collection = siaas
 mongo_db = siaas
@@ -20,8 +20,9 @@ data_transfer_loop_interval_sec = 120
 neighbourhood_arp_timeout_sec = 5
 neighbourhood_loop_interval_sec = 60
 nmap_portscan_timeout_sec = 300
-nmap_script = vulners
-#nmap_script = /home/ubuntu/siaas-agent/tmp/nmap-vulners
+#nmap_scripts = vulners
+#nmap_scripts = nmap-vulners,vulscan
+nmap_scripts = nmap-vulners,vulscan,vuln,http-csrf,http-sherlock,http-slowloris-attack,http-vmware-path-vuln,http-passwd,http-internal-ip-disclosure,http-vuln-cve2013-0156
 nmap_sysinfo_timeout_sec = 600
-portscanner_loop_interval_sec = 15
+portscanner_loop_interval_sec = 60
 #silent_mode = true

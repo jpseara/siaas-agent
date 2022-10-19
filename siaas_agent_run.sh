@@ -9,7 +9,7 @@ fi
 
 cd ${SCRIPT_DIR}
 
-#rm -rf tmp/nmap-vulners && git clone https://github.com/vulnersCom/nmap-vulners.git tmp/nmap-vulners
+./siaas_agent_refresh_nmap_scripts_repos.sh
 
 source ./venv/bin/activate
 python3 -u ./siaas_agent.py
