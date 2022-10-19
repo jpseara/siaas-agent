@@ -61,8 +61,7 @@ def main(version="N/A"):
         agent["platform"]["cpu"]["total_cores"] = psutil.cpu_count(
             logical=True)
         cpu_freq = psutil.cpu_freq()
-        agent["platform"]["cpu"]["current_freq"] = str(
-            cpu_freq.current) + " MHz"
+        agent["platform"]["cpu"]["current_freq"] = f'{float(str(cpu_freq.current)):.2f}'+" MHz"
         agent["platform"]["cpu"]["percentage"] = str(psutil.cpu_percent())+" %"
     except:
         logger.warning("Couldn't get CPU information. Ignoring.")

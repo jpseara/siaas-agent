@@ -24,6 +24,7 @@ logging.basicConfig(handlers=[RotatingFileHandler(os.path.join(sys.path[0], log_
 
 import routes
 
+
 SIAAS_VERSION = "0.0.1"
 
 if __name__ == "__main__":
