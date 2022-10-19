@@ -1,6 +1,5 @@
 # Protected configurations (last for the whole run and can't be changed remotely)
 
-agent_id = 00000000-0000-0000-0000-000000000001 # this should be kept commented except for testing purposes
 log_level = debug
 mongo_collection = siaas
 mongo_db = siaas
