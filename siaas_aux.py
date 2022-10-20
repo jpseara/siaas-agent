@@ -52,7 +52,7 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
     return write_to_local_file(output, merged_config_dict)
 
 
-def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.db'), config_name=None):
+def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.db'), config_name=None, convert_to_string=True):
     """
     Reads a configuration value from the configs db
     If the intput is "None" it returns an entire dict with all the values. Returns an empty dict if there are no configs
@@ -64,6 +64,12 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
         config_dict = read_from_local_file(
             local_dict)
         if len(config_dict or '') > 0:
+            out_dict = {}
+            for k in config_dict.keys():
+                if convert_to_string:
+                   out_dict[k]=str(config_dict[k])
+                else:
+                   out_dict[k]=config_dict[k]
             return config_dict
 
         logger.error("Couldn't get configuration dictionary from local DB.")
@@ -77,6 +83,9 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
             local_dict)
         if len(config_dict or '') > 0:
             if config_name in config_dict.keys():
+                value=config_dict[config_name]
+                if convert_to_string:
+                    value=str(value)
                 return config_dict[config_name]
 
         logger.debug("Couldn't get configuration named '" +
@@ -124,7 +133,7 @@ def read_mongodb_collection(collection, siaas_uid="00000000-0000-0000-0000-00000
     If the UID is "nil" it will return all records. Else, it will return records only for the inputted UID
     Returns a list of records. Returns None if data can't be read
     """
-    logger.info("Reading data from the remote DB server ...")
+    logger.debug("Reading data from the remote DB server ...")
     try:
 
         if(siaas_uid == "00000000-0000-0000-0000-000000000000"):
@@ -155,7 +164,7 @@ def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-
     my_configs = {}
     broadcasted_configs = {}
     final_results = {}
-    logger.info("Reading data from the remote DB server ...")
+    logger.debug("Reading data from the remote DB server ...")
     try:
         cursor = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+siaas_uid, "scope": scope}, {'_id': False,
                                                                                                                   'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)  # show most recent first
@@ -180,12 +189,12 @@ def insert_in_mongodb_collection(collection, data_to_insert):
     Inserts data (usually a dict) into a said collection
     Returns True if all was OK. Returns False if the insertion failed
     """
-    logger.info("Inserting data in the remote DB server ...")
+    logger.debug("Inserting data in the remote DB server ...")
     try:
         logger.debug("All data that will now be written to the database:\n" +
                      pprint.pformat(data_to_insert))
         collection.insert_one(copy(data_to_insert))
-        logger.info("Data successfully uploaded to the remote DB server.")
+        logger.debug("Data successfully uploaded to the remote DB server.")
         return True
     except Exception as e:
         logger.error("Can't upload data to remote DB server: "+str(e))
@@ -197,7 +206,7 @@ def connect_mongodb_collection(mongo_user="siaas", mongo_password="siaas", mongo
     Set up a MongoDB collection connection based on the inputs
     Returns the collection obj if succeeded. Returns None if it failed
     """
-    logger.info("Connecting to remote DB server at "+str(mongo_host)+" ...")
+    logger.debug("Connecting to remote DB server at "+str(mongo_host)+" ...")
     try:
         uri = "mongodb://%s:%s@%s/%s" % (quote_plus(mongo_user),
                                          quote_plus(mongo_password), mongo_host, mongo_db)
@@ -218,7 +227,7 @@ def write_to_local_file(file_to_write, data_to_insert):
     Returns True if all went OK
     Returns False if it failed
     """
-    logger.info("Inserting data to local file "+file_to_write+" ...")
+    logger.debug("Inserting data to local file "+file_to_write+" ...")
     try:
         os.makedirs(os.path.dirname(os.path.join(
             sys.path[0], file_to_write)), exist_ok=True)
@@ -226,7 +235,7 @@ def write_to_local_file(file_to_write, data_to_insert):
                      pprint.pformat(data_to_insert))
         with open(file_to_write, 'w') as file:
             file.write(json.dumps(data_to_insert))
-            logger.info("Local file write ended successfully.")
+            logger.debug("Local file write ended successfully.")
             return True
     except Exception as e:
         logger.error(
@@ -239,7 +248,7 @@ def read_from_local_file(file_to_read):
     Reads data from local file and returns it
     It will return None if it failed
     """
-    logger.info("Reading from local file "+file_to_read+" ...")
+    logger.debug("Reading from local file "+file_to_read+" ...")
     try:
         with open(file_to_read, 'r') as file:
             content = file.read()

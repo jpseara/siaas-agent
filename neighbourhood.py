@@ -36,12 +36,12 @@ def get_arp_ndp_known_hosts():
         if cmd.returncode != 0:
             raise OSError(cmd.stderr.decode('utf-8'))
         logger.debug("Raw 'ip neigh show' command output: " +
-                     str(arp_output.split('\n')))
+                     str(arp_output.splitlines()))
     except Exception as e:
         logger.error("'ip' command failed: "+str(e))
         return ip_mac_host
 
-    for arp in arp_output.split('\n'):
+    for arp in arp_output.splitlines():
 
         status = "up"
 
@@ -50,7 +50,7 @@ def get_arp_ndp_known_hosts():
             if "FAILED" in fields:
                 raise ValueError("ARP/NDP entry in FAILED state.")
             ip_arp = fields[0]
-            if ip_arp.startswith("127.") or ip_arp.startswith("fe80::") or ip_arp == "::1":
+            if ip_arp.startswith("127.") or ip_arp.lower().startswith("fe80::") or ip_arp == "::1":
                 raise ValueError(
                     "Rejecting ARP/NDP entry which is a link local address.")
             mac = fields[4]
@@ -174,12 +174,13 @@ def add_manual_hosts(manual_hosts_string=""):
     ip_mac_host = {}
 
     if type(manual_hosts_string) is not str:
-        logger.error(
-            "The manual hosts input is not a string. Not adding any manual host.")
+        logger.warning(
+            "Manual hosts string is undefined or invalid. Not adding any manual host.")
         return ip_mac_host
 
-    if len(manual_hosts_string) == 0:
-        logger.warning("No manual hosts were found.")
+    if len(manual_hosts_string or '') == 0:
+        logger.warning(
+            "Manual hosts string is undefined or invalid. Not adding any manual host.")
         return ip_mac_host
 
     manual_hosts_list = manual_hosts_string.split(",")
@@ -190,11 +191,11 @@ def add_manual_hosts(manual_hosts_string=""):
         host_uncommented = host_raw.split('#')[0]
         host = host_uncommented.split('\t')[0].split('\n')[0].rstrip().lstrip()
 
-        if len(host_uncommented) > 0 and len(host) == 0:
-            logger.warning("Manually configured host '" +
-                           host_uncommented+"' is invalid. Skipped.")
+        if host.startswith("127.") or host.lower().startswith("fe80::") or host == "::1" or host.lower() == "localhost":
+            logger.warning("Manually configured host '"+host+"' is invalid. No localhost hosts are allowed.")
+            continue
 
-        else:
+        if len(host) > 0:
 
             try:
                 socket.getaddrinfo(host, None)[0][4][0]

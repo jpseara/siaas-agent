@@ -174,10 +174,6 @@ def loop(version=""):
 
         agent_dict = main(version)
 
-        # Creating agent dict
-        logger.debug(
-            "Information that will now be written to the database:\n" + pprint.pformat(agent_dict))
-
         # Writing in local database
         siaas_aux.write_to_local_file(os.path.join(
             sys.path[0], 'var/agent.db'), agent_dict)
