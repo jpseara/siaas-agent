@@ -338,8 +338,8 @@ def loop():
 
         logger.debug("Loop running ...")
 
-        disable_portscanner = str(siaas_aux.get_config_from_configs_db(
-            config_name="disable_portscanner"))
+        disable_portscanner = siaas_aux.get_config_from_configs_db(
+            config_name="disable_portscanner", convert_to_string=True)
         if len(disable_portscanner or '') > 0:
             if disable_portscanner.lower() == "true":
                 logger.warning(

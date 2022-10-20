@@ -338,8 +338,8 @@ def loop(interface_to_scan=None):
 
         logger.debug("Loop running ...")
 
-        ignore_neighbourhood = str(siaas_aux.get_config_from_configs_db(
-            config_name="ignore_neighbourhood"))
+        ignore_neighbourhood = siaas_aux.get_config_from_configs_db(
+            config_name="ignore_neighbourhood", convert_to_string=True)
         dont_neighbourhood = False
         if len(ignore_neighbourhood or '') > 0:
             if ignore_neighbourhood.lower() == "true":

@@ -87,7 +87,7 @@ def loop():
     OFFLINE_MODE = "false"
 
     # Generate global variables from the configuration file
-    config_dict = siaas_aux.get_config_from_configs_db()
+    config_dict = siaas_aux.get_config_from_configs_db(convert_to_string=True)
     for config_name in config_dict.keys():
         if config_name.upper() == "MONGO_USER":
             MONGO_USER = config_dict[config_name]
@@ -102,7 +102,7 @@ def loop():
         if config_name.upper() == "MONGO_COLLECTION":
             MONGO_COLLECTION = config_dict[config_name]
         if config_name.upper() == "OFFLINE_MODE":
-            OFFLINE_MODE = str(config_dict[config_name])
+            OFFLINE_MODE = config_dict[config_name]
 
     run = True
     if OFFLINE_MODE.lower() == "true":
@@ -126,8 +126,8 @@ def loop():
         if db_collection != None:
 
             # Upload agent data
-            silent_mode = str(siaas_aux.get_config_from_configs_db(
-                config_name="silent_mode"))
+            silent_mode = siaas_aux.get_config_from_configs_db(
+                config_name="silent_mode", convert_to_string=True)
             dont_upload = False
             if len(silent_mode or '') > 0:
                 if silent_mode.lower() == "true":

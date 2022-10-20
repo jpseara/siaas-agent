@@ -468,4 +468,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # print(str(write_config_db_from_conf_file()))
-    print(str(get_config_from_configs_db()))
+    print(str(get_config_from_configs_db(convert_to_string=True)))
