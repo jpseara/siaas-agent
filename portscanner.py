@@ -116,7 +116,6 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
             prot_flag = "T"
 
         try:
-            # By default nmap will scan the top 1000 ports (~93% of TCP ports, ~49% of UDP ports)
             #results = nmap.nmap_version_detection(target_ip, args="-%s -p%s:%s --script %s -Pn --script-args mincvss+5.0 --host-timeout %s" % (ipv, prot_flag, port, nmap_script, timeout))
             results = nmap.nmap_version_detection(
                 target_ip, args="-%s -p%s:%s --script %s -Pn --host-timeout %s" % (ipv, prot_flag, port, nmap_script, timeout))
