@@ -9,6 +9,15 @@ fi
 
 cd ${SCRIPT_DIR}
 
+if ! source ./venv/bin/activate 2> /dev/null
+then
+	python3 -m venv ./venv
+	source ./venv/bin/activate
+	pip3 install wheel==0.37.1
+	pip3 install -r ./requirements.txt
+	pip3 install -e git+https://github.com/jpseara/python3-nmap.git#egg=python3-nmap # forked nmap version
+fi
+
 ./siaas_agent_refresh_nmap_scripts_repos.sh
 
 source ./venv/bin/activate

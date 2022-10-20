@@ -79,7 +79,7 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
     except:
         timeout = 300
         logger.warning(
-            "Input timeout for port scanning is in an invalid format. Defaulting to \"300\".")
+            "Input timeout for port scanning is not configured or in an invalid format. Defaulting to \"300\".")
 
     if len(nmap_scripts_string or '') == 0:
         nmap_scripts_string = "vuln"
@@ -179,9 +179,9 @@ def get_system_info(target_ip, timeout=30):
     try:
         timeout = int(timeout)
     except:
-        timeout = 300
+        timeout = 600
         logger.warning(
-            "Input timeout for system information scanning is in an invalid format. Defaulting to \"600\".")
+            "Input timeout for system information scanning is not configured or in an invalid format. Defaulting to \"600\".")
 
     ipv = siaas_aux.is_ipv4_or_ipv6(target_ip)
     if ipv == None:

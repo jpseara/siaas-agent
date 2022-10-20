@@ -17,7 +17,6 @@ from urllib.parse import quote_plus
 
 logger = logging.getLogger(__name__)
 
-
 def merge_module_dicts(module_list=[]):
     """
     Grabs all DB files from the module list and concatenate them
