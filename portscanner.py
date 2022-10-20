@@ -25,6 +25,8 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
 
       logger.error("Invalid input was provided. Not parsing nmap raw data.")
       return out_dict
+
+   total_vulns=0
    
    if script_name.endswith("vulners") or script_name.endswith("vulscan"):
 
@@ -39,7 +41,9 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
                out_dict[current_section]={}
             else:
                if current_section != "":
+                  total_vulns+=1
                   out_dict[current_section][clean_line.split(maxsplit=1)[0].lstrip("[").rstrip("]")]=clean_line.split(maxsplit=1)[1].split("\t")
+                  #out_dict[current_section][clean_line.split(maxsplit=1)[0].lstrip("[").rstrip("]")]=clean_line.split(maxsplit=1)[1].replace("\t"," | ")
 
    else:
 
@@ -50,12 +54,13 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
          if len(line or '') > 0:
             clean_line=line.lstrip().rstrip()
             try:
-                out_list.append(clean_line.lstrip().rstrip().replace("\t", " | "))
+               out_list.append(clean_line.lstrip().rstrip().replace("\t", " | "))
+               total_vulns+=1
             except:
-                logger.warning("Couldn't append line to list of vulnerabilities: "+str(clean_line))
-      out_dict["output"]=out_list
+               logger.warning("Couldn't append line to list of vulnerabilities: "+str(clean_line))
+      out_dict["raw_lines"]=out_list
 
-   return out_dict
+   return (out_dict, total_vulns)
 
 def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vuln", timeout=300):
 
@@ -101,6 +106,7 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
         logger.debug("Now scanning using script '"+nmap_script +
                      "' for "+target_ip+" at " + str(port)+"/" + protocol+" ...")
 
+        total_vulns=0
         vuln_dict[nmap_script] = {}
         nmap = nmap3.Nmap()
 
@@ -127,12 +133,17 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
             #script_list = []
             #for c in host_results["ports"][0]["cpe"]:
             #    script_list.append(c["cpe"])
-           
+            
+
             for d in host_results["ports"][0]["scripts"]:
                 raw=""
                 if "raw" in d.keys():
                    raw=d["raw"]
-                vuln_dict[nmap_script]=parse_raw_output_from_nmap_scan(nmap_script,raw)
+                sub_script="main"
+                if "name" in d.keys():
+                   sub_script=d["name"]
+                vuln_dict[nmap_script][sub_script], n_vulns = parse_raw_output_from_nmap_scan(sub_script,raw)
+                total_vulns+=n_vulns
                 #vuln_dict[nmap_script]["raw"]=raw
 
         except TimeoutError as e:
@@ -148,11 +159,11 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string="vul
                          nmap_script+"' in "+target_ip+" at "+str(port)+"/"+protocol+": "+str(e))
             return vuln_dict
 
-        if len(vuln_dict[nmap_script]) == 0:
+        if total_vulns == 0:
             logger.info("No vulnerabilities found using script '" +
                         nmap_script+"' for "+target_ip+" at "+str(port)+"/"+protocol)
         else:
-            logger.info(str(len(vuln_dict[nmap_script]))+" VULNERABILITIES WERE FOUND! While using script '"+nmap_script +
+            logger.info(str(total_vulns)+" VULNERABILITIES WERE FOUND! While using script '"+nmap_script +
                             "' in "+target_ip+" at "+str(port)+"/"+protocol+".")
 
     return vuln_dict
