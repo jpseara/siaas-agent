@@ -54,7 +54,7 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
             clean_line=line.lstrip().rstrip()
             try:
                out_list.append(clean_line.lstrip().rstrip().replace("\t", " | "))
-               total_vulns+=1
+               #total_vulns+=1 # not counting raw lines as vulnerabilities as there's lots of trash in there (fingerprints, banners, etc)
             except:
                logger.warning("Couldn't append line to list of vulnerabilities: "+str(clean_line))
       out_dict["raw_lines"]=out_list
