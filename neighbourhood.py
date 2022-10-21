@@ -64,14 +64,14 @@ def get_arp_ndp_known_hosts():
         ipv = siaas_aux.is_ipv4_or_ipv6(ip_arp)
         if ipv == None:
             logger.warning(
-                "The IP "+ip_arp+" found in the local ARP/NDP tables is not from a valid IP protocol. Skipped.")
+                "The IP "+ip_arp+" found in the local ARP/NDP tables for interface '"+interface+"' is not from a valid IP protocol. Skipped.")
             continue
 
         try:
             ip = socket.getaddrinfo(ip_arp, None)[0][4][0]
         except:
             logger.warning(
-                "The host "+ip_arp+" found in the local ARP/NDP tables can't be resolved. Skipped.")
+                "The host "+ip_arp+" found in the local ARP/NDP tables for interface '"+interface+"' can't be resolved. Skipped.")
             continue
 
         if(ipv == "6"):
@@ -101,18 +101,18 @@ def get_arp_ndp_known_hosts():
 
         ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 
-        logger.info("Host existing in the local ARP/NDP tables: "+dns_entry)
+        logger.info("Host existing in the local ARP/NDP tables for interface '"+interface+"': "+dns_entry)
 
         if not host_up:
             logger.warning(
-                "The host "+ip+" found in the local ARP/NDP tables didn't respond to ping.")
+                "The host "+ip+" found in the local ARP/NDP tables for interface '"+interface+"' didn't respond to ping.")
 
     return ip_mac_host
 
 
 def scan_and_print_neighbors(net, interface, timeout=5):
 
-    logger.info("Arping %s in the neighbourhood of %s ..." % (net, interface))
+    logger.info("Arping %s in the neighbourhood of '%s' ..." % (net, interface))
 
     ip_mac_host = {}
 
@@ -120,7 +120,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
         ans, unans = scapy.layers.l2.arping(
             net, iface=interface, timeout=timeout, verbose=False)
     except Exception as e:
-        logger.error("Arping failed for interface "+interface+": "+str(e))
+        logger.error("Arping failed for interface '"+interface+"': "+str(e))
         return(ip_mac_host)
 
     for s, r in ans.res:
@@ -137,7 +137,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
             ip = socket.getaddrinfo(r.psrc, None)[0][4][0]
         except:
             logger.warning("The automatically found host "+host +
-                           " in the neighbourhood of "+interface+" can't be resolved. Skipped.")
+                           " in the neighbourhood of '"+interface+"' can't be resolved. Skipped.")
             continue
 
         host_up = True if os.system(
@@ -164,7 +164,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
         ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 
         logger.info(
-            "Host automatically found in the neighbourhood of "+interface+": "+dns_entry)
+            "Host automatically found in the neighbourhood of '"+interface+"': "+dns_entry)
 
         if not host_up:
             logger.warning("The automatically found host " +
@@ -287,15 +287,8 @@ def main(interface_to_scan=None, ignore_neighbourhood=False):
             if network == 0 or interface.lower() == 'lo' or address == '127.0.0.1' or address == '0.0.0.0' or (not interface.lower().startswith("e") and not interface.lower().startswith("w") and not interface.lower().startswith("b")):
                 continue
 
+            # Skip invalid netmasks
             if netmask <= 0 or netmask == 0xFFFFFFFF:
-                continue
-
-            # Skip docker interfaces
-            if interface != interface_to_scan \
-                    and (interface.startswith('docker')
-                         or interface.startswith('br-')
-                         or interface.startswith('tun')):
-                logger.warning("Skipped interface %s." % interface)
                 continue
 
             net = siaas_aux.to_cidr_notation(network, netmask)
