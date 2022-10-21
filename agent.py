@@ -85,7 +85,6 @@ def main(version="N/A"):
             swap.used)
         agent["platform"]["memory"]["swap"]["present"] = siaas_aux.get_size(
             swap.total)
-        agent["platform"]["memory"]["swap"] = {}
     except:
         logger.warning("Couldn't get memory information. Ignoring.")
 
@@ -96,7 +95,7 @@ def main(version="N/A"):
         agent["platform"]["io"] = {}
         agent["platform"]["io"]["volumes"] = {}
         for partition in partitions:
-            if partition.device.startswith("/dev/loop"):
+            if partition.device.startswith("/dev/loop") or "/snap" in partition.mountpoint:
                 continue
             else:
                 agent["platform"]["io"]["volumes"][partition.device] = {}

@@ -53,6 +53,10 @@ def get_arp_ndp_known_hosts():
             if ip_arp.startswith("127.") or ip_arp.lower().startswith("fe80::") or ip_arp == "::1":
                 raise ValueError(
                     "Rejecting ARP/NDP entry which is a link local address.")
+            interface = fields[2]
+            if interface.lower() == "lo" or (not interface.lower().startswith("e") and not interface.lower().startswith("w") and not interface.lower().startswith("b")):
+                raise ValueError(
+                        "Rejecting ARP/NDP entry which is in an invalid interface: "+interface)
             mac = fields[4]
         except:
             continue
@@ -86,6 +90,7 @@ def get_arp_ndp_known_hosts():
 
         dns_entry = ip
         ip_mac_host[ip] = {}
+        ip_mac_host[ip]["interface"] = interface
         ip_mac_host[ip]["macaddress"] = mac
         if len(dns_name) > 0:
             ip_mac_host[ip]["domain_name"] = dns_name
@@ -147,6 +152,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
 
         dns_entry = ip
         ip_mac_host[ip] = {}
+        ip_mac_host[ip]["interface"] = interface
         ip_mac_host[ip]["macaddress"] = r.src
         if len(dns_name) > 0:
             ip_mac_host[ip]["domain_name"] = dns_name
@@ -278,7 +284,7 @@ def main(interface_to_scan=None, ignore_neighbourhood=False):
                 continue
 
             # Skip loopback network and default GW
-            if network == 0 or interface == 'lo' or address == '127.0.0.1' or address == '0.0.0.0':
+            if network == 0 or interface.lower() == 'lo' or address == '127.0.0.1' or address == '0.0.0.0' or (not interface.lower().startswith("e") and not interface.lower().startswith("w") and not interface.lower().startswith("b")):
                 continue
 
             if netmask <= 0 or netmask == 0xFFFFFFFF:
