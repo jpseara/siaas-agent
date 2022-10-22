@@ -131,7 +131,7 @@ def main(version="N/A"):
             if interface_name.startswith('docker') or interface_name.startswith('br-') or interface_name.startswith('tun') or interface_name == 'lo':
                 continue
             list_addr_mask = []
-            agent["platform"]["network"]["interfaces"][interface_name] = {}
+            agent["platform"]["network"]["interfaces"][interface_name] = []
             for address in interface_addresses:
                 if str(address.family) == 'AddressFamily.AF_INET':
                     if interface_name not in address.address:
