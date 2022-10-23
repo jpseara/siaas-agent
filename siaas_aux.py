@@ -168,7 +168,6 @@ def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-
     """
     my_configs = {}
     broadcasted_configs = {}
-    final_results = {}
     out_dict = {}
     logger.debug("Reading data from the remote DB server ...")
     try:
@@ -189,7 +188,7 @@ def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-
             broadcasted_configs = doc["payload"]
 
         final_results = dict(
-            list(broadcasted_configs.items())+list(my_configs.items()))
+            list(broadcasted_configs.items())+list(my_configs.items())) # configs directed to the agent have precedence over broadcasted ones
 
         for k in final_results.keys():
             if convert_to_string:
