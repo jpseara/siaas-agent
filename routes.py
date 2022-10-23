@@ -30,11 +30,11 @@ def index():
 @app.route('/siaas-agent', methods=['GET'])
 def siaas_agent():
     module = request.args.get('module', default='*', type=str)
-    if module not in ["*", "agent", "config", "neighbourhood", "portscanner"]:
-        abort(404)
-    if module == "*":
-        module = "agent,config,neighbourhood,portscanner"
-    output = siaas_aux.merge_module_dicts(module.split(','))
+    module_list = module.split(',')
+    all_existing_modules = ["agent", "config", "neighbourhood", "portscanner"]
+    if "*" in module_list:
+        module_list = all_existing_modules
+    output = siaas_aux.merge_module_dicts(module_list)
     try:
         output["config"]["mongo_pwd"] = '*' * \
             len(output["config"]["mongo_pwd"])

@@ -319,7 +319,7 @@ def main(target_ip="127.0.0.1"):
     target_info["metadata"]["num_ports"]=total_ports
     target_info["metadata"]["num_valid_scripts"]=len(total_valid_scripts)
     target_info["metadata"]["total_num_vulnerabilities"]=total_vulns
-    target_info["last_scan"] = siaas_aux.get_now_utc_str()
+    target_info["last_check"] = siaas_aux.get_now_utc_str()
 
     return (target_ip, target_info)
 
