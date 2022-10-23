@@ -19,7 +19,7 @@ def download_agent_data(db_collection=None, scope="agent_configs"):
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
     downloaded_configs = siaas_aux.read_published_data_for_agents_mongodb(
-        db_collection, siaas_uid, scope)
+        db_collection, siaas_uid, scope, convert_to_string=False)
     siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs)
 
     return True

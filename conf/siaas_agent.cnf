@@ -3,7 +3,8 @@
 log_level = debug
 mongo_collection = siaas
 mongo_db = siaas
-mongo_host = 127.0.0.1
+#mongo_host = 127.0.0.1
+mongo_host = 192.168.122.172
 mongo_port = 27017
 mongo_pwd = siaas
 mongo_user = siaas

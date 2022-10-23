@@ -32,20 +32,25 @@ def merge_module_dicts(module_list=[]):
             merged_dict = dict(
                 list(merged_dict.items())+list(next_dict_to_merge.items()))
         except:
-            logger.warning("Couldn't merge upstream dict: " +
+            logger.warning("Couldn't merge dict: " +
                            str(next_dict_to_merge))
     return merged_dict
 
 
 def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_orig.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict={}):
     """
-    Merges the configs downloaded from the server to the current configs DB
+    Merges the configs downloaded from the server to the local configs DB;
+    If the config disappears from the server, it reverts to the local config.
     """
     merged_config_dict = {}
+    delta_dict = {}
     try:
-        current_config_dict = get_config_from_configs_db(local_dict=local_dict)
-        merged_config_dict = dict(
-            list(current_config_dict.items())+list(upstream_dict.items()))
+        local_config_dict = get_config_from_configs_db(local_dict=local_dict)
+        if len(upstream_dict) > 0:
+            logger.debug("The following configurations are being applied/overwritten from the server: "+str(upstream_dict))
+        else:
+            logger.debug("No configurations were found in the remote server. Using local configurations only.")
+        merged_config_dict = dict(list(local_config_dict.items())+list(upstream_dict.items()))
     except:
         logger.error(
             "Could not merge configurations from remote server with the local configs.")
@@ -156,7 +161,7 @@ def read_mongodb_collection(collection, siaas_uid="00000000-0000-0000-0000-00000
         return None
 
 
-def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-0000-0000-000000000000", scope="agent_configs"):
+def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-0000-0000-000000000000", scope="agent_configs", convert_to_string=False):
     """
     Reads data from the Mongo DB collection, specifically published by the server, for agents
     Returns a config dict. Returns an empty dict if anything failed
@@ -164,6 +169,7 @@ def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-
     my_configs = {}
     broadcasted_configs = {}
     final_results = {}
+    out_dict = {}
     logger.debug("Reading data from the remote DB server ...")
     try:
         cursor = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+siaas_uid, "scope": scope}, {'_id': False,
@@ -178,10 +184,17 @@ def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-
             broadcasted_configs = doc["payload"]
         final_results = dict(
             list(broadcasted_configs.items())+list(my_configs.items()))
-        logger.debug("Records read from the server: "+str(final_results))
+
+        for k in final_results.keys():
+            if convert_to_string:
+                out_dict[k]=str(final_results[k])
+            else:
+                out_dict[k]=final_results[k]
+
+        logger.debug("Records read from the server: "+str(out_dict))
     except Exception as e:
         logger.error("Can't read data from remote DB server: "+str(e))
-    return final_results
+    return out_dict
 
 
 def insert_in_mongodb_collection(collection, data_to_insert):
