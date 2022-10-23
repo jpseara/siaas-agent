@@ -161,7 +161,7 @@ def read_mongodb_collection(collection, siaas_uid="00000000-0000-0000-0000-00000
         return None
 
 
-def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-0000-0000-000000000000", scope="agent_configs", convert_to_string=False):
+def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-0000-0000-000000000000", scope=None, convert_to_string=False):
     """
     Reads data from the Mongo DB collection, specifically published by the server, for agents
     Returns a config dict. Returns an empty dict if anything failed
@@ -172,16 +172,22 @@ def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-
     out_dict = {}
     logger.debug("Reading data from the remote DB server ...")
     try:
-        cursor = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+siaas_uid, "scope": scope}, {'_id': False,
-                                                                                                                  'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)  # show most recent first
-        results1 = list(cursor)
+        if len(scope or '') > 0:
+            cursor1 = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+siaas_uid, "scope": scope}, {'_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)
+        else:
+            cursor1 = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+siaas_uid}, {'_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)
+        results1 = list(cursor1)
         for doc in results1:
             my_configs = doc["payload"]
-        cursor = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+"ffffffff-ffff-ffff-ffff-ffffffffffff", "scope": scope}, {
-                                 '_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)  # show most recent first
-        results2 = list(cursor)
+
+        if len(scope or '') > 0:
+            cursor2 = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+"ffffffff-ffff-ffff-ffff-ffffffffffff", "scope": scope}, {'_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)
+        else:
+            cursor2 = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+"ffffffff-ffff-ffff-ffff-ffffffffffff"}, {'_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)
+        results2 = list(cursor2)
         for doc in results2:
             broadcasted_configs = doc["payload"]
+
         final_results = dict(
             list(broadcasted_configs.items())+list(my_configs.items()))
 

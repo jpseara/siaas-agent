@@ -10,7 +10,7 @@ from copy import copy
 logger = logging.getLogger(__name__)
 
 
-def download_agent_data(db_collection=None, scope="agent_configs"):
+def download_agent_data(db_collection=None):
 
     if db_collection == None:
         logger.error(
@@ -18,8 +18,7 @@ def download_agent_data(db_collection=None, scope="agent_configs"):
         return False
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
-    downloaded_configs = siaas_aux.read_published_data_for_agents_mongodb(
-        db_collection, siaas_uid, scope, convert_to_string=False)
+    downloaded_configs = siaas_aux.read_published_data_for_agents_mongodb(db_collection, siaas_uid, scope="agent_configs", convert_to_string=False)
     siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs)
 
     return True
@@ -139,7 +138,7 @@ def loop():
                     db_collection, last_uploaded_dict)
 
             # Download agent data
-            download_agent_data(db_collection, "agent_configs")
+            download_agent_data(db_collection)
         else:
             logger.error(
                 "The DB connection is not OK. Sleeping for some seconds and retrying ...")
