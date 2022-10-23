@@ -58,16 +58,10 @@ def upload_agent_data(db_collection=None, last_uploaded_dict={}):
     complete_dict["destiny"] = "*"
     complete_dict["scope"] = "agent_data"
 
-    ret_db = False
-    if db_collection != None:
-        ret_db = siaas_aux.insert_in_mongodb_collection(
-            db_collection, complete_dict)
-        if ret_db:
-            return current_dict
+    if not siaas_aux.insert_in_mongodb_collection(db_collection, complete_dict):
+        return current_dict
 
     return last_uploaded_dict
-
-    #siaas_aux.read_mongodb_collection(db_collection, siaas_uid)
 
 
 def loop():
