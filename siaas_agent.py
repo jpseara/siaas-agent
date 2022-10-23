@@ -3,7 +3,7 @@
 
 import data_transfer
 import portscanner
-import neighbourhood
+import neighborhood
 import agent
 import siaas_aux
 import os
@@ -80,17 +80,17 @@ if __name__ == "__main__":
 
     # Main logic
     agent = Process(target=agent.loop, args=(SIAAS_VERSION,))
-    #neighbourhood = Process(target=neighbourhood.loop, args=("enp1s0",))
-    neighbourhood = Process(target=neighbourhood.loop, args=())
+    #neighborhood = Process(target=neighborhood.loop, args=("enp1s0",))
+    neighborhood = Process(target=neighborhood.loop, args=())
     portscanner = Process(target=portscanner.loop, args=())
     data_transfer = Process(target=data_transfer.loop, args=())
     agent.start()
-    neighbourhood.start()
+    neighborhood.start()
     portscanner.start()
     data_transfer.start()
     app.run(debug=True, use_reloader=False, host="0.0.0.0")
     #serve(app, host="0.0.0.0", port=5000)
     agent.join()
-    neighbourhood.join()
+    neighborhood.join()
     portscanner.join()
     data_transfer.join()

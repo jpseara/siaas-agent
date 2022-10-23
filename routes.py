@@ -31,7 +31,7 @@ def index():
 def siaas_agent():
     module = request.args.get('module', default='*', type=str)
     module_list = module.split(',')
-    all_existing_modules = ["agent", "config", "neighbourhood", "portscanner"]
+    all_existing_modules = ["agent", "config", "neighborhood", "portscanner"]
     if "*" in module_list:
         module_list = all_existing_modules
     output = siaas_aux.merge_module_dicts(module_list)

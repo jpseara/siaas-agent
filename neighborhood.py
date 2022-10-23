@@ -112,7 +112,7 @@ def get_arp_ndp_known_hosts():
 
 def scan_and_print_neighbors(net, interface, timeout=5):
 
-    logger.info("Arping %s in the neighbourhood of '%s' ..." % (net, interface))
+    logger.info("Arping %s in the neighborhood of '%s' ..." % (net, interface))
 
     ip_mac_host = {}
 
@@ -129,7 +129,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
 
         ipv = siaas_aux.is_ipv4_or_ipv6(r.psrc)
         if ipv == None:
-            logger.warning("The automatically found host "+r.psrc+" in the neighbourhood of " +
+            logger.warning("The automatically found host "+r.psrc+" in the neighborhood of " +
                            interface+" is not from a valid IP protocol. Skipped.")
             continue
 
@@ -137,7 +137,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
             ip = socket.getaddrinfo(r.psrc, None)[0][4][0]
         except:
             logger.warning("The automatically found host "+host +
-                           " in the neighbourhood of '"+interface+"' can't be resolved. Skipped.")
+                           " in the neighborhood of '"+interface+"' can't be resolved. Skipped.")
             continue
 
         host_up = True if os.system(
@@ -164,7 +164,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
         ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 
         logger.info(
-            "Host automatically found in the neighbourhood of '"+interface+"': "+dns_entry)
+            "Host automatically found in the neighborhood of '"+interface+"': "+dns_entry)
 
         if not host_up:
             logger.warning("The automatically found host " +
@@ -258,7 +258,7 @@ def add_manual_hosts(manual_hosts_string=""):
     return(ip_mac_host)
 
 
-def main(interface_to_scan=None, ignore_neighbourhood=False):
+def main(interface_to_scan=None, ignore_neighborhood=False):
 
     auto_hosts = {}
     manual_hosts = {}
@@ -266,10 +266,10 @@ def main(interface_to_scan=None, ignore_neighbourhood=False):
     all_hosts = {}
     auto_scanned_interfaces = 0
 
-    if ignore_neighbourhood:
+    if ignore_neighborhood:
 
         logger.warning(
-            "Bypassing discovery of hosts in the neighbourhood as per configuration. To change the behavior, set the configuration accordingly.")
+            "Bypassing discovery of hosts in the neighborhood as per configuration. To change the behavior, set the configuration accordingly.")
 
     else:
 
@@ -277,7 +277,7 @@ def main(interface_to_scan=None, ignore_neighbourhood=False):
         arp_ndp_hosts = get_arp_ndp_known_hosts()
 
         # Grab automatically discovered hosts
-        logger.info("Starting automatic neighbourhood discovery ...")
+        logger.info("Starting automatic neighborhood discovery ...")
         for network, netmask, _, interface, address, _ in scapy.config.conf.route.routes:
 
             if interface_to_scan and interface_to_scan != interface:
@@ -297,7 +297,7 @@ def main(interface_to_scan=None, ignore_neighbourhood=False):
             if int(mask) > 16:
                 try:
                     arp_timeout = int(siaas_aux.get_config_from_configs_db(
-                        config_name="neighbourhood_arp_timeout_sec"))
+                        config_name="neighborhood_arp_timeout_sec"))
                 except:
                     arp_timeout = 5
                     logger.warning(
@@ -311,13 +311,13 @@ def main(interface_to_scan=None, ignore_neighbourhood=False):
 
         if auto_scanned_interfaces == 0:
             logger.warning(
-                "Automatic neighbourhood discovery found no interfaces with a valid network configuration to work on.")
+                "Automatic neighborhood discovery found no interfaces with a valid network configuration to work on.")
 
     # Grab manual configured hosts
     manual_hosts = add_manual_hosts(
         siaas_aux.get_config_from_configs_db(config_name="manual_hosts"))
 
-    # Merge all hosts (give priority to automatically found hosts in the neighbourhood, as they have more info)
+    # Merge all hosts (give priority to automatically found hosts in the neighborhood, as they have more info)
     all_hosts = dict(list(manual_hosts.items()) +
                      list(auto_hosts.items())+list(arp_ndp_hosts.items()))
 
@@ -326,36 +326,36 @@ def main(interface_to_scan=None, ignore_neighbourhood=False):
 
 def loop(interface_to_scan=None):
 
-    # Initializing the neighbourhood local DB
+    # Initializing the neighborhood local DB
     os.makedirs(os.path.join(sys.path[0], 'var'), exist_ok=True)
     siaas_aux.write_to_local_file(os.path.join(
-        sys.path[0], 'var/neighbourhood.db'), {})
+        sys.path[0], 'var/neighborhood.db'), {})
 
     while True:
 
-        neighbourhood_dict = {}
+        neighborhood_dict = {}
 
         logger.debug("Loop running ...")
 
-        ignore_neighbourhood = siaas_aux.get_config_from_configs_db(
-            config_name="ignore_neighbourhood", convert_to_string=True)
-        dont_neighbourhood = False
-        if len(ignore_neighbourhood or '') > 0:
-            if ignore_neighbourhood.lower() == "true":
-                dont_neighbourhood = True
+        ignore_neighborhood = siaas_aux.get_config_from_configs_db(
+            config_name="ignore_neighborhood", convert_to_string=True)
+        dont_neighborhood = False
+        if len(ignore_neighborhood or '') > 0:
+            if ignore_neighborhood.lower() == "true":
+                dont_neighborhood = True
 
-        # Creating neighbourhood dict
-        neighbourhood_dict = main(
-            interface_to_scan=interface_to_scan, ignore_neighbourhood=dont_neighbourhood)
+        # Creating neighborhood dict
+        neighborhood_dict = main(
+            interface_to_scan=interface_to_scan, ignore_neighborhood=dont_neighborhood)
 
         # Writing in local database
         siaas_aux.write_to_local_file(os.path.join(
-            sys.path[0], 'var/neighbourhood.db'), neighbourhood_dict)
+            sys.path[0], 'var/neighborhood.db'), neighborhood_dict)
 
         # Sleep before next loop
         try:
             sleep_time = int(siaas_aux.get_config_from_configs_db(
-                config_name="neighbourhood_loop_interval_sec"))
+                config_name="neighborhood_loop_interval_sec"))
             logger.debug("Sleeping for "+str(sleep_time) +
                          " seconds before next loop ...")
             time.sleep(sleep_time)

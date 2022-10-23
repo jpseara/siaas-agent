@@ -348,10 +348,10 @@ def loop():
                 continue
 
         hosts = siaas_aux.read_from_local_file(
-            os.path.join(sys.path[0], 'var/neighbourhood.db'))
+            os.path.join(sys.path[0], 'var/neighborhood.db'))
         if len(hosts or '') == 0:
             logger.warning(
-                "Couldn't read neighbourhood data. Either it's still being populated, or no neighbours exist at the moment. Trying again ...")
+                "Couldn't read neighborhood data. Either it's still being populated, or no neighbors exist at the moment. Trying again ...")
             time.sleep(60)
             continue
 
