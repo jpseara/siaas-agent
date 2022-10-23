@@ -1,10 +1,10 @@
 # SIAAS - Sistema Inteligente para Automação de Auditorias de Segurança
 # By João Pedro Seara
 
-import data_transfer
-import portscanner
-import neighborhood
-import agent
+import siaas_datatransfer
+import siaas_portscanner
+import siaas_neighborhood
+import siaas_platform
 import siaas_aux
 import os
 import sys
@@ -18,7 +18,7 @@ from waitress import serve
 app = Flask(__name__)
 logger = logging.getLogger(__name__)
 
-import routes
+import siaas_routes
 
 SIAAS_VERSION = "0.0.1"
 
@@ -50,10 +50,8 @@ if __name__ == "__main__":
         sys.path[0], 'var/config_orig.db'), {})
 
     # Read local configuration file and insert in local database
-    if not siaas_aux.write_config_db_from_conf_file() or not siaas_aux.write_config_db_from_conf_file(output=os.path.join(sys.path[0], 'var/config_orig.db')):
-        logger.critical(
-            "\nCan't find or use local configuration file. Aborting !\n")
-        sys.exit(3)
+    siaas_aux.write_config_db_from_conf_file()
+    siaas_aux.write_config_db_from_conf_file(output=os.path.join(sys.path[0], 'var/config_orig.db'))
 
     # Define logging level according to user config
     log_file = "log/siaas-agent.log"
@@ -71,7 +69,7 @@ if __name__ == "__main__":
     agent_uid = siaas_aux.get_or_create_unique_system_id()
     if agent_uid == "00000000-0000-0000-0000-000000000000":
         logger.critical("\nCan't proceed without an unique system ID. Aborting !\n")
-        sys.exit(4)
+        sys.exit(3)
 
 
     print("\nSIAAS Agent v"+SIAAS_VERSION +
@@ -79,18 +77,18 @@ if __name__ == "__main__":
     logger.info("SIAAS Agent v"+SIAAS_VERSION+" starting ["+agent_uid+"]")
 
     # Main logic
-    agent = Process(target=agent.loop, args=(SIAAS_VERSION,))
-    #neighborhood = Process(target=neighborhood.loop, args=("enp1s0",))
-    neighborhood = Process(target=neighborhood.loop, args=())
-    portscanner = Process(target=portscanner.loop, args=())
-    data_transfer = Process(target=data_transfer.loop, args=())
-    agent.start()
+    platform = Process(target=siaas_platform.loop, args=(SIAAS_VERSION,))
+    #neighborhood = Process(target=siaas_neighborhood.loop, args=("enp1s0",))
+    neighborhood = Process(target=siaas_neighborhood.loop, args=())
+    portscanner = Process(target=siaas_portscanner.loop, args=())
+    datatransfer = Process(target=siaas_datatransfer.loop, args=())
+    platform.start()
     neighborhood.start()
     portscanner.start()
-    data_transfer.start()
-    app.run(debug=True, use_reloader=False, host="0.0.0.0")
-    #serve(app, host="0.0.0.0", port=5000)
-    agent.join()
+    datatransfer.start()
+    app.run(debug=True, use_reloader=False, host="0.0.0.0", port="5001")
+    #serve(app, host="0.0.0.0", port="5001")
+    platform.join()
     neighborhood.join()
     portscanner.join()
-    data_transfer.join()
+    datatransfer.join()

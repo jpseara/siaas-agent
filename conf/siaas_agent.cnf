@@ -12,8 +12,7 @@ mongo_user = siaas
 
 # Runtime configurations (can be changed during runtime by the remote server)
 
-agent_info_loop_interval_sec = 60
-data_transfer_loop_interval_sec = 120
+datatransfer_loop_interval_sec = 120
 #disable_portscanner = true # don't scan hosts information or vulnerabilities
 #ignore_neighborhood = true # consider only manually configured hosts (bypass ARP/NDP and automatic discovery)
 manual_hosts = 109.51.61.78,sapo.pt,google.com,focal62
@@ -24,6 +23,7 @@ nmap_portscan_timeout_sec = 300
 #nmap_scripts = vuln # leaving this field commented means no vulnerability scan is performed
 nmap_scripts = nmap-vulners,vulscan,vuln,http-csrf,http-sherlock,http-slowloris-attack,http-vmware-path-vuln,http-passwd,http-internal-ip-disclosure,http-vuln-cve2013-0156
 nmap_sysinfo_timeout_sec = 600
+platform_loop_interval_sec = 60
 portscanner_loop_interval_sec = 60
 #silent_mode = true # the agent will download and update its configs from the server, but will not upload any data
 #target_specific_ports = 22,80,8080-8083 # when this setting is commented, only the open ports of each host will be scanned
