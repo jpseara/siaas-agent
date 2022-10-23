@@ -117,7 +117,7 @@ def main(version="N/A"):
         disk_io = psutil.disk_io_counters()
         agent["platform"]["io"]["total_read"] = siaas_aux.get_size(
             disk_io.read_bytes)
-        agent["platform"]["io"]["total_write"] = siaas_aux.get_size(
+        agent["platform"]["io"]["total_written"] = siaas_aux.get_size(
             disk_io.write_bytes)
     except:
         logger.warning("Couldn't get IO statistics. Ignoring.")
