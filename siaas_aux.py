@@ -25,12 +25,13 @@ def merge_module_dicts(module_list=[]):
     merged_dict = {}
     for module in module_list:
         try:
-            next_dict_to_merge = {}
-            next_dict_to_merge[module] = {}
-            next_dict_to_merge[module] = read_from_local_file(
+            module_dict = read_from_local_file(
                 os.path.join(sys.path[0], 'var/'+str(module)+'.db'))
-            merged_dict = dict(
-                list(merged_dict.items())+list(next_dict_to_merge.items()))
+            if module_dict != None:
+                next_dict_to_merge = {}
+                next_dict_to_merge[module] = module_dict
+                merged_dict = dict(
+                  list(merged_dict.items())+list(next_dict_to_merge.items()))
         except:
             logger.warning("Couldn't merge dict: " +
                            str(next_dict_to_merge))
