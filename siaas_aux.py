@@ -17,13 +17,14 @@ from urllib.parse import quote_plus
 
 logger = logging.getLogger(__name__)
 
-def merge_module_dicts(module_list=[]):
+def merge_module_dicts(modules=""):
     """
     Grabs all DB files from the module list and concatenate them
     Returns an empty dict if it fails 
     """
     merged_dict = {}
-    for module in module_list:
+    for module in modules.split(','):
+        module = module.lstrip().rstrip()
         try:
             module_dict = read_from_local_file(
                 os.path.join(sys.path[0], 'var/'+str(module)+'.db'))

@@ -8,8 +8,8 @@ import sys
 app.config['JSON_AS_ASCII'] = False
 
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', strict_slashes=False)
+@app.route('/index', strict_slashes=False)
 def index():
     siaas = {
         'name': 'Sistema Inteligente para Automação de Auditorias de Segurança',
@@ -27,19 +27,20 @@ def index():
     )
 
 
-@app.route('/siaas-agent', methods=['GET'])
+@app.route('/siaas-agent', methods=['GET'], strict_slashes=False)
 def siaas_agent():
     module = request.args.get('module', default='*', type=str)
-    module_list = module.split(',')
-    all_existing_modules = ["config", "neighborhood", "platform", "portscanner"]
-    if "*" in module_list:
-        module_list = all_existing_modules
-    output = siaas_aux.merge_module_dicts(module_list)
+    all_existing_modules = "config,neighborhood,platform,portscanner"
+    for m in module.split(','):
+        if m.lstrip().rstrip() == "*":
+            module = all_existing_modules
+    output = siaas_aux.merge_module_dicts(module)
     try:
         output["config"]["mongo_pwd"] = '*' * \
             len(output["config"]["mongo_pwd"])
     except:
         pass
+
     return jsonify(
         {
             'status': 'success',
@@ -48,3 +49,4 @@ def siaas_agent():
             'output': output
         }
     )
+
