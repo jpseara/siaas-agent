@@ -142,15 +142,9 @@ def read_mongodb_collection(collection, siaas_uid="00000000-0000-0000-0000-00000
     try:
 
         if(siaas_uid == "00000000-0000-0000-0000-000000000000"):
-            # cursor = collection.find() # show all raw
-            cursor = collection.find().sort('_id', -1).limit(5)  # show only most recent raw
-            # cursor = collection.find({},{'_id': False}).sort('_id', -1).limit(5) # show only most recent, hide object id, direction and timestamp
+            cursor = collection.find({"payload": {'$exists': True}}).sort('_id', -1).limit(15) # show everything
         else:
-            # cursor = collection.find({"payload": {'$exists': True}}).sort('_id', -1) # show most recent first
-            cursor = collection.find({"payload": {'$exists': True}}).sort(
-                '_id', -1).limit(5)  # show only the 5 most recent
-            # cursor = collection.find({"payload": {'$exists': True}, "origin":"agent_"+siaas_uid},{'_id': False}).sort('_id', -1).limit(5) # same, but only for the UID of this agent
-            # cursor = collection.find({"payload.agent.platform.system.os": "Linux" },{'_id': False}).sort('_id', -1).limit(5) # show only most recent for agents running on Linux
+            cursor = collection.find({'$and': [{"payload": {'$exists': True}}, {'$or':[{"origin": "agent_"+siaas_uid}, {"destiny": {'$in': ["agent_"+siaas_uid, "agent_ffffffff-ffff-ffff-ffff-ffffffffffff"]}}]}]}).sort('_id', -1).limit(15)  # destinated or originated to/from the agent
 
         results = list(cursor)
         for doc in results:
@@ -473,17 +467,3 @@ def to_cidr_notation(bytes_network, bytes_netmask):
     net = "%s/%s" % (network, netmask)
 
     return net
-
-
-if __name__ == "__main__":
-
-    log_level = logging.INFO
-    logging.basicConfig(
-        format='%(asctime)s %(levelname)-5s %(filename)s [%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_level)
-
-    if os.geteuid() != 0:
-        print("You need to be root to run this script!", file=sys.stderr)
-        sys.exit(1)
-
-    # print(str(write_config_db_from_conf_file()))
-    print(str(get_config_from_configs_db(convert_to_string=True)))
