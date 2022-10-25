@@ -56,7 +56,7 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
     except:
         logger.error(
             "Could not merge configurations from remote server with the local configs.")
-    return write_to_local_file(output, merged_config_dict)
+    return write_to_local_file(output, dict(sorted(merged_config_dict.items())))
 
 
 def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.db'), config_name=None, convert_to_string=True):
@@ -130,7 +130,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
             logger.warning("Invalid line from local config file: "+str(line))
             continue
 
-    return write_to_local_file(output, config_dict)
+    return write_to_local_file(output, dict(sorted(config_dict.items())))
 
 
 def read_mongodb_collection(collection, siaas_uid="00000000-0000-0000-0000-000000000000"):
