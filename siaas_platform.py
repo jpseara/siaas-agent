@@ -66,7 +66,7 @@ def main(version="N/A"):
         platform["system_info"]["memory"]["available"] = siaas_aux.get_size(svmem.available)
         swap = psutil.swap_memory()
         platform["system_info"]["memory"]["swap"] = {}
-        platform["system_info"]["memory"]["swap"]["percent"] = str(swap.percent)+" %"
+        platform["system_info"]["memory"]["swap"]["percentage"] = str(swap.percent)+" %"
         platform["system_info"]["memory"]["swap"]["total"] = siaas_aux.get_size(
             swap.total)
         platform["system_info"]["memory"]["swap"]["used"] = siaas_aux.get_size(
