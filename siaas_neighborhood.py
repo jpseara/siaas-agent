@@ -90,7 +90,6 @@ def get_arp_ndp_known_hosts():
 
         dns_entry = ip
         ip_mac_host[ip] = {}
-        ip_mac_host[ip]["interface"] = interface
         ip_mac_host[ip]["macaddress"] = mac
         if len(dns_name) > 0:
             ip_mac_host[ip]["domain_name"] = dns_name
@@ -98,6 +97,7 @@ def get_arp_ndp_known_hosts():
         ip_mac_host[ip]["discovery_type"] = "arp_ndp"
         ip_mac_host[ip]["ping_status"] = status
         ip_mac_host[ip]["ip_version"] = ipv
+        ip_mac_host[ip]["interface"] = interface
 
         ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 
@@ -152,7 +152,6 @@ def scan_and_print_neighbors(net, interface, timeout=5):
 
         dns_entry = ip
         ip_mac_host[ip] = {}
-        ip_mac_host[ip]["interface"] = interface
         ip_mac_host[ip]["macaddress"] = r.src
         if len(dns_name) > 0:
             ip_mac_host[ip]["domain_name"] = dns_name
@@ -160,6 +159,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
         ip_mac_host[ip]["discovery_type"] = "auto"
         ip_mac_host[ip]["ping_status"] = status
         ip_mac_host[ip]["ip_version"] = ipv
+        ip_mac_host[ip]["interface"] = interface
 
         ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 

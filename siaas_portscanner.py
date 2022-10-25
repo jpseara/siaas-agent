@@ -224,22 +224,22 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
         return (sysinfo_dict, detected_ports)
 
     try:
+        sysinfo_dict["hostname"] = host_results["hostname"][0]["name"]
+    except:
+        pass
+
+    try:
         sysinfo_dict["mac_address"] = host_results["macaddress"]["addr"]
         sysinfo_dict["nic_vendor"] = host_results["macaddress"]["vendor"]
     except:
         pass
 
     try:
-        sysinfo_dict["hostname"] = host_results["hostname"][0]["name"]
-    except:
-        pass
-
-    try:
         sysinfo_dict["os_name"] = host_results["osmatch"][0]["name"]
         sysinfo_dict["os_family"] = host_results["osmatch"][0]["osclass"]["osfamily"]
+        sysinfo_dict["os_gen"] = host_results["osmatch"][0]["osclass"]["osgen"]
         sysinfo_dict["os_vendor"] = host_results["osmatch"][0]["osclass"]["vendor"]
         sysinfo_dict["os_type"] = host_results["osmatch"][0]["osclass"]["type"]
-        sysinfo_dict["os_gen"] = host_results["osmatch"][0]["osclass"]["osgen"]
     except:
         pass
 
