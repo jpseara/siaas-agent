@@ -363,7 +363,7 @@ def loop():
                 scan_results_all[future.result()[0]] = (future.result()[1])
 
         # Creating portscanner dict
-        portscanner_dict = dict(sorted(scan_results_all.items()))
+        portscanner_dict = siaas_aux.sort_ip_dict(scan_results_all)
 
         # Writing in local database
         siaas_aux.write_to_local_file(os.path.join(

@@ -321,7 +321,7 @@ def main(interface_to_scan=None, ignore_neighborhood=False):
     all_hosts = dict(list(manual_hosts.items()) +
                      list(auto_hosts.items())+list(arp_ndp_hosts.items()))
 
-    return dict(sorted(all_hosts.items()))
+    return siaas_aux.sort_ip_dict(all_hosts)
 
 
 def loop(interface_to_scan=None):

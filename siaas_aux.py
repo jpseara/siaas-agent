@@ -372,6 +372,31 @@ def get_now_utc_obj():
     return datetime.strptime(datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'), '%Y-%m-%dT%H:%M:%SZ')
 
 
+def ip_sorter(s):
+    """
+    IP sorter to use in sorted function
+    """
+    try:
+        ip = int(ipaddress.ip_address(s))
+    except ValueError:
+        return (1, s)
+    return (0, ip)
+
+
+def sort_ip_dict(ip_dict):
+    """
+    Sorts a dict by their keys considering they're IPs
+    """
+    out_dict={}
+    try:
+        sorted_keys=sorted(ip_dict.keys(), key=ip_sorter)
+        for k in sorted_keys:
+            out_dict[k]=ip_dict[k]
+    except:
+        pass
+    return out_dict
+
+
 def is_ipv4_or_ipv6(ip):
     """
     Returns "6" if input IP is IPv6
