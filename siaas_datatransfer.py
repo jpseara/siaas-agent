@@ -70,17 +70,14 @@ def loop():
     last_uploaded_dict = {}
     last_downloaded_dict = {}
 
-    # Some default values for some well known variables that can't be changed during runtime (these will be overwritten if there's a config file key for them)
-    MONGO_USER = "siaas"
-    MONGO_PWD = "siaas"
-    MONGO_HOST = "127.0.0.1"
-    MONGO_PORT = "27017"
-    MONGO_DB = "siaas"
-    MONGO_COLLECTION = "siaas"
-    OFFLINE_MODE = "false"
-
     # Generate global variables from the configuration file
     config_dict = siaas_aux.get_config_from_configs_db(convert_to_string=True)
+    MONGO_USER=None
+    MONGO_PWD=None
+    MONGO_HOST=None
+    MONGO_PORT=None
+    MONGO_DB=None
+    MONGO_COLLECTION=None
     for config_name in config_dict.keys():
         if config_name.upper() == "MONGO_USER":
             MONGO_USER = config_dict[config_name]
@@ -94,14 +91,14 @@ def loop():
             MONGO_DB = config_dict[config_name]
         if config_name.upper() == "MONGO_COLLECTION":
             MONGO_COLLECTION = config_dict[config_name]
-        if config_name.upper() == "OFFLINE_MODE":
-            OFFLINE_MODE = config_dict[config_name]
 
     run = True
-    if OFFLINE_MODE.lower() == "true":
-        logger.warning(
-            "Offline mode is on! No data will be transferred. If you want to change this behavior, change the configuration and restart the application.")
-        run = False
+    offline_mode = siaas_aux.get_config_from_configs_db(config_name="offline_mode", convert_to_string=True)
+    if len(offline_mode or '') > 0:
+        if offline_mode.lower() == "true":
+            logger.warning(
+                "Offline mode is on! No data will be transferred. If you want to change this behavior, change the configuration and restart the application.")
+            run = False
 
     while run:
 
@@ -164,15 +161,15 @@ if __name__ == "__main__":
 
     print('\nThis script is being directly run, so it will just read data from the DB!\n')
 
+    siaas_uid = siaas_aux.get_or_create_unique_system_id()
+    #siaas_uid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
+
     MONGO_USER = "siaas"
     MONGO_PWD = "siaas"
-    MONGO_HOST = "192.168.122.172"
+    MONGO_HOST = "127.0.0.1"
     MONGO_PORT = "27017"
     MONGO_DB = "siaas"
     MONGO_COLLECTION = "siaas"
-
-    siaas_uid = siaas_aux.get_or_create_unique_system_id()
-    #siaas_uid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
 
     try:
         collection = siaas_aux.connect_mongodb_collection(

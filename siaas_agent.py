@@ -71,7 +71,6 @@ if __name__ == "__main__":
         logger.critical("\nCan't proceed without an unique system ID. Aborting !\n")
         sys.exit(3)
 
-
     print("\nSIAAS Agent v"+SIAAS_VERSION +
           " starting ["+agent_uid+"]\n\nLogging to: "+os.path.join(sys.path[0], log_file)+"\n")
     logger.info("SIAAS Agent v"+SIAAS_VERSION+" starting ["+agent_uid+"]")

@@ -93,7 +93,7 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
                 value=config_dict[config_name]
                 if convert_to_string:
                     value=str(value)
-                return config_dict[config_name]
+                return value
 
         logger.debug("Couldn't get configuration named '" +
                      config_name+"' from local DB. Maybe it doesn't exist.")
@@ -105,7 +105,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
     Writes the configuration DB (dict) from the config file. If the file is empty or does not exist, returns False
     It will strip all characters after '#', and then strip the spaces from the beginning or end of the resulting string. If the resulting string is empty, it will ignore it
     Then, it will grab the string before the first "=" as the config key, and after it as the actual value
-    The config key is then converted to lowercase, spaces removed from beginning or end, and all " and ' are removed.
+    The config key has its spaces removed from beginning or end, and all " and ' are removed.
     The actual value is just stripped of spaces from the beginning and the end
     Writes the resulting dict in the DB file of config.db. This means it will return True if things go fine, or False if it fails
     """
@@ -123,8 +123,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
             line_uncommented = line.split('#')[0].rstrip().lstrip()
             if len(line_uncommented) == 0:
                 continue
-            config_name = line_uncommented.split("=", 1)[0].lower(
-            ).rstrip().lstrip().replace("\"", "").replace("\'", "")
+            config_name = line_uncommented.split("=", 1)[0].rstrip().lstrip().replace("\"", "").replace("\'", "")
             config_value = line_uncommented.split("=", 1)[1].rstrip().lstrip()
             config_dict[config_name] = config_value
         except:
