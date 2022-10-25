@@ -345,8 +345,9 @@ def loop(interface_to_scan=None):
                 dont_neighborhood = True
 
         # Creating neighborhood dict
-        neighborhood_dict = main(
-            interface_to_scan=interface_to_scan, ignore_neighborhood=dont_neighborhood)
+        neighborhood_dict = dict(sorted(main(
+            interface_to_scan=interface_to_scan, ignore_neighborhood=dont_neighborhood).items()
+            ))
 
         # Writing in local database
         siaas_aux.write_to_local_file(os.path.join(

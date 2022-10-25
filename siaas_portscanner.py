@@ -279,7 +279,7 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
     if len(host_results["ports"]) == 0:
         logger.info("Found no ports/services reachable for host "+target_ip+".")
 
-    return (sysinfo_dict, detected_ports)
+    return (sysinfo_dict, dict(sorted(detected_ports.items())))
 
 
 def main(target_ip="127.0.0.1"):
