@@ -36,10 +36,10 @@ def upload_agent_data(db_collection=None, last_uploaded_dict={}):
     all_modules = "config,neighborhood,platform,portscanner"
     current_dict = siaas_aux.merge_module_dicts(all_modules)
 
-    if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict) == 0:
-        logger.info(
-            "No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
-        return last_uploaded_dict
+    #if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict) == 0:
+    #    logger.info(
+    #        "No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
+    #    return last_uploaded_dict
 
     # Creating a new dict with a date object and date transfer direction so we can easily filter it and order entries in MongoDB
 
