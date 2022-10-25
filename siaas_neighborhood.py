@@ -321,7 +321,7 @@ def main(interface_to_scan=None, ignore_neighborhood=False):
     all_hosts = dict(list(manual_hosts.items()) +
                      list(auto_hosts.items())+list(arp_ndp_hosts.items()))
 
-    return all_hosts
+    return dict(sorted(all_hosts.items()))
 
 
 def loop(interface_to_scan=None):
@@ -345,9 +345,8 @@ def loop(interface_to_scan=None):
                 dont_neighborhood = True
 
         # Creating neighborhood dict
-        neighborhood_dict = dict(sorted(main(
-            interface_to_scan=interface_to_scan, ignore_neighborhood=dont_neighborhood).items()
-            ))
+        neighborhood_dict = main(
+            interface_to_scan=interface_to_scan, ignore_neighborhood=dont_neighborhood)
 
         # Writing in local database
         siaas_aux.write_to_local_file(os.path.join(

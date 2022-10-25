@@ -279,7 +279,7 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
     if len(host_results["ports"]) == 0:
         logger.info("Found no ports/services reachable for host "+target_ip+".")
 
-    return (sysinfo_dict, dict(sorted(detected_ports.items())))
+    return (sysinfo_dict, detected_ports)
 
 
 def main(target_ip="127.0.0.1"):
@@ -363,7 +363,7 @@ def loop():
                 scan_results_all[future.result()[0]] = (future.result()[1])
 
         # Creating portscanner dict
-        portscanner_dict = scan_results_all
+        portscanner_dict = dict(sorted(scan_results_all.items()))
 
         # Writing in local database
         siaas_aux.write_to_local_file(os.path.join(
