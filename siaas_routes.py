@@ -12,7 +12,7 @@ app.config['JSON_SORT_KEYS'] = False
 @app.route('/', strict_slashes=False)
 @app.route('/index', strict_slashes=False)
 def index():
-    siaas = {
+    output = {
         'name': 'Sistema Inteligente para Automação de Auditorias de Segurança',
         'module': 'Agent',
         'author': 'João Pedro Seara',
@@ -22,7 +22,7 @@ def index():
         {
             'output': output,
             'status': 'success',
-            'total_entries': len(siaas),
+            'total_entries': len(output),
             'time': siaas_aux.get_now_utc_str()
         }
     )
