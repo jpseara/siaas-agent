@@ -33,7 +33,7 @@ def upload_agent_data(db_collection=None, last_uploaded_dict={}):
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
 
-    all_modules = "config,neighborhood,platform,portscanner"
+    all_modules = "platform,neighborhood,portscanner,config"
     current_dict = siaas_aux.merge_module_dicts(all_modules)
 
     #if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict) == 0:
