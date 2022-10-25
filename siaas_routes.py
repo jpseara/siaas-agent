@@ -6,6 +6,7 @@ import os
 import sys
 
 app.config['JSON_AS_ASCII'] = False
+app.config['JSON_SORT_KEYS'] = False
 
 
 @app.route('/', strict_slashes=False)
@@ -19,10 +20,10 @@ def index():
     }
     return jsonify(
         {
+            'output': output,
             'status': 'success',
             'total_entries': len(siaas),
-            'time': siaas_aux.get_now_utc_str(),
-            'output': siaas
+            'time': siaas_aux.get_now_utc_str()
         }
     )
 
@@ -43,10 +44,10 @@ def siaas_agent():
 
     return jsonify(
         {
+            'output': output,
             'status': 'success',
             'total_entries': len(output),
-            'time': siaas_aux.get_now_utc_str(),
-            'output': output
+            'time': siaas_aux.get_now_utc_str()
         }
     )
 

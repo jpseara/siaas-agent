@@ -27,64 +27,53 @@ def main(version="N/A"):
 
     platform["version"] = version
     platform["uid"] = siaas_aux.get_or_create_unique_system_id()
-    platform["last_check"] = siaas_aux.get_now_utc_str()
-    platform["platform"] = {}
 
-    # Boot Time
-    try:
-        boot_time_timestamp = psutil.boot_time()
-        bt = datetime.utcfromtimestamp(
-            boot_time_timestamp).strftime('%Y-%m-%dT%H:%M:%SZ')
-        platform["platform"]["last_boot"] = str(bt)
-    except:
-        logger.warning("Couldn't grab boot time information. Ignoring.")
+    platform["system_info"] = {}
 
     # Platform
     try:
         uname = platform.uname()
-        platform["platform"]["system"] = {}
-        platform["platform"]["system"]["os"] = uname.system
-        platform["platform"]["system"]["node_name"] = uname.node
-        platform["platform"]["system"]["kernel"] = uname.release
-        platform["platform"]["system"]["flavor"] = uname.version
-        platform["platform"]["system"]["arch"] = uname.machine
-        platform["platform"]["system"]["processor"] = cpuinfo.get_cpu_info()[
+        platform["system_info"]["system"] = {}
+        platform["system_info"]["system"]["os"] = uname.system
+        platform["system_info"]["system"]["node_name"] = uname.node
+        platform["system_info"]["system"]["kernel"] = uname.release
+        platform["system_info"]["system"]["flavor"] = uname.version
+        platform["system_info"]["system"]["arch"] = uname.machine
+        platform["system_info"]["system"]["processor"] = cpuinfo.get_cpu_info()[
             'brand_raw']
     except:
         logger.warning("Couldn't get platform information. Ignoring.")
 
     # CPU information
     try:
-        platform["platform"]["cpu"] = {}
-        platform["platform"]["cpu"]["physical_cores"] = psutil.cpu_count(
+        platform["system_info"]["cpu"] = {}
+        platform["system_info"]["cpu"]["percentage"] = str(psutil.cpu_percent())+" %"
+        platform["system_info"]["cpu"]["physical_cores"] = psutil.cpu_count(
             logical=False)
-        platform["platform"]["cpu"]["total_cores"] = psutil.cpu_count(
+        platform["system_info"]["cpu"]["total_cores"] = psutil.cpu_count(
             logical=True)
         cpu_freq = psutil.cpu_freq()
-        platform["platform"]["cpu"]["current_freq"] = f'{float(str(cpu_freq.current)):.2f}'+" MHz"
-        platform["platform"]["cpu"]["percentage"] = str(psutil.cpu_percent())+" %"
+        platform["system_info"]["cpu"]["current_freq"] = f'{float(str(cpu_freq.current)):.2f}'+" MHz"
     except:
         logger.warning("Couldn't get CPU information. Ignoring.")
 
     # Memory Information
     try:
         svmem = psutil.virtual_memory()
-        platform["platform"]["memory"] = {}
-        platform["platform"]["memory"]["total"] = siaas_aux.get_size(svmem.total)
-        platform["platform"]["memory"]["available"] = siaas_aux.get_size(
+        platform["system_info"]["memory"] = {}
+        platform["system_info"]["memory"]["percentage"] = str(svmem.percent)+" %"
+        platform["system_info"]["memory"]["total"] = siaas_aux.get_size(svmem.total)
+        platform["system_info"]["memory"]["used"] = siaas_aux.get_size(svmem.used)
+        platform["system_info"]["memory"]["available"] = siaas_aux.get_size(
             svmem.available)
-        platform["platform"]["memory"]["used"] = siaas_aux.get_size(svmem.used)
-        platform["platform"]["memory"]["percentage"] = str(svmem.percent)+" %"
         swap = psutil.swap_memory()
-        platform["platform"]["memory"]["swap"] = {}
-        platform["platform"]["memory"]["swap"]["total"] = siaas_aux.get_size(
+        platform["system_info"]["memory"]["swap"] = {}
+        platform["system_info"]["memory"]["swap"]["total"] = siaas_aux.get_size(
             swap.total)
-        platform["platform"]["memory"]["swap"]["free"] = siaas_aux.get_size(
-            swap.free)
-        platform["platform"]["memory"]["swap"]["used"] = siaas_aux.get_size(
+        platform["system_info"]["memory"]["swap"]["used"] = siaas_aux.get_size(
             swap.used)
-        platform["platform"]["memory"]["swap"]["present"] = siaas_aux.get_size(
-            swap.total)
+        platform["system_info"]["memory"]["swap"]["free"] = siaas_aux.get_size(
+            swap.free)
     except:
         logger.warning("Couldn't get memory information. Ignoring.")
 
@@ -92,46 +81,46 @@ def main(version="N/A"):
     try:
         # get all disk partitions
         partitions = psutil.disk_partitions()
-        platform["platform"]["io"] = {}
-        platform["platform"]["io"]["volumes"] = {}
+        platform["system_info"]["io"] = {}
+        platform["system_info"]["io"]["volumes"] = {}
         for partition in partitions:
             if partition.device.startswith("/dev/loop") or "/snap" in partition.mountpoint:
                 continue
             else:
-                platform["platform"]["io"]["volumes"][partition.device] = {}
-                platform["platform"]["io"]["volumes"][partition.device]["partition_mountpoint"] = partition.mountpoint
-                platform["platform"]["io"]["volumes"][partition.device]["partition_fstype"] = partition.fstype
-                platform["platform"]["io"]["volumes"][partition.device]["usage"] = {}
+                platform["system_info"]["io"]["volumes"][partition.device] = {}
+                platform["system_info"]["io"]["volumes"][partition.device]["partition_mountpoint"] = partition.mountpoint
+                platform["system_info"]["io"]["volumes"][partition.device]["partition_fstype"] = partition.fstype
+                platform["system_info"]["io"]["volumes"][partition.device]["usage"] = {}
                 try:
                     partition_usage = psutil.disk_usage(partition.mountpoint)
-                    platform["platform"]["io"]["volumes"][partition.device]["usage"]["total"] = siaas_aux.get_size(
-                        partition_usage.total)
-                    platform["platform"]["io"]["volumes"][partition.device]["usage"]["used"] = siaas_aux.get_size(
-                        partition_usage.used)
-                    platform["platform"]["io"]["volumes"][partition.device]["usage"]["free"] = siaas_aux.get_size(
-                        partition_usage.free)
-                    platform["platform"]["io"]["volumes"][partition.device]["usage"]["percentage"] = str(
+                    platform["system_info"]["io"]["volumes"][partition.device]["usage"]["percentage"] = str(
                         partition_usage.percent)+" %"
+                    platform["system_info"]["io"]["volumes"][partition.device]["usage"]["total"] = siaas_aux.get_size(
+                        partition_usage.total)
+                    platform["system_info"]["io"]["volumes"][partition.device]["usage"]["used"] = siaas_aux.get_size(
+                        partition_usage.used)
+                    platform["system_info"]["io"]["volumes"][partition.device]["usage"]["free"] = siaas_aux.get_size(
+                        partition_usage.free)
                 except:
                     pass
         disk_io = psutil.disk_io_counters()
-        platform["platform"]["io"]["total_read"] = siaas_aux.get_size(
+        platform["system_info"]["io"]["total_read"] = siaas_aux.get_size(
             disk_io.read_bytes)
-        platform["platform"]["io"]["total_written"] = siaas_aux.get_size(
+        platform["system_info"]["io"]["total_written"] = siaas_aux.get_size(
             disk_io.write_bytes)
     except:
         logger.warning("Couldn't get IO statistics. Ignoring.")
 
     # Network and network interface statistics
     try:
-        platform["platform"]["network"] = {}
-        platform["platform"]["network"]["interfaces"] = {}
+        platform["system_info"]["network"] = {}
+        platform["system_info"]["network"]["interfaces"] = {}
         if_addrs = psutil.net_if_addrs()
         for interface_name, interface_addresses in if_addrs.items():
             if interface_name.startswith('docker') or interface_name.startswith('br-') or interface_name.startswith('tun') or interface_name == 'lo':
                 continue
             list_addr_mask = []
-            platform["platform"]["network"]["interfaces"][interface_name] = []
+            platform["system_info"]["network"]["interfaces"][interface_name] = []
             for address in interface_addresses:
                 if str(address.family) == 'AddressFamily.AF_INET':
                     if interface_name not in address.address:
@@ -145,15 +134,26 @@ def main(version="N/A"):
                         list_addr_mask.append(
                             address.address+"/"+str(mask_prefix))
             if len(list_addr_mask) > 0:
-                platform["platform"]["network"]["interfaces"][interface_name] = list_addr_mask
+                platform["system_info"]["network"]["interfaces"][interface_name] = list_addr_mask
         net_io = psutil.net_io_counters()
-        platform["platform"]["network"]["total_sent"] = siaas_aux.get_size(
-            net_io.bytes_sent)
-        platform["platform"]["network"]["total_received"] = siaas_aux.get_size(
+        platform["system_info"]["network"]["total_received"] = siaas_aux.get_size(
             net_io.bytes_recv)
+        platform["system_info"]["network"]["total_sent"] = siaas_aux.get_size(
+            net_io.bytes_sent)
     except:
         logger.warning(
             "Couldnt get network information and statistics. Ignoring.")
+
+    # Boot Time
+    try:
+        boot_time_timestamp = psutil.boot_time()
+        bt = datetime.utcfromtimestamp(
+            boot_time_timestamp).strftime('%Y-%m-%dT%H:%M:%SZ')
+        platform["system_info"]["last_boot"] = str(bt)
+    except:
+        logger.warning("Couldn't grab boot time information. Ignoring.")
+
+    platform["last_check"] = siaas_aux.get_now_utc_str()
 
     return platform
 

@@ -238,12 +238,12 @@ def add_manual_hosts(manual_hosts_string=""):
 
                 dns_entry = ip
                 ip_mac_host[ip] = {}
-                ip_mac_host[ip]["discovery_type"] = "manual"
+                ip_mac_host[ip]["manual_entry_address"] = host
                 if len(dns_name) > 0:
                     ip_mac_host[ip]["domain_name"] = dns_name
                     dns_entry = ip+" ("+dns_name+")"
+                ip_mac_host[ip]["discovery_type"] = "manual"
                 ip_mac_host[ip]["ping_status"] = status
-                ip_mac_host[ip]["manual_entry_address"] = host
                 ip_mac_host[ip]["ip_version"] = ipv
 
                 ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
