@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def merge_module_dicts(modules=""):
     """
-    Grabs all DB files from the module list and concatenate them
+    Grabs all  files from the module list and concatenate them
     Returns an empty dict if it fails 
     """
     merged_dict = {}
@@ -42,7 +42,7 @@ def merge_module_dicts(modules=""):
 
 def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_orig.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict={}):
     """
-    Merges the configs downloaded from the server to the local configs DB;
+    Merges the upstream configs to the local configs ;
     If the config disappears from the server, it reverts to the local config.
     """
     merged_config_dict = {}
@@ -52,11 +52,11 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
         if len(upstream_dict) > 0:
             logger.debug("The following configurations are being applied/overwritten from the server: "+str(upstream_dict))
         else:
-            logger.debug("No configurations were found in the remote server. Using local configurations only.")
+            logger.debug("No configurations were found in the upstream dict. Using local configurations only.")
         merged_config_dict = dict(list(local_config_dict.items())+list(upstream_dict.items()))
     except:
         logger.error(
-            "Could not merge configurations from remote server with the local configs.")
+            "Could not merge configurations from the upstream dict.")
     return write_to_local_file(output, dict(sorted(merged_config_dict.items())))
 
 
@@ -68,7 +68,7 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
     """
     if config_name == None:
 
-        logger.debug("Getting configuration dictionary from local DB ...")
+        logger.debug("Getting configuration dictionary from local  ...")
         config_dict = read_from_local_file(
             local_dict)
         if len(config_dict or '') > 0:
@@ -80,13 +80,13 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
                    out_dict[k]=config_dict[k]
             return config_dict
 
-        logger.error("Couldn't get configuration dictionary from local DB.")
+        logger.error("Couldn't get configuration dictionary from local .")
         return {}
 
     else:
 
         logger.debug("Getting configuration value '" +
-                     config_name+"' from local DB ...")
+                     config_name+"' from local  ...")
         config_dict = read_from_local_file(
             local_dict)
         if len(config_dict or '') > 0:
@@ -97,21 +97,21 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
                 return value
 
         logger.debug("Couldn't get configuration named '" +
-                     config_name+"' from local DB. Maybe it doesn't exist.")
+                     config_name+"' from local . Maybe it doesn't exist.")
         return None
 
 
 def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/siaas_agent.cnf'), output=os.path.join(sys.path[0], 'var/config.db')):
     """
-    Writes the configuration DB (dict) from the config file. If the file is empty or does not exist, returns False
+    Writes the configuration  (dict) from the config file. If the file is empty or does not exist, returns False
     It will strip all characters after '#', and then strip the spaces from the beginning or end of the resulting string. If the resulting string is empty, it will ignore it
     Then, it will grab the string before the first "=" as the config key, and after it as the actual value
     The config key has its spaces removed from beginning or end, and all " and ' are removed.
     The actual value is just stripped of spaces from the beginning and the end
-    Writes the resulting dict in the DB file of config.db. This means it will return True if things go fine, or False if it fails
+    Writes the resulting dict in the  file of config.db. This means it will return True if things go fine, or False if it fails
     """
 
-    logger.debug("Writing configuration local DB, from local file: "+conf_file)
+    logger.debug("Writing configuration local , from local file: "+conf_file)
 
     config_dict = {}
     pattern = "^[A-Za-z0-9_-]*$"
@@ -139,11 +139,11 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
 
 def read_mongodb_collection(collection, siaas_uid="00000000-0000-0000-0000-000000000000"):
     """
-    Reads data from the Mongo DB collection
+    Reads data from the Mongo  collection
     If the UID is "nil" it will return all records. Else, it will return records only for the inputted UID
     Returns a list of records. Returns None if data can't be read
     """
-    logger.debug("Reading data from the remote DB server ...")
+    logger.debug("Reading data from the server ...")
     try:
 
         if(siaas_uid == "00000000-0000-0000-0000-000000000000"):
@@ -156,19 +156,19 @@ def read_mongodb_collection(collection, siaas_uid="00000000-0000-0000-0000-00000
             logger.debug("Record read: "+str(doc))
         return results
     except Exception as e:
-        logger.error("Can't read data from remote DB server: "+str(e))
+        logger.error("Can't read data from server: "+str(e))
         return None
 
 
 def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-0000-0000-000000000000", scope=None, convert_to_string=False):
     """
-    Reads data from the Mongo DB collection, specifically published by the server, for agents
+    Reads data from the Mongo  collection, specifically published by the server, for agents
     Returns a config dict. Returns an empty dict if anything failed
     """
     my_configs = {}
     broadcasted_configs = {}
     out_dict = {}
-    logger.debug("Reading data from the remote DB server ...")
+    logger.debug("Reading data from the server ...")
     try:
         if len(scope or '') > 0:
             cursor1 = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+siaas_uid, "scope": scope}, {'_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)
@@ -197,7 +197,7 @@ def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-
 
         logger.debug("Records read from the server: "+str(out_dict))
     except Exception as e:
-        logger.error("Can't read data from remote DB server: "+str(e))
+        logger.error("Can't read data from the server: "+str(e))
     return out_dict
 
 
@@ -206,24 +206,24 @@ def insert_in_mongodb_collection(collection, data_to_insert):
     Inserts data (usually a dict) into a said collection
     Returns True if all was OK. Returns False if the insertion failed
     """
-    logger.debug("Inserting data in the remote DB server ...")
+    logger.debug("Inserting data in the server ...")
     try:
         logger.debug("All data that will now be written to the database:\n" +
                      pprint.pformat(data_to_insert))
         collection.insert_one(copy(data_to_insert))
-        logger.debug("Data successfully uploaded to the remote DB server.")
+        logger.debug("Data successfully uploaded to the server.")
         return True
     except Exception as e:
-        logger.error("Can't upload data to remote DB server: "+str(e))
+        logger.error("Can't upload data to server: "+str(e))
         return False
 
 
 def connect_mongodb_collection(mongo_user="siaas", mongo_password="siaas", mongo_host="127.0.0.1:27017", mongo_db="siaas", mongo_collection="siaas"):
     """
-    Set up a MongoDB collection connection based on the inputs
+    Set up a Mongo collection connection based on the inputs
     Returns the collection obj if succeeded. Returns None if it failed
     """
-    logger.debug("Connecting to remote DB server at "+str(mongo_host)+" ...")
+    logger.debug("Connecting to server at "+str(mongo_host)+" ...")
     try:
         uri = "mongodb://%s:%s@%s/%s" % (quote_plus(mongo_user),
                                          quote_plus(mongo_password), mongo_host, mongo_db)
@@ -231,10 +231,10 @@ def connect_mongodb_collection(mongo_user="siaas", mongo_password="siaas", mongo
         db = client[mongo_db]
         collection = db[mongo_collection]
         logger.info(
-            "Correctly configured the remote DB server connection to collection '"+mongo_collection+"'.")
+            "Correctly configured the server connection to collection '"+mongo_collection+"'.")
         return collection
     except Exception as e:
-        logger.error("Can't connect to remote DB server: "+str(e))
+        logger.error("Can't connect to server: "+str(e))
         return None
 
 
