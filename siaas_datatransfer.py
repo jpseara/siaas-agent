@@ -10,15 +10,17 @@ from copy import copy
 logger = logging.getLogger(__name__)
 
 
-def download_agent_data(db_collection=None):
-
-    if db_collection == None:
-        logger.error(
-            "No valid DB collection object received. Bypassed remote DB data upload.")
-        return False
+def download_agent_data(api_base_uri):
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
-    downloaded_configs = siaas_aux.read_published_data_for_agents_mongodb(db_collection, siaas_uid, scope="agent_configs", convert_to_string=False)
+
+    downloaded_configs_raw = siaas_aux.post_get_to_server(api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1")
+
+    try:
+        downloaded_configs = downloaded_configs_raw["output"][siaas_uid]
+    except:
+        downloaded_configs = {}
+
     siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs)
 
     return True
@@ -49,74 +51,43 @@ def loop():
     last_uploaded_dict = {}
     last_downloaded_dict = {}
 
-    # Generate global variables from the configuration file
-    config_dict = siaas_aux.get_config_from_configs_db(convert_to_string=True)
-    MONGO_USER=None
-    MONGO_PWD=None
-    MONGO_HOST=None
-    MONGO_PORT=None
-    MONGO_DB=None
-    MONGO_COLLECTION=None
-    for config_name in config_dict.keys():
-        if config_name.upper() == "MONGO_USER":
-            MONGO_USER = config_dict[config_name]
-        if config_name.upper() == "MONGO_PWD":
-            MONGO_PWD = config_dict[config_name]
-        if config_name.upper() == "MONGO_HOST":
-            MONGO_HOST = config_dict[config_name]
-        if config_name.upper() == "MONGO_PORT":
-            MONGO_PORT = config_dict[config_name]
-        if config_name.upper() == "MONGO_DB":
-            MONGO_DB = config_dict[config_name]
-        if config_name.upper() == "MONGO_COLLECTION":
-            MONGO_COLLECTION = config_dict[config_name]
+    run1 = True
+    api_base_uri = siaas_aux.get_config_from_configs_db(config_name="api_uri", convert_to_string=True)
+    if len(api_base_uri or '') == 0:
+        logger.error(
+            "The API URI is empty. No communications with the server will take place.")
+        run1 = False
 
-    run = True
+    run2 = True
     offline_mode = siaas_aux.get_config_from_configs_db(config_name="offline_mode", convert_to_string=True)
     if len(offline_mode or '') > 0:
         if offline_mode.lower() == "true":
             logger.warning(
                 "Offline mode is on! No data will be transferred. If you want to change this behavior, change the configuration and restart the application.")
-            run = False
+            run2 = False
 
-    while run:
+    while run1 and run2:
 
         logger.debug("Loop running ...")
 
-        if db_collection == None:
-            # Create connection to MongoDB if it doesn't exist
-            if len(MONGO_PORT or '') > 0:
-                mongo_host_port = MONGO_HOST+":"+MONGO_PORT
-            else:
-                mongo_host_port = MONGO_HOST
-            db_collection = siaas_aux.connect_mongodb_collection(
-                MONGO_USER, MONGO_PWD, mongo_host_port, MONGO_DB, MONGO_COLLECTION)
+        api_base_uri = siaas_aux.get_config_from_configs_db(
+            config_name="api_uri", convert_to_string=True)
 
-        if db_collection != None:
+        # Upload agent data
+        silent_mode = siaas_aux.get_config_from_configs_db(
+            config_name="silent_mode", convert_to_string=True)
+        dont_upload = False
+        if len(silent_mode or '') > 0:
+            if silent_mode.lower() == "true":
+                dont_upload = True
+                logger.warning(
+                    "Silent mode is on! This means no data is sent to the server. Will check again later ...")
+        if dont_upload != True:
+            last_uploaded_dict = upload_agent_data(api_base_uri,
+                last_uploaded_dict)
 
-            api_base_uri = siaas_aux.get_config_from_configs_db(
-                config_name="api_uri", convert_to_string=True)
-
-            # Upload agent data
-            silent_mode = siaas_aux.get_config_from_configs_db(
-                config_name="silent_mode", convert_to_string=True)
-            dont_upload = False
-            if len(silent_mode or '') > 0:
-                if silent_mode.lower() == "true":
-                    dont_upload = True
-                    logger.warning(
-                        "Silent mode is on! This means no data is sent to the server. Will check again later ...")
-            if dont_upload != True:
-                last_uploaded_dict = upload_agent_data(api_base_uri,
-                    last_uploaded_dict)
-
-            # Download agent data
-            download_agent_data(db_collection)
-        else:
-            logger.error(
-                "The DB connection is not OK. Sleeping for some seconds and retrying ...")
-            time.sleep(60)
-            # continue
+        # Download agent data
+        download_agent_data(api_base_uri)
 
         # Sleep before next loop
         try:
@@ -146,25 +117,8 @@ if __name__ == "__main__":
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
     #siaas_uid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
 
-    MONGO_USER = "siaas"
-    MONGO_PWD = "siaas"
-    MONGO_HOST = "127.0.0.1"
-    MONGO_PORT = "27017"
-    MONGO_DB = "siaas"
-    MONGO_COLLECTION = "siaas"
+    api_base_uri="http://192.168.122.172:5000"
 
-    try:
-        collection = siaas_aux.connect_mongodb_collection(
-            MONGO_USER, MONGO_PWD, MONGO_HOST+":"+MONGO_PORT, MONGO_DB, MONGO_COLLECTION)
-    except:
-        print("Can't connect to DB!")
-        sys.exit(1)
-
-    results=siaas_aux.read_mongodb_collection(collection, siaas_uid)
-
-    if results != None:
-        for doc in results:
-            # print('\n'+str(pprint.pformat(doc)))
-            print('\n'+str(doc))
+    pprint.pprint(siaas_aux.post_get_to_server(api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1"))
 
     print('\nAll done. Bye!\n')
