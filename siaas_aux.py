@@ -114,7 +114,6 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
     logger.debug("Writing configuration local , from local file: "+conf_file)
 
     config_dict = {}
-    pattern = "^[A-Za-z0-9_-]*$"
 
     local_conf_file = read_from_local_file(conf_file)
     if len(local_conf_file or '') == 0:
@@ -126,7 +125,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
             if len(line_uncommented) == 0:
                 continue
             config_name = line_uncommented.split("=", 1)[0].rstrip().lstrip()
-            if not bool(re.match(pattern, config_name)):
+            if not validate_string_key(config_name):
                 raise
             config_value = line_uncommented.split("=", 1)[1].rstrip().lstrip()
             config_dict[config_name] = config_value
@@ -347,6 +346,21 @@ def get_or_create_unique_system_id():
         return "00000000-0000-0000-0000-000000000000"
     return new_uid
 
+def validate_string_key(string):
+    pattern = "^[A-Za-z0-9_-]*$"
+    if type(string) is not str:
+       logger.debug(
+            "This data dict has a key which is not a string. No data was uploaded.")
+       return False
+    if len(string or '') == 0:
+       logger.debug(
+            "This data dict has an empty or invalid key. No data was uploaded.")
+       return False
+    if not bool(re.match(pattern, string)):
+       logger.debug(
+            "Invalid character detected in data dict keys. No data was uploaded.")
+       return False
+    return True
 
 def get_size(bytes, suffix="B"):
     """

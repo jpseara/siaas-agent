@@ -59,9 +59,9 @@ def upload_agent_data(db_collection=None, last_uploaded_dict={}):
     complete_dict["timestamp"] = siaas_aux.get_now_utc_obj()
 
     if not siaas_aux.insert_in_mongodb_collection(db_collection, complete_dict):
-        return current_dict
+        return last_uploaded_dict
 
-    return last_uploaded_dict
+    return current_dict
 
 
 def loop():
