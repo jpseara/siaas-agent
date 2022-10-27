@@ -46,7 +46,8 @@ def main(version="N/A"):
     # CPU information
     try:
         platform["system_info"]["cpu"] = {}
-        platform["system_info"]["cpu"]["percentage"] = str(psutil.cpu_percent())+" %"
+        platform["system_info"]["cpu"]["percentage"] = str(
+            psutil.cpu_percent())+" %"
         platform["system_info"]["cpu"]["physical_cores"] = psutil.cpu_count(
             logical=False)
         platform["system_info"]["cpu"]["total_cores"] = psutil.cpu_count(
@@ -60,13 +61,18 @@ def main(version="N/A"):
     try:
         svmem = psutil.virtual_memory()
         platform["system_info"]["memory"] = {}
-        platform["system_info"]["memory"]["percentage"] = str(svmem.percent)+" %"
-        platform["system_info"]["memory"]["total"] = siaas_aux.get_size(svmem.total)
-        platform["system_info"]["memory"]["used"] = siaas_aux.get_size(svmem.used)
-        platform["system_info"]["memory"]["available"] = siaas_aux.get_size(svmem.available)
+        platform["system_info"]["memory"]["percentage"] = str(
+            svmem.percent)+" %"
+        platform["system_info"]["memory"]["total"] = siaas_aux.get_size(
+            svmem.total)
+        platform["system_info"]["memory"]["used"] = siaas_aux.get_size(
+            svmem.used)
+        platform["system_info"]["memory"]["available"] = siaas_aux.get_size(
+            svmem.available)
         swap = psutil.swap_memory()
         platform["system_info"]["memory"]["swap"] = {}
-        platform["system_info"]["memory"]["swap"]["percentage"] = str(swap.percent)+" %"
+        platform["system_info"]["memory"]["swap"]["percentage"] = str(
+            swap.percent)+" %"
         platform["system_info"]["memory"]["swap"]["total"] = siaas_aux.get_size(
             swap.total)
         platform["system_info"]["memory"]["swap"]["used"] = siaas_aux.get_size(

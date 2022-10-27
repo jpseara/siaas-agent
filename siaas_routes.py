@@ -54,4 +54,3 @@ def siaas_agent():
             'time': siaas_aux.get_now_utc_str()
         }
     )
-

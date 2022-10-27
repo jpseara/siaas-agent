@@ -18,6 +18,7 @@ from urllib.parse import quote_plus
 
 logger = logging.getLogger(__name__)
 
+
 def merge_module_dicts(modules=""):
     """
     Grabs all  files from the module list and concatenate them
@@ -33,7 +34,7 @@ def merge_module_dicts(modules=""):
                 next_dict_to_merge = {}
                 next_dict_to_merge[module] = module_dict
                 merged_dict = dict(
-                  list(merged_dict.items())+list(next_dict_to_merge.items()))
+                    list(merged_dict.items())+list(next_dict_to_merge.items()))
         except:
             logger.warning("Couldn't merge dict: " +
                            str(next_dict_to_merge))
@@ -50,38 +51,45 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
     try:
         local_config_dict = get_config_from_configs_db(local_dict=local_dict)
         if len(upstream_dict) > 0:
-            logger.debug("The following configurations are being applied/overwritten from the server: "+str(upstream_dict))
+            logger.debug(
+                "The following configurations are being applied/overwritten from the server: "+str(upstream_dict))
         else:
-            logger.debug("No configurations were found in the upstream dict. Using local configurations only.")
-        merged_config_dict = dict(list(local_config_dict.items())+list(upstream_dict.items()))
+            logger.debug(
+                "No configurations were found in the upstream dict. Using local configurations only.")
+        merged_config_dict = dict(
+            list(local_config_dict.items())+list(upstream_dict.items()))
     except:
         logger.error(
             "Could not merge configurations from the upstream dict.")
     return write_to_local_file(output, dict(sorted(merged_config_dict.items())))
 
+
 def post_get_to_server(api_uri):
     try:
-       r = requests.get(api_uri, timeout=15)
+        r = requests.get(api_uri, timeout=15)
     except Exception as e:
-       logger.debug("Error while performing a GET request to server: "+str(e))
-       return False
+        logger.debug("Error while performing a GET request to server: "+str(e))
+        return False
     if r.status_code == 200:
-       return r.json()
+        return r.json()
     else:
-       logger.debug("Error getting data from server: "+str(r.status_code))
-       return False
+        logger.debug("Error getting data from server: "+str(r.status_code))
+        return False
+
 
 def post_request_to_server(api_uri, data_to_post):
     try:
-       r = requests.post(api_uri, json=data_to_post, timeout=15)
+        r = requests.post(api_uri, json=data_to_post, timeout=15)
     except Exception as e:
-       logger.debug("Error while performing a POST request to server: "+str(e))
-       return False
+        logger.debug(
+            "Error while performing a POST request to server: "+str(e))
+        return False
     if r.status_code == 200:
-       return True
+        return True
     else:
-       logger.debug("Error posting data to server: "+str(r.status_code))
-       return False
+        logger.debug("Error posting data to server: "+str(r.status_code))
+        return False
+
 
 def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.db'), config_name=None, convert_to_string=True):
     """
@@ -98,9 +106,9 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
             out_dict = {}
             for k in config_dict.keys():
                 if convert_to_string:
-                   out_dict[k]=str(config_dict[k])
+                    out_dict[k] = str(config_dict[k])
                 else:
-                   out_dict[k]=config_dict[k]
+                    out_dict[k] = config_dict[k]
             return config_dict
 
         logger.error("Couldn't get configuration dictionary from local .")
@@ -114,9 +122,9 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
             local_dict)
         if len(config_dict or '') > 0:
             if config_name in config_dict.keys():
-                value=config_dict[config_name]
+                value = config_dict[config_name]
                 if convert_to_string:
-                    value=str(value)
+                    value = str(value)
                 return value
 
         logger.debug("Couldn't get configuration named '" +
@@ -153,7 +161,8 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
             config_value = line_uncommented.split("=", 1)[1].rstrip().lstrip()
             config_dict[config_name] = config_value
         except:
-            logger.warning("Invalid line from local configuration file was ignored: "+str(line))
+            logger.warning(
+                "Invalid line from local configuration file was ignored: "+str(line))
             continue
 
     return write_to_local_file(output, dict(sorted(config_dict.items())))
@@ -268,21 +277,23 @@ def get_or_create_unique_system_id():
         return "00000000-0000-0000-0000-000000000000"
     return new_uid
 
+
 def validate_string_key(string):
     pattern = "^[A-Za-z0-9_-]*$"
     if type(string) is not str:
-       logger.debug(
+        logger.debug(
             "This data dict has a key which is not a string. No data was uploaded.")
-       return False
+        return False
     if len(string or '') == 0:
-       logger.debug(
+        logger.debug(
             "This data dict has an empty or invalid key. No data was uploaded.")
-       return False
+        return False
     if not bool(re.match(pattern, string)):
-       logger.debug(
+        logger.debug(
             "Invalid character detected in data dict keys. No data was uploaded.")
-       return False
+        return False
     return True
+
 
 def get_size(bytes, suffix="B"):
     """
@@ -327,11 +338,11 @@ def sort_ip_dict(ip_dict):
     """
     Sorts a dict by their keys considering they're IPs
     """
-    out_dict={}
+    out_dict = {}
     try:
-        sorted_keys=sorted(ip_dict.keys(), key=ip_sorter)
+        sorted_keys = sorted(ip_dict.keys(), key=ip_sorter)
         for k in sorted_keys:
-            out_dict[k]=ip_dict[k]
+            out_dict[k] = ip_dict[k]
     except:
         pass
     return out_dict

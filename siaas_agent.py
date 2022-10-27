@@ -1,11 +1,6 @@
 # SIAAS - Sistema Inteligente para Automação de Auditorias de Segurança
 # By João Pedro Seara
 
-import siaas_datatransfer
-import siaas_portscanner
-import siaas_neighborhood
-import siaas_platform
-import siaas_aux
 import os
 import sys
 import logging
@@ -18,23 +13,30 @@ from waitress import serve
 app = Flask(__name__)
 logger = logging.getLogger(__name__)
 
-import siaas_routes
-
 SIAAS_VERSION = "0.0.1"
 
 
 if __name__ == "__main__":
 
+    import siaas_aux
+    import siaas_datatransfer
+    import siaas_neighborhood
+    import siaas_platform
+    import siaas_portscanner
+    import siaas_routes
+
     print('\n')
 
     # No Windows can do ; - )
     if os.name != "posix":
-        logger.critical("\nThis program can only be run in Linux or Raspberry Pi. Exiting!\n")
+        logger.critical(
+            "\nThis program can only be run in Linux or Raspberry Pi. Exiting!\n")
         sys.exit(1)
 
     # Needs to be root
     if os.geteuid() != 0:
-        logger.critical("\nThis script must be run as root or using sudo!\n", file=sys.stderr)
+        logger.critical(
+            "\nThis script must be run as root or using sudo!\n", file=sys.stderr)
         sys.exit(2)
 
     # Create local directories
@@ -51,7 +53,8 @@ if __name__ == "__main__":
 
     # Read local configuration file and insert in local database
     siaas_aux.write_config_db_from_conf_file()
-    siaas_aux.write_config_db_from_conf_file(output=os.path.join(sys.path[0], 'var/config_orig.db'))
+    siaas_aux.write_config_db_from_conf_file(
+        output=os.path.join(sys.path[0], 'var/config_orig.db'))
 
     # Define logging level according to user config
     log_file = "log/siaas-agent.log"
@@ -68,7 +71,8 @@ if __name__ == "__main__":
     # Grabbing a unique system ID before proceeding
     agent_uid = siaas_aux.get_or_create_unique_system_id()
     if agent_uid == "00000000-0000-0000-0000-000000000000":
-        logger.critical("\nCan't proceed without an unique system ID. Aborting !\n")
+        logger.critical(
+            "\nCan't proceed without an unique system ID. Aborting !\n")
         sys.exit(3)
 
     print("\nSIAAS Agent v"+SIAAS_VERSION +

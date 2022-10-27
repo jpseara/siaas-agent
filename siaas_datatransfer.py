@@ -14,7 +14,8 @@ def download_agent_data(api_base_uri):
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
 
-    downloaded_configs_raw = siaas_aux.post_get_to_server(api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1")
+    downloaded_configs_raw = siaas_aux.post_get_to_server(
+        api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1")
 
     try:
         downloaded_configs = downloaded_configs_raw["output"][siaas_uid]
@@ -33,7 +34,7 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}):
     all_modules = "platform,neighborhood,portscanner,config"
     current_dict = siaas_aux.merge_module_dicts(all_modules)
 
-    #if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict) == 0:
+    # if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict) == 0:
     #    logger.info(
     #        "No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
     #    return last_uploaded_dict
@@ -52,14 +53,16 @@ def loop():
     last_downloaded_dict = {}
 
     run1 = True
-    api_base_uri = siaas_aux.get_config_from_configs_db(config_name="api_uri", convert_to_string=True)
+    api_base_uri = siaas_aux.get_config_from_configs_db(
+        config_name="api_uri", convert_to_string=True)
     if len(api_base_uri or '') == 0:
         logger.error(
             "The API URI is empty. No communications with the server will take place.")
         run1 = False
 
     run2 = True
-    offline_mode = siaas_aux.get_config_from_configs_db(config_name="offline_mode", convert_to_string=True)
+    offline_mode = siaas_aux.get_config_from_configs_db(
+        config_name="offline_mode", convert_to_string=True)
     if len(offline_mode or '') > 0:
         if offline_mode.lower() == "true":
             logger.warning(
@@ -84,7 +87,7 @@ def loop():
                     "Silent mode is on! This means no data is sent to the server. Will check again later ...")
         if dont_upload != True:
             last_uploaded_dict = upload_agent_data(api_base_uri,
-                last_uploaded_dict)
+                                                   last_uploaded_dict)
 
         # Download agent data
         download_agent_data(api_base_uri)
@@ -115,10 +118,11 @@ if __name__ == "__main__":
     print('\nThis script is being directly run, so it will just read data from the DB!\n')
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
-    #siaas_uid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
+    # siaas_uid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
 
-    api_base_uri="http://192.168.122.172:5000"
+    api_base_uri = "http://192.168.122.172:5000"
 
-    pprint.pprint(siaas_aux.post_get_to_server(api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1"))
+    pprint.pprint(siaas_aux.post_get_to_server(
+        api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1"))
 
     print('\nAll done. Bye!\n')

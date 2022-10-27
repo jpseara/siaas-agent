@@ -56,7 +56,7 @@ def get_arp_ndp_known_hosts():
             interface = fields[2]
             if interface.lower() == "lo" or (not interface.lower().startswith("e") and not interface.lower().startswith("w") and not interface.lower().startswith("b")):
                 raise ValueError(
-                        "Rejecting ARP/NDP entry which is in an invalid interface: "+interface)
+                    "Rejecting ARP/NDP entry which is in an invalid interface: "+interface)
             mac = fields[4]
         except:
             continue
@@ -101,7 +101,8 @@ def get_arp_ndp_known_hosts():
 
         ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 
-        logger.info("Host existing in the local ARP/NDP tables for interface '"+interface+"': "+dns_entry)
+        logger.info(
+            "Host existing in the local ARP/NDP tables for interface '"+interface+"': "+dns_entry)
 
         if not host_up:
             logger.warning(
@@ -198,7 +199,8 @@ def add_manual_hosts(manual_hosts_string=""):
         host = host_uncommented.split('\t')[0].split('\n')[0].rstrip().lstrip()
 
         if host.startswith("127.") or host.lower().startswith("fe80::") or host == "::1" or host.lower() == "localhost":
-            logger.warning("Manually configured host '"+host+"' is invalid. No localhost hosts are allowed.")
+            logger.warning("Manually configured host '"+host +
+                           "' is invalid. No localhost hosts are allowed.")
             continue
 
         if len(host) > 0:
