@@ -298,7 +298,7 @@ def main(interface_to_scan=None, ignore_neighborhood=False):
 
             if int(mask) > 16:
                 auto_hosts = dict(list(auto_hosts.items(
-                ))+list(scan_and_print_neighbors(net=net, interface=interface).items()))
+                ))+list(scan_and_print_neighbors(net, interface).items()))
                 auto_scanned_interfaces += 1
             else:
                 logger.warning("Skipping network "+net +
