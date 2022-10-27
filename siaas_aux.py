@@ -10,6 +10,7 @@ import uuid
 import os
 import sys
 import re
+import requests
 import json
 from copy import copy
 from datetime import datetime
@@ -59,6 +60,17 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
             "Could not merge configurations from the upstream dict.")
     return write_to_local_file(output, dict(sorted(merged_config_dict.items())))
 
+def post_request_to_server(api_uri, data_to_post):
+    try:
+       r = requests.post(api_uri, json=data_to_post)
+    except Exception as e:
+       logger.debug("Error while performing a POST request to server: "+str(e))
+       return False
+    if r.status_code == 200:
+       return True
+    else:
+       logger.debug("Error posting data to server: "+str(r.status_code))
+       return False
 
 def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.db'), config_name=None, convert_to_string=True):
     """
