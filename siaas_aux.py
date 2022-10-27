@@ -14,7 +14,6 @@ import requests
 import json
 from copy import copy
 from datetime import datetime
-from pymongo import MongoClient
 from urllib.parse import quote_plus
 
 logger = logging.getLogger(__name__)
@@ -158,107 +157,6 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
             continue
 
     return write_to_local_file(output, dict(sorted(config_dict.items())))
-
-
-def read_mongodb_collection(collection, siaas_uid="00000000-0000-0000-0000-000000000000"):
-    """
-    Reads data from the Mongo  collection
-    If the UID is "nil" it will return all records. Else, it will return records only for the inputted UID
-    Returns a list of records. Returns None if data can't be read
-    """
-    logger.debug("Reading data from the server ...")
-    try:
-
-        if(siaas_uid == "00000000-0000-0000-0000-000000000000"):
-            cursor = collection.find({"payload": {'$exists': True}}).sort('_id', -1).limit(15) # show everything
-        else:
-            cursor = collection.find({'$and': [{"payload": {'$exists': True}}, {'$or':[{"origin": "agent_"+siaas_uid}, {"destiny": {'$in': ["agent_"+siaas_uid, "agent_ffffffff-ffff-ffff-ffff-ffffffffffff"]}}]}]}).sort('_id', -1).limit(15)  # destinated or originated to/from the agent
-
-        results = list(cursor)
-        for doc in results:
-            logger.debug("Record read: "+str(doc))
-        return results
-    except Exception as e:
-        logger.error("Can't read data from server: "+str(e))
-        return None
-
-
-def read_published_data_for_agents_mongodb(collection, siaas_uid="00000000-0000-0000-0000-000000000000", scope=None, convert_to_string=False):
-    """
-    Reads data from the Mongo  collection, specifically published by the server, for agents
-    Returns a config dict. Returns an empty dict if anything failed
-    """
-    my_configs = {}
-    broadcasted_configs = {}
-    out_dict = {}
-    logger.debug("Reading data from the server ...")
-    try:
-        if len(scope or '') > 0:
-            cursor1 = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+siaas_uid, "scope": scope}, {'_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)
-        else:
-            cursor1 = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+siaas_uid}, {'_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)
-        results1 = list(cursor1)
-        for doc in results1:
-            my_configs = doc["payload"]
-
-        if len(scope or '') > 0:
-            cursor2 = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+"ffffffff-ffff-ffff-ffff-ffffffffffff", "scope": scope}, {'_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)
-        else:
-            cursor2 = collection.find({"payload": {'$exists': True}, "destiny": "agent_"+"ffffffff-ffff-ffff-ffff-ffffffffffff"}, {'_id': False, 'timestamp': False, 'origin': False, 'destiny': False, 'scope': False}).sort('_id', -1).limit(1)
-        results2 = list(cursor2)
-        for doc in results2:
-            broadcasted_configs = doc["payload"]
-
-        final_results = dict(
-            list(broadcasted_configs.items())+list(my_configs.items())) # configs directed to the agent have precedence over broadcasted ones
-
-        for k in final_results.keys():
-            if convert_to_string:
-                out_dict[k]=str(final_results[k])
-            else:
-                out_dict[k]=final_results[k]
-
-        logger.debug("Records read from the server: "+str(out_dict))
-    except Exception as e:
-        logger.error("Can't read data from the server: "+str(e))
-    return out_dict
-
-
-def insert_in_mongodb_collection(collection, data_to_insert):
-    """
-    Inserts data (usually a dict) into a said collection
-    Returns True if all was OK. Returns False if the insertion failed
-    """
-    logger.debug("Inserting data in the server ...")
-    try:
-        logger.debug("All data that will now be written to the database:\n" +
-                     pprint.pformat(data_to_insert))
-        collection.insert_one(copy(data_to_insert))
-        logger.debug("Data successfully uploaded to the server.")
-        return True
-    except Exception as e:
-        logger.error("Can't upload data to server: "+str(e))
-        return False
-
-
-def connect_mongodb_collection(mongo_user="siaas", mongo_password="siaas", mongo_host="127.0.0.1:27017", mongo_db="siaas", mongo_collection="siaas"):
-    """
-    Set up a Mongo collection connection based on the inputs
-    Returns the collection obj if succeeded. Returns None if it failed
-    """
-    logger.debug("Connecting to server at "+str(mongo_host)+" ...")
-    try:
-        uri = "mongodb://%s:%s@%s/%s" % (quote_plus(mongo_user),
-                                         quote_plus(mongo_password), mongo_host, mongo_db)
-        client = MongoClient(uri)
-        db = client[mongo_db]
-        collection = db[mongo_collection]
-        logger.info(
-            "Correctly configured the server connection to collection '"+mongo_collection+"'.")
-        return collection
-    except Exception as e:
-        logger.error("Can't connect to server: "+str(e))
-        return None
 
 
 def write_to_local_file(file_to_write, data_to_insert):
