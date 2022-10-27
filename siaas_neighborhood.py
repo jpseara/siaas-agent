@@ -297,15 +297,8 @@ def main(interface_to_scan=None, ignore_neighborhood=False):
             mask = net.split('/')[1]
 
             if int(mask) > 16:
-                try:
-                    arp_timeout = int(siaas_aux.get_config_from_configs_db(
-                        config_name="neighborhood_arp_timeout_sec"))
-                except:
-                    arp_timeout = 5
-                    logger.warning(
-                        "Invalid or undefined timeout configuration for ARP timeout. Defaulting to \"5\".")
                 auto_hosts = dict(list(auto_hosts.items(
-                ))+list(scan_and_print_neighbors(net, interface, timeout=arp_timeout).items()))
+                ))+list(scan_and_print_neighbors(net=net, interface=interface).items()))
                 auto_scanned_interfaces += 1
             else:
                 logger.warning("Skipping network "+net +

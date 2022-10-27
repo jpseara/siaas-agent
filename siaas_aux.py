@@ -64,9 +64,9 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
     return write_to_local_file(output, dict(sorted(merged_config_dict.items())))
 
 
-def post_get_to_server(api_uri):
+def post_get_to_server(api_uri, timeout=15):
     try:
-        r = requests.get(api_uri, timeout=15)
+        r = requests.get(api_uri, timeout=timeout)
     except Exception as e:
         logger.debug("Error while performing a GET request to server: "+str(e))
         return False
@@ -77,9 +77,9 @@ def post_get_to_server(api_uri):
         return False
 
 
-def post_request_to_server(api_uri, data_to_post):
+def post_request_to_server(api_uri, data_to_post, timeout=15):
     try:
-        r = requests.post(api_uri, json=data_to_post, timeout=15)
+        r = requests.post(api_uri, json=data_to_post, timeout=timeout)
     except Exception as e:
         logger.debug(
             "Error while performing a POST request to server: "+str(e))
