@@ -1,7 +1,7 @@
 # Protected configurations (last for the whole run and can't be changed remotely)
 
 log_level = debug
-api_uri = http://192.168.122.172:5000
+api_uri = http://192.168.122.172/api
 #offline_mode = true # don't communicate with the server at all
 
 # Runtime configurations (can be changed during runtime by the remote server)
