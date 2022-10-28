@@ -298,9 +298,6 @@ def main(target_ip="127.0.0.1"):
     target_info["detected_ports"] = {}
     system_info_output = ({}, {})
 
-    # Enable just one single target (testing purposes)
-    # if target_ip != "192.168.122.51": return (target_ip, target_info)
-
     # Grab system information and detected ports
     system_info_output = get_system_info(
         target_ip, specific_ports=siaas_aux.get_config_from_configs_db(config_name="target_specific_ports"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_sysinfo_timeout_sec"))
