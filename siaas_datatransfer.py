@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def download_agent_data(api_base_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
 
-    logger.info("Downloading data from the API ...")
+    logger.info("Downloading agent configs from the server ...")
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
 
@@ -21,19 +21,20 @@ def download_agent_data(api_base_uri, ignore_ssl=False, ca_bundle=None, api_user
 
     try:
         downloaded_configs = downloaded_configs_raw["output"][siaas_uid]
+
     except:
         downloaded_configs = {}
+ 
+    logger.info("Agent config download process finished.")
 
     siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs)
-
-    logger.info("All data was downloaded from the API.")
 
     return True
 
 
 def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
 
-    logger.debug("Uploading data to the API ...")
+    logger.debug("Uploading agent data to the server ...")
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
 
@@ -45,11 +46,10 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
     #        "No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
     #    return last_uploaded_dict
 
-    if not siaas_aux.post_request_to_server(api_base_uri+"/siaas-server/agents/data/"+siaas_uid, dict(current_dict), ignore_ssl=ignore_ssl, ca_bundle=ca_bundle, api_user=api_user, api_pwd=api_pwd):
-        logger.error("Error while uploading agent data to the server.")
-        return last_uploaded_dict
+    logger.info("Agent data upload process finished.")
 
-    logger.info("All data was uploaded to the API.")
+    if not siaas_aux.post_request_to_server(api_base_uri+"/siaas-server/agents/data/"+siaas_uid, dict(current_dict), ignore_ssl=ignore_ssl, ca_bundle=ca_bundle, api_user=api_user, api_pwd=api_pwd):
+        return last_uploaded_dict
 
     return current_dict
 
