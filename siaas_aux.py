@@ -65,7 +65,7 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
     return write_to_local_file(output, dict(sorted(merged_config_dict.items())))
 
 
-def post_get_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
+def get_request_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
     urllib3.disable_warnings()
     if ignore_ssl==True:
        logger.warning("SSL verification is off. This might have security implications while connecting to the server API.")

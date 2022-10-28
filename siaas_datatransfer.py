@@ -16,7 +16,7 @@ def download_agent_configs(api_base_uri, ignore_ssl=False, ca_bundle=None, api_u
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
 
-    downloaded_configs_raw = siaas_aux.post_get_to_server(
+    downloaded_configs_raw = siaas_aux.get_request_to_server(
         api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1", ignore_ssl=ignore_ssl, ca_bundle=ca_bundle, api_user=api_user, api_pwd=api_pwd)
 
     try:
@@ -157,9 +157,9 @@ if __name__ == "__main__":
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
     # siaas_uid = "00000000-0000-0000-0000-000000000000" # hack to show data from all agents
 
-    api_base_uri = "http://192.168.122.172:5000"
+    api_base_uri = "https://siaas/api"
 
-    pprint.pprint(siaas_aux.post_get_to_server(
-        api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1"))
+    pprint.pprint(siaas_aux.get_request_to_server(
+        api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1", ignore_ssl=True, api_user="siaas", api_pwd="siaas"))
 
     print('\nAll done. Bye!\n')
