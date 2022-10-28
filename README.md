@@ -10,7 +10,7 @@ __
 
 **Instructions (tested on Ubuntu 20.04 "Focal" and Raspberry Pi OS 11 "Bullseye")**
 
- - Set up system and Pyhon packages (Ubuntu 20.04 "Focal"): `sudo ./siaas_agent_install_system_packages.sh`
+ - Set up system and Pyhon packages (Ubuntu 20.04 "Focal"): `sudo ./siaas_agent_install_and_configure.sh`
 
  - How to run: `sudo siaas_agent_run.sh`
 
