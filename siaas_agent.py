@@ -14,8 +14,7 @@ app = Flask(__name__)
 logger = logging.getLogger(__name__)
 
 SIAAS_VERSION = "0.0.1"
-#LOG_DIR = "log"
-LOG_DIR = "/var/log/siaas"
+LOG_DIR = "log"
 
 
 if __name__ == "__main__":
