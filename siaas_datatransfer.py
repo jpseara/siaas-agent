@@ -55,7 +55,6 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
 
 def loop():
 
-    db_collection = None
     last_uploaded_dict = {}
     last_downloaded_dict = {}
 
