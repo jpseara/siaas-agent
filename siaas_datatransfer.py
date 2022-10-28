@@ -10,12 +10,14 @@ from copy import copy
 logger = logging.getLogger(__name__)
 
 
-def download_agent_data(api_base_uri):
+def download_agent_data(api_base_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
+
+    logger.info("Downloading data from the API ...")
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
 
     downloaded_configs_raw = siaas_aux.post_get_to_server(
-        api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1")
+        api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1", ignore_ssl=ignore_ssl, ca_bundle=ca_bundle, api_user=api_user, api_pwd=api_pwd)
 
     try:
         downloaded_configs = downloaded_configs_raw["output"][siaas_uid]
@@ -24,10 +26,14 @@ def download_agent_data(api_base_uri):
 
     siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs)
 
+    logger.info("All data was downloaded from the API.")
+
     return True
 
 
-def upload_agent_data(api_base_uri, last_uploaded_dict={}):
+def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
+
+    logger.debug("Uploading data to the API ...")
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
 
@@ -39,9 +45,11 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}):
     #        "No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
     #    return last_uploaded_dict
 
-    if not siaas_aux.post_request_to_server(api_base_uri+"/siaas-server/agents/data/"+siaas_uid, dict(current_dict)):
+    if not siaas_aux.post_request_to_server(api_base_uri+"/siaas-server/agents/data/"+siaas_uid, dict(current_dict), ignore_ssl=ignore_ssl, ca_bundle=ca_bundle, api_user=api_user, api_pwd=api_pwd):
         logger.error("Error while uploading agent data to the server.")
         return last_uploaded_dict
+
+    logger.info("All data was uploaded to the API.")
 
     return current_dict
 
@@ -52,10 +60,42 @@ def loop():
     last_uploaded_dict = {}
     last_downloaded_dict = {}
 
+    # Generate global variables from the configuration file
+    config_dict = siaas_aux.get_config_from_configs_db(convert_to_string=True)
+    API_URI=None
+    API_USER=None
+    API_PWD=None
+    API_SSL_IGNORE_VERIFY=None
+    API_SSL_CA_BUNDLE=None
+    for config_name in config_dict.keys():
+        if config_name.upper() == "API_URI":
+            API_URI = config_dict[config_name]
+        if config_name.upper() == "API_USER":
+            API_USER = config_dict[config_name]
+        if config_name.upper() == "API_PWD":
+            API_PWD = config_dict[config_name]
+        if config_name.upper() == "API_SSL_IGNORE_VERIFY":
+            API_SSL_IGNORE_VERIFY = config_dict[config_name]
+        if config_name.upper() == "API_SSL_CA_BUNDLE":
+            API_SSL_CA_BUNDLE = config_dict[config_name]
+
+    ssl_ignore_verify = False
+    if len(API_SSL_IGNORE_VERIFY or '') > 0:
+        if API_SSL_IGNORE_VERIFY.lower() == "true":
+            ssl_ignore_verify = True
+
+    ssl_ca_bundle = None
+    if len(API_SSL_CA_BUNDLE or '') > 0:
+        ssl_ca_bundle = os.path.join(sys.path[0], API_SSL_CA_BUNDLE)
+
+    api_user = None
+    api_pwd = None
+    if len(API_USER or '') > 0 and len(API_PWD or '') > 0:
+        api_user = API_USER
+        api_pwd = API_PWD
+
     run1 = True
-    api_base_uri = siaas_aux.get_config_from_configs_db(
-        config_name="api_uri", convert_to_string=True)
-    if len(api_base_uri or '') == 0:
+    if len(API_URI or '') == 0:
         logger.error(
             "The API URI is empty. No communications with the server will take place.")
         run1 = False
@@ -73,9 +113,6 @@ def loop():
 
         logger.debug("Loop running ...")
 
-        api_base_uri = siaas_aux.get_config_from_configs_db(
-            config_name="api_uri", convert_to_string=True)
-
         # Upload agent data
         silent_mode = siaas_aux.get_config_from_configs_db(
             config_name="silent_mode", convert_to_string=True)
@@ -86,11 +123,11 @@ def loop():
                 logger.warning(
                     "Silent mode is on! This means no data is sent to the server. Will check again later ...")
         if dont_upload != True:
-            last_uploaded_dict = upload_agent_data(api_base_uri,
-                                                   last_uploaded_dict)
+            last_uploaded_dict = upload_agent_data(API_URI,
+                                                   last_uploaded_dict, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd)
 
         # Download agent data
-        download_agent_data(api_base_uri)
+        download_agent_data(API_URI, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd)
 
         # Sleep before next loop
         try:

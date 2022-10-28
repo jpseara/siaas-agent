@@ -2,6 +2,10 @@
 
 log_level = debug
 api_uri = http://192.168.122.172/api
+api_user = siaas
+api_pwd = siaas
+#api_ssl_ignore_verify = true
+#api_ssl_ca_bundle = /cert/ca-bundle.crt
 #offline_mode = true # don't communicate with the server at all
 
 # Runtime configurations (can be changed during runtime by the remote server)
@@ -10,6 +14,7 @@ datatransfer_loop_interval_sec = 120
 #disable_portscanner = true # don't scan hosts information or vulnerabilities
 #ignore_neighborhood = true # consider only manually configured hosts (bypass ARP/NDP and automatic discovery)
 manual_hosts = 109.51.61.78,sapo.pt,google.com,focal62
+neighborhood_arp_timeout_sec = 5
 neighborhood_loop_interval_sec = 60
 nmap_portscan_timeout_sec = 300
 #nmap_scripts = vuln # leaving this field commented means no vulnerability scan is performed

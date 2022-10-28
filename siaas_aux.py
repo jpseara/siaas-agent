@@ -64,30 +64,50 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
     return write_to_local_file(output, dict(sorted(merged_config_dict.items())))
 
 
-def post_get_to_server(api_uri, timeout=15):
+def post_get_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
+    if ignore_ssl==True:
+       logger.warning("SSL verification is off. This might have security implications while connecting to the server API.")
+       verify=False
+    else:
+       if len(ca_bundle or '')>0:
+         verify=ca_bundle
+       else:
+         verify=True
     try:
-        r = requests.get(api_uri, timeout=timeout)
+        r = requests.get(api_uri, timeout=15, verify=verify, allow_redirects=True, auth=(api_user,api_pwd))
     except Exception as e:
-        logger.debug("Error while performing a GET request to server: "+str(e))
+        logger.error("Error while performing a GET request to the server API: "+str(e))
         return False
     if r.status_code == 200:
+        logger.debug("All data that was read from the server API:\n" +
+                     pprint.pformat(r.json()))
         return r.json()
     else:
-        logger.debug("Error getting data from server: "+str(r.status_code))
+        logger.error("Error getting data from the server API: "+str(r.status_code))
         return False
 
 
-def post_request_to_server(api_uri, data_to_post, timeout=15):
+def post_request_to_server(api_uri, data_to_post, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
+    if ignore_ssl==True:
+       logger.warning("SSL verification is off. This might have security implications while connecting to the server API.")
+       verify=False
+    else:
+        if len(ca_bundle or '')>0:
+          verify=ca_bundle
+        else:
+          verify=True
     try:
-        r = requests.post(api_uri, json=data_to_post, timeout=timeout)
+        r = requests.post(api_uri, json=data_to_post, timeout=15, verify=verify, allow_redirects=True, auth=(api_user,api_pwd))
     except Exception as e:
-        logger.debug(
-            "Error while performing a POST request to server: "+str(e))
+        logger.error(
+            "Error while performing a POST request to the server API: "+str(e))
         return False
     if r.status_code == 200:
+        logger.debug("All data that was written to the server API:\n" +
+                     pprint.pformat(data_to_post))
         return True
     else:
-        logger.debug("Error posting data to server: "+str(r.status_code))
+        logger.error("Error posting data to the sever API: "+str(r.status_code))
         return False
 
 
