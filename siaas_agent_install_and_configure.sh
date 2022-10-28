@@ -12,5 +12,18 @@ cd ${SCRIPT_DIR}
 apt-get update
 apt-get install -y python3 python3-pip python3-venv git nmap
 
+# SYSTEMD CONFIGURATION
 ln -fs ${SCRIPT_DIR}/siaas_agent_run.sh /usr/local/bin/
 ln -fs ${SCRIPT_DIR}/siaas_agent_kill.sh /usr/local/bin/
+sudo cat << EOF | sudo tee /etc/systemd/system/siaas-agent.service
+[Unit]
+Description=SIAAS agent
+[Service]
+ExecStart=/usr/local/bin/siaas_agent_run.sh
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl enable siaas-agent
+
+echo -e "\nSIAAS Agent will be started on boot.\n\nTo start/stop manually: sudo systemctl start siaas-agent\n"
