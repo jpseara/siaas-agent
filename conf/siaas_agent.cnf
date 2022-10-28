@@ -1,8 +1,8 @@
 # Protected configurations (last for the whole run and can't be changed remotely)
 
 log_level = debug
-api_uri = http://192.168.122.172/api
-#api_uri = http://siaas/api
+#api_uri = http://192.168.122.172/api
+api_uri = http://siaas/api
 api_user = siaas
 api_pwd = siaas
 #api_ssl_ignore_verify = true

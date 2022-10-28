@@ -10,6 +10,7 @@ fi
 cd ${SCRIPT_DIR}
 
 NMAP_SCRIPTS_DIR=${SCRIPT_DIR}/tmp
+mkdir -p ${NMAP_SCRIPTS_DIR}
 
 git -C ${NMAP_SCRIPTS_DIR}/nmap-vulners pull 2> /dev/null || (rm -rf ${NMAP_SCRIPTS_DIR}/nmap-vulners && git clone https://github.com/vulnersCom/nmap-vulners.git ${NMAP_SCRIPTS_DIR}/nmap-vulners && ln -fs ${NMAP_SCRIPTS_DIR}/nmap-vulners /usr/share/nmap/scripts/)
 
