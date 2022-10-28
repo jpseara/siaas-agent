@@ -13,7 +13,6 @@ import re
 import requests
 import urllib3
 import json
-from copy import copy
 from datetime import datetime
 from urllib.parse import quote_plus
 

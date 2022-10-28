@@ -5,7 +5,6 @@ import sys
 import pprint
 import time
 from datetime import datetime
-from copy import copy
 
 logger = logging.getLogger(__name__)
 
