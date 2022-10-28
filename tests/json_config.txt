@@ -1,0 +1,5 @@
+{
+        "datatransfer_loop_interval_sec": 45,
+        "disable_portscanner": "false",
+        "silent_mode": "false"
+}
