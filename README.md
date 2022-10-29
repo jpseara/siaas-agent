@@ -10,14 +10,12 @@ __
 
 **Instructions (tested on Ubuntu 20.04 "Focal" and Raspberry Pi OS 11 "Bullseye")**
 
- - Set up system and Pyhon packages (Ubuntu 20.04 "Focal"): `sudo ./siaas_agent_install_and_configure.sh`
+ - Install and configure: `sudo ./siaas_agent_install_and_configure.sh`
 
- - How to run: `sudo siaas_agent_run.sh`
+ - Start: `sudo systemctl start siaas-agent` or `sudo ./siaas_agent_run.sh`
 
- - How to stop: `sudo siaas_agent_kill.sh`
+ - Stop: `sudo systemctl stop siaas-agent` or `sudo ./siaas_agent_kill.sh`
 
- - RECOMMENDED WAY TO START/STOP SERVICES: `sudo systemctl [start/stop/restart] siaas-agent`
+ - Logs: `tail -100f /var/log/siaas-agent/siaas-agent.log` or `tail -100f ./log/siaas-agent.log`
 
- - Logs: `tail -100f /var/log/siaas/siaas-agent.log`
-
- - How to generate a project archive (it is recommended to stop all processes before): `sudo siaas_agent_archive.sh`
+ - Generate a project archive (it is recommended to stop all processes before): `sudo ./siaas_agent_archive.sh`
