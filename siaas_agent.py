@@ -49,12 +49,13 @@ if __name__ == "__main__":
     siaas_aux.write_to_local_file(
         os.path.join(sys.path[0], 'var/config.db'), {})
     siaas_aux.write_to_local_file(os.path.join(
-        sys.path[0], 'var/config_orig.db'), {})
+        sys.path[0], 'var/config_local.db'), {})
 
-    # Read local configuration file and insert in local database
-    siaas_aux.write_config_db_from_conf_file()
+    # Read local configuration file and insert in local databases
     siaas_aux.write_config_db_from_conf_file(
-        output=os.path.join(sys.path[0], 'var/config_orig.db'))
+        output=os.path.join(sys.path[0], 'var/config.db'))
+    siaas_aux.write_config_db_from_conf_file(
+        output=os.path.join(sys.path[0], 'var/config_local.db'))
 
     # Define logging level according to user config
     os.makedirs(os.path.join(sys.path[0], LOG_DIR), exist_ok=True)

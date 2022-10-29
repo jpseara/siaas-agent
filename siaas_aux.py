@@ -41,7 +41,7 @@ def merge_module_dicts(modules=""):
     return merged_dict
 
 
-def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_orig.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict={}):
+def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_local.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict={}):
     """
     Merges the upstream configs to the local configs ;
     If the config disappears from the server, it reverts to the local config.
