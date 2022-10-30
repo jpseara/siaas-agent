@@ -134,7 +134,7 @@ def main(version="N/A"):
                         list_addr_mask.append(
                             address.address+"/"+str(mask_prefix))
                 if str(address.family) == 'AddressFamily.AF_INET6':
-                    if not address.address.lower().startswith("fe80::") and not address.addresss == "::1":
+                    if not address.address.lower().startswith("fe80::") and not address.address == "::1":
                         mask_prefix = siaas_aux.get_ipv6_cidr(address.netmask)
                         list_addr_mask.append(
                             address.address+"/"+str(mask_prefix))
