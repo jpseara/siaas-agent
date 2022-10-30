@@ -128,13 +128,13 @@ def main(version="N/A"):
             platform["system_info"]["network"]["interfaces"][interface_name] = []
             for address in interface_addresses:
                 if str(address.family) == 'AddressFamily.AF_INET':
-                    if interface_name not in address.address:
+                    if not address.address.startswith("127."):
                         mask_prefix = ipaddress.IPv4Network(
                             "0.0.0.0/"+address.netmask).prefixlen
                         list_addr_mask.append(
                             address.address+"/"+str(mask_prefix))
                 if str(address.family) == 'AddressFamily.AF_INET6':
-                    if interface_name not in address.address:
+                    if not address.address.lower().startswith("fe80::") and not address.addresss == "::1":
                         mask_prefix = siaas_aux.get_ipv6_cidr(address.netmask)
                         list_addr_mask.append(
                             address.address+"/"+str(mask_prefix))
