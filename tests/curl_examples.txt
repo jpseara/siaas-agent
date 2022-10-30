@@ -1,4 +1,6 @@
-curl -X DELETE http://siaas:5000/siaas-server/agents/data/TEST?days=0
+curl -X DELETE http://siaas:5000/siaas-server/agents/data/TEST
+curl -X DELETE http://siaas:5000/siaas-server/agents/data/TEST2
+curl -X DELETE http://siaas:5000/siaas-server/agents/data/TEST3?days=0
 curl -X DELETE http://siaas:5000/siaas-server/agents/configs/TEST
 curl -X DELETE http://siaas:5000/siaas-server/agents/configs/TEST2
 curl -X DELETE http://siaas:5000/siaas-server/agents/configs/TEST3
