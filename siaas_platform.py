@@ -3,7 +3,7 @@
 
 import siaas_aux
 import psutil
-import platform
+import platform as platform_mod
 import cpuinfo
 import socket
 import re
@@ -31,7 +31,7 @@ def main(version="N/A"):
 
     # Platform
     try:
-        uname = platform.uname()
+        uname = platform_mod.uname()
         platform["system_info"]["system"] = {}
         platform["system_info"]["system"]["os"] = uname.system
         platform["system_info"]["system"]["node_name"] = uname.node
