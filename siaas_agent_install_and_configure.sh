@@ -12,6 +12,9 @@ cd ${SCRIPT_DIR}
 apt-get update
 apt-get install -y python3 python3-pip python3-venv git nmap
 
+# SSL CA DIRECTORY
+mkdir -p ssl/ca
+
 # SERVICE CONFIGURATION
 cp -n conf/siaas_agent.cnf.orig conf/siaas_agent.cnf
 ln -fs ${SCRIPT_DIR}/siaas_agent_run.sh /usr/local/bin/

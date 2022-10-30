@@ -22,6 +22,7 @@ log/
 tmp/
 var/
 conf/*.cnf
+ssl/ca
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
