@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 
 def merge_module_dicts(modules=""):
     """
-    Grabs all  files from the module list and concatenate them
-    Returns an empty dict if it fails 
+    Grabs all local DBs (dicts) from the module list and concatenates them;
+    Returns False if it fails. 
     """
     merged_dict = {}
     for module in modules.split(','):
@@ -36,14 +36,16 @@ def merge_module_dicts(modules=""):
                 merged_dict = dict(
                     list(merged_dict.items())+list(next_dict_to_merge.items()))
         except:
-            logger.warning("Couldn't merge dict: " +
+            logger.error("Couldn't merge dict: " +
                            str(next_dict_to_merge))
+            return False
+
     return merged_dict
 
 
 def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_local.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict={}):
     """
-    Merges the upstream configs to the local configs ;
+    Merges the upstream configs to the local configs;
     If the config disappears from the server, it reverts to the local config.
     """
     merged_config_dict = {}

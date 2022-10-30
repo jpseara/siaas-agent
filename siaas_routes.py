@@ -36,6 +36,11 @@ def siaas_agent():
         if m.lstrip().rstrip() == "*":
             module = all_existing_modules
     output = siaas_aux.merge_module_dicts(module)
+    if output:
+        status = "success"
+    else:
+        status = "failure"
+        output = {}
     try:
         output["config"]["mongo_pwd"] = '*' * \
             len(output["config"]["mongo_pwd"])
@@ -49,7 +54,7 @@ def siaas_agent():
     return jsonify(
         {
             'output': output,
-            'status': 'success',
+            'status': status,
             'total_entries': len(output),
             'time': siaas_aux.get_now_utc_str()
         }
