@@ -1,19 +1,29 @@
 curl -X DELETE http://siaas:5000/siaas-server/agents/data/TEST?days=0
 curl -X DELETE http://siaas:5000/siaas-server/agents/configs/TEST
+curl -X DELETE http://siaas:5000/siaas-server/agents/configs/TEST2
+curl -X DELETE http://siaas:5000/siaas-server/agents/configs/TEST3
 curl -X DELETE http://siaas:5000/siaas-server/agents/configs/0924aa8b-6dc9-4fec-9716-d1601fc8b6c6
 curl -X DELETE http://siaas:5000/siaas-server/agents/configs/L1HF89B0091
 curl -X DELETE http://siaas:5000/siaas-server/agents/configs/ffffffff-ffff-ffff-ffff-ffffffffffff
 
 curl -X POST http://siaas:5000/siaas-server/agents/data/TEST -H "Content-Type: application/json" -d @data.json
+curl -X POST http://siaas:5000/siaas-server/agents/data/TEST2 -H "Content-Type: application/json" -d @data2.json
+curl -X POST http://siaas:5000/siaas-server/agents/data/TEST3 -H "Content-Type: application/json" -d @data3.json
 curl -X POST http://siaas:5000/siaas-server/agents/configs/TEST -H "Content-Type: application/json" -d @config.json 
+curl -X POST http://siaas:5000/siaas-server/agents/configs/TEST2 -H "Content-Type: application/json" -d @config.json 
+curl -X POST http://siaas:5000/siaas-server/agents/configs/TEST3 -H "Content-Type: application/json" -d @config.json 
 curl -X POST http://siaas:5000/siaas-server/agents/configs/0924aa8b-6dc9-4fec-9716-d1601fc8b6c6 -H "Content-Type: application/json" -d @config_2.json
 curl -X POST http://siaas:5000/siaas-server/agents/configs/L1HF89B0091 -H "Content-Type: application/json" -d @config_3.json
 curl -X POST http://siaas:5000/siaas-server/agents/configs/ffffffff-ffff-ffff-ffff-ffffffffffff -H "Content-Type: application/json" -d @config_bc.json
 
 curl -X GET http://siaas:5000/siaas-server/agents/data/TEST
+curl -X GET http://siaas:5000/siaas-server/agents/data/TEST2
+curl -X GET http://siaas:5000/siaas-server/agents/data/TEST3
 curl -X GET http://siaas:5000/siaas-server/agents/configs
 curl -X GET http://siaas:5000/siaas-server/agents/configs?merge_broadcast=1
 curl -X GET http://siaas:5000/siaas-server/agents/configs/TEST
+curl -X GET http://siaas:5000/siaas-server/agents/configs/TEST2
+curl -X GET http://siaas:5000/siaas-server/agents/configs/TEST3
 curl -X GET http://siaas:5000/siaas-server/agents/configs/TEST?merge_broadcast=1
 
 curl -X GET https://siaas:siaas@siaas/api/siaas-server/agents/data
