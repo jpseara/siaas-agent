@@ -5,7 +5,7 @@ api_uri = https://siaas/api
 api_user = siaas
 api_pwd = siaas
 #api_ssl_ignore_verify = true
-api_ssl_ca_bundle = ./ssl/ca/siaas.crt
+api_ssl_ca_bundle = ./ssl/siaas.crt
 #offline_mode = true # don't communicate with the server at all
 
 # Runtime configurations (can be changed during runtime by the remote server)
