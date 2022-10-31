@@ -267,21 +267,21 @@ def get_or_create_unique_system_id():
             new_uid = content.split('\n')[0]
     except:
         pass
-    if len(new_uid or '') == 0 or new_uid == "NA" or new_uid == "N/A":
+    if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
         try:
             with open("/sys/class/dmi/id/product_uuid", 'r') as file:
                 content = file.read()
                 new_uid = content.split('\n')[0]
         except:
             pass
-    if len(new_uid or '') == 0 or new_uid == "NA" or new_uid == "N/A":
+    if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
         try:
             with open("/var/lib/dbus/machine-id", 'r') as file:
                 content = file.read()
                 new_uid = content.split('\n')[0]
         except:
             pass
-    if len(new_uid or '') == 0 or new_uid == "NA" or new_uid == "N/A":
+    if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
         logger.warning(
             "Couldn't create a new UID from the system info. Creating a new one on-the-fly ...")
         try:
