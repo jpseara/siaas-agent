@@ -91,8 +91,13 @@ if __name__ == "__main__":
     neighborhood.start()
     portscanner.start()
     datatransfer.start()
-    app.run(debug=True, use_reloader=False, host="0.0.0.0", port="5001")
-    #serve(app, host="0.0.0.0", port="5001")
+
+    enable_internal_api = siaas_aux.get_config_from_configs_db(
+            config_name="enable_internal_api", convert_to_string=True)
+    if siaas_aux.validate_bool_string(enable_internal_api):
+       app.run(debug=True, use_reloader=False, host="0.0.0.0", port="5001")
+       #serve(app, host="0.0.0.0", port="5001")
+
     platform.join()
     neighborhood.join()
     portscanner.join()

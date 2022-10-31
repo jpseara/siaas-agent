@@ -6,6 +6,7 @@ api_user = siaas
 api_pwd = siaas
 #api_ssl_ignore_verify = true
 api_ssl_ca_bundle = ./ssl/siaas.crt
+#enable_internal_api = true
 #offline_mode = true # don't communicate with the server at all
 
 # Runtime configurations (can be changed during runtime by the remote server)
