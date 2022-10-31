@@ -1,4 +1,5 @@
 {
         "datatransfer_loop_interval_sec": 99,
+	"dummy_from_bc": "dummy",
         "testing_a_dict": { "oi": 123 }
 }
