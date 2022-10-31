@@ -29,4 +29,4 @@ EOF
 systemctl daemon-reload
 systemctl enable siaas-agent
 
-echo -e "\nSIAAS Agent will be started on boot.\n\nTo start/stop manually: sudo systemctl start siaas-agent\n"
+echo -e "\nSIAAS Agent will be started on boot.\n\nTo start (or restart) manually right now: sudo systemctl [start/restart] siaas-agent\n"
