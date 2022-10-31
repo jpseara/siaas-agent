@@ -260,7 +260,7 @@ def add_manual_hosts(manual_hosts_string=""):
     return(ip_mac_host)
 
 
-def main(interface_to_scan=None, ignore_neighborhood=False):
+def main(interface_to_scan=None, ignore_neighborhood=False, ignore_wifi_auto_discovery=False):
 
     auto_hosts = {}
     manual_hosts = {}
@@ -269,7 +269,6 @@ def main(interface_to_scan=None, ignore_neighborhood=False):
     auto_scanned_interfaces = 0
 
     if ignore_neighborhood:
-
         logger.warning(
             "Bypassing discovery of hosts in the neighborhood as per configuration. To change the behavior, set the configuration accordingly.")
 
@@ -287,6 +286,11 @@ def main(interface_to_scan=None, ignore_neighborhood=False):
 
             # Skip loopback network and default GW
             if network == 0 or interface.lower() == 'lo' or address == '127.0.0.1' or address == '0.0.0.0' or (not interface.lower().startswith("e") and not interface.lower().startswith("w") and not interface.lower().startswith("b")):
+                continue
+
+            # Skip wireless interface if configuration says so
+            if interface.lower().startswith("w") and ignore_wifi_auto_discovery:
+                logger.warning("Bypassing automatic discovery of hosts over Wi-Fi network '"+str(interface)+"' as per configuration.")
                 continue
 
             # Skip invalid netmasks
@@ -339,9 +343,16 @@ def loop(interface_to_scan=None):
             if ignore_neighborhood.lower() == "true":
                 dont_neighborhood = True
 
+        ignore_wifi_auto_discovery = siaas_aux.get_config_from_configs_db(
+            config_name="ignore_wifi_auto_discovery", convert_to_string=True)
+        dont_wifi = False
+        if len(ignore_wifi_auto_discovery or '') > 0:
+            if ignore_wifi_auto_discovery.lower() == "true":
+                dont_wifi= True
+
         # Creating neighborhood dict
         neighborhood_dict = main(
-            interface_to_scan=interface_to_scan, ignore_neighborhood=dont_neighborhood)
+            interface_to_scan=interface_to_scan, ignore_neighborhood=dont_neighborhood, ignore_wifi_auto_discovery=dont_wifi)
 
         # Writing in local database
         siaas_aux.write_to_local_file(os.path.join(
