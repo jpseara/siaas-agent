@@ -36,11 +36,11 @@ def siaas_agent():
         if m.lstrip().rstrip() == "*":
             module = all_existing_modules
     output = siaas_aux.merge_module_dicts(module)
-    if output:
-        status = "success"
-    else:
+    if type(output) == bool and output == False:
         status = "failure"
         output = {}
+    else:
+        status = "success"
     try:
         output["config"]["mongo_pwd"] = '*' * \
             len(output["config"]["mongo_pwd"])
