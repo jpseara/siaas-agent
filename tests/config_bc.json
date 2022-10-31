@@ -1,7 +1,4 @@
 {
         "datatransfer_loop_interval_sec": 99,
-        "disable_portscanner": "true",
-        "ignore_neighborhood": "",
-        "silent_mode": "true",
         "testing_a_dict": { "oi": 123 }
 }
