@@ -25,8 +25,8 @@ def main(version="N/A"):
 
     platform = {}
 
-    platform["uid"] = siaas_aux.get_or_create_unique_system_id()
     platform["version"] = version
+    platform["uid"] = siaas_aux.get_or_create_unique_system_id()
     platform["system_info"] = {}
 
     # Platform
