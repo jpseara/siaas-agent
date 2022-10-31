@@ -338,17 +338,11 @@ def loop(interface_to_scan=None):
 
         ignore_neighborhood = siaas_aux.get_config_from_configs_db(
             config_name="ignore_neighborhood", convert_to_string=True)
-        dont_neighborhood = False
-        if len(ignore_neighborhood or '') > 0:
-            if ignore_neighborhood.lower() == "true":
-                dont_neighborhood = True
+        dont_neighborhood = siaas_aux.validate_bool_string(ignore_neighborhood)
 
         ignore_wifi_auto_discovery = siaas_aux.get_config_from_configs_db(
             config_name="ignore_wifi_auto_discovery", convert_to_string=True)
-        dont_wifi = False
-        if len(ignore_wifi_auto_discovery or '') > 0:
-            if ignore_wifi_auto_discovery.lower() == "true":
-                dont_wifi= True
+        dont_wifi = siaas_aux.validate_bool_string(ignore_wifi_auto_discovery)
 
         # Creating neighborhood dict
         neighborhood_dict = main(

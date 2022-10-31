@@ -302,6 +302,21 @@ def get_or_create_unique_system_id():
     return new_uid
 
 
+def validate_bool_string(input_string, default_output=False):
+   if type(default_output) is not bool:
+      return None
+   if default_output == False:
+      if len(input_string or '') > 0:
+          if input_string.lower() == "true":
+              return True
+      return False
+   if default_output == True:
+      if len(input_string or '') > 0:
+          if input_string.lower() == "false":
+              return False
+      return True
+
+
 def validate_string_key(string):
     pattern = "^[A-Za-z0-9_-]*$"
     if type(string) is not str:

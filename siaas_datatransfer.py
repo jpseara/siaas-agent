@@ -77,10 +77,7 @@ def loop():
         if config_name.upper() == "API_SSL_CA_BUNDLE":
             API_SSL_CA_BUNDLE = config_dict[config_name]
 
-    ssl_ignore_verify = False
-    if len(API_SSL_IGNORE_VERIFY or '') > 0:
-        if API_SSL_IGNORE_VERIFY.lower() == "true":
-            ssl_ignore_verify = True
+    ssl_ignore_verify = siaas_aux.validate_bool_string(API_SSL_IGNORE_VERIFY)
 
     ssl_ca_bundle = None
     if len(API_SSL_CA_BUNDLE or '') > 0:
@@ -92,35 +89,30 @@ def loop():
         api_user = API_USER
         api_pwd = API_PWD
 
-    run1 = True
+    valid_api = True
     if len(API_URI or '') == 0:
         logger.error(
             "The API URI is empty. No communications with the server will take place.")
-        run1 = False
+        valid_api = False
 
-    run2 = True
     offline_mode = siaas_aux.get_config_from_configs_db(
         config_name="offline_mode", convert_to_string=True)
-    if len(offline_mode or '') > 0:
-        if offline_mode.lower() == "true":
-            logger.warning(
+    no_comms = siaas_aux.validate_bool_string(offline_mode)
+    if no_comms:
+        logger.warning(
                 "Offline mode is on! No data will be transferred. If you want to change this behavior, change the configuration and restart the application.")
-            run2 = False
 
-    while run1 and run2:
+    while valid_api and not no_comms:
 
         logger.debug("Loop running ...")
 
         # Upload agent data
         silent_mode = siaas_aux.get_config_from_configs_db(
             config_name="silent_mode", convert_to_string=True)
-        dont_upload = False
-        if len(silent_mode or '') > 0:
-            if silent_mode.lower() == "true":
-                dont_upload = True
-                logger.warning(
-                    "Silent mode is on! This means no data is sent to the server. Will check again later ...")
-        if dont_upload != True:
+        if siaas_aux.validate_bool_string(silent_mode):
+            logger.warning(
+                "Silent mode is on! This means no data is sent to the server. Will check again later ...")
+        else:
             last_uploaded_dict = upload_agent_data(API_URI,
                                                    last_uploaded_dict, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd)
 

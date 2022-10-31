@@ -346,12 +346,11 @@ def loop():
 
         disable_portscanner = siaas_aux.get_config_from_configs_db(
             config_name="disable_portscanner", convert_to_string=True)
-        if len(disable_portscanner or '') > 0:
-            if disable_portscanner.lower() == "true":
-                logger.warning(
-                    "Portscanner is disabled in the config. Not running. Will check again in a bit ...")
-                time.sleep(60)
-                continue
+        if siaas_aux.validate_bool_string(disable_portscanner):
+            logger.warning(
+                "Portscanner is disabled in the config. Not running. Will check again in a bit ...")
+            time.sleep(60)
+            continue
 
         hosts = siaas_aux.read_from_local_file(
             os.path.join(sys.path[0], 'var/neighborhood.db'))
