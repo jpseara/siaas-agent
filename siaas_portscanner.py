@@ -179,7 +179,7 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
     logger.info("Scanning " + target_ip + " for system information ...")
 
     sysinfo_dict = {}
-    detected_ports = {}
+    scanned_ports = {}
 
     try:
         timeout = int(timeout)
@@ -192,7 +192,7 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
     if ipv == None:
         logger.error("Can't get system information for " +
                      target_ip+" as it is not from a valid IP protocol.")
-        return (sysinfo_dict, detected_ports)
+        return (sysinfo_dict, scanned_ports)
 
     nmap = nmap3.Nmap()
 
@@ -221,15 +221,15 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
     except TimeoutError as e:
         logger.warning("Nmap timed out while grabbing system info for " +
                        target_ip+": "+str(e)+" sec. Maybe it needs to be increased?")
-        return (sysinfo_dict, detected_ports)
+        return (sysinfo_dict, scanned_ports)
     except LookupError as e:
         logger.warning("Nmap returned an empty reply while grabbing system info for " +
                        target_ip+". Possible timeout, or maybe the host is down?")
-        return (sysinfo_dict, detected_ports)
+        return (sysinfo_dict, scanned_ports)
     except Exception as e:
         logger.error(
             "Nmap returned an unknown error while grabbing system info for "+target_ip+": "+str(e))
-        return (sysinfo_dict, detected_ports)
+        return (sysinfo_dict, scanned_ports)
 
     try:
         sysinfo_dict["hostname"] = host_results["hostname"][0]["name"]
@@ -257,18 +257,18 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
         prod_name = ""
         hostname = ""
 
-        detected_ports[p["portid"]+"/"+p["protocol"]] = {}
-        detected_ports[p["portid"]+"/"+p["protocol"]]["state"] = p["state"]
+        scanned_ports[p["portid"]+"/"+p["protocol"]] = {}
+        scanned_ports[p["portid"]+"/"+p["protocol"]]["state"] = p["state"]
 
         if "name" in p["service"].keys():
             if len(p["service"]["name"]) > 0:
-                detected_ports[p["portid"]+"/"+p["protocol"]
+                scanned_ports[p["portid"]+"/"+p["protocol"]
                                ]["service"] = p["service"]["name"]
                 name = p["service"]["name"]
 
         if "hostname" in p["service"].keys():
             if len(p["service"]["hostname"]) > 0:
-                detected_ports[p["portid"]+"/"+p["protocol"]
+                scanned_ports[p["portid"]+"/"+p["protocol"]
                                ]["site"] = p["service"]["hostname"]
 
         if "product" in p["service"].keys():
@@ -278,7 +278,7 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
             if "extrainfo" in p["service"].keys():
                 prod_name += " ("+p["service"]["extrainfo"]+")"
             if len(p["service"]["product"]) > 0:
-                detected_ports[p["portid"]+"/" +
+                scanned_ports[p["portid"]+"/" +
                                p["protocol"]]["product"] = prod_name
 
         logger.info("Service in "+target_ip+" at " +
@@ -287,7 +287,7 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
     if len(host_results["ports"]) == 0:
         logger.info("Found no ports/services reachable for host "+target_ip+".")
 
-    return (sysinfo_dict, detected_ports)
+    return (sysinfo_dict, scanned_ports)
 
 
 def main(target_ip="127.0.0.1"):
@@ -295,26 +295,26 @@ def main(target_ip="127.0.0.1"):
     timeout = 15
     target_info = {}
     target_info["system_info"] = {}
-    target_info["detected_ports"] = {}
+    target_info["scanned_ports"] = {}
     system_info_output = ({}, {})
 
     # Grab system information and detected ports
     system_info_output = get_system_info(
         target_ip, specific_ports=siaas_aux.get_config_from_configs_db(config_name="target_specific_ports"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_sysinfo_timeout_sec"))
     target_info["system_info"] = system_info_output[0]
-    detected_ports = system_info_output[1]
+    scanned_ports = system_info_output[1]
 
     # Report
-    total_ports = len(detected_ports)
+    total_ports = len(scanned_ports)
     total_valid_scripts = set()
     total_vulns = 0
 
     # Scan vulnerabilities for each detected port
-    for port in detected_ports.keys():
-        target_info["detected_ports"][port] = {}
-        target_info["detected_ports"][port]["vulnerabilities"] = {}
-        target_info["detected_ports"][port] = detected_ports[port]
-        target_info["detected_ports"][port]["vulnerabilities"], scripts_port, n_vulns_port = vulnerabilities_per_port(target_ip, port.split("/")[0], port.split(
+    for port in scanned_ports.keys():
+        target_info["scanned_ports"][port] = {}
+        target_info["scanned_ports"][port]["vulnerabilities"] = {}
+        target_info["scanned_ports"][port] = scanned_ports[port]
+        target_info["scanned_ports"][port]["vulnerabilities"], scripts_port, n_vulns_port = vulnerabilities_per_port(target_ip, port.split("/")[0], port.split(
             "/")[1], nmap_scripts_string=siaas_aux.get_config_from_configs_db(config_name="nmap_scripts"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_portscan_timeout_sec"))
         total_valid_scripts.update(scripts_port)
         total_vulns += n_vulns_port
@@ -322,7 +322,7 @@ def main(target_ip="127.0.0.1"):
     logger.info("Port scanning ended for %s: %s vulnerabilities were detected, across %s ports and using %s valid Nmap scripts. You might have duplicated outputs if you use multiple scripts." % (
         target_ip, total_vulns, total_ports, len(total_valid_scripts)))
     target_info["metadata"] = {}
-    target_info["metadata"]["num_ports"] = total_ports
+    target_info["metadata"]["num_scanned_ports"] = total_ports
     target_info["metadata"]["num_valid_scripts"] = len(total_valid_scripts)
     target_info["metadata"]["total_num_vulnerabilities"] = total_vulns
     target_info["last_check"] = siaas_aux.get_now_utc_str()
