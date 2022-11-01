@@ -25,7 +25,7 @@ def merge_module_dicts(modules=""):
     Returns False if it fails. 
     """
     merged_dict = {}
-    for module in sorted(modules.split(',')):
+    for module in modules.split(','):
         module = module.lstrip().rstrip()
         try:
             module_dict = read_from_local_file(
