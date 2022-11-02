@@ -69,7 +69,7 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
 def get_request_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
     urllib3.disable_warnings()
     if ignore_ssl==True:
-       logger.warning("SSL verification is off. This might have security implications while connecting to the server API.")
+       logger.warning("SSL verification is off! This might have security implications while connecting to the server API.")
        verify=False
     else:
        if len(ca_bundle or '')>0:
@@ -93,7 +93,7 @@ def get_request_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=No
 def post_request_to_server(api_uri, data_to_post, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
     urllib3.disable_warnings()
     if ignore_ssl==True:
-       logger.warning("SSL verification is off. This might have security implications while connecting to the server API.")
+       logger.warning("SSL verification is off! This might have security implications while connecting to the server API.")
        verify=False
     else:
         if len(ca_bundle or '')>0:

@@ -348,7 +348,7 @@ def loop():
             config_name="disable_portscanner", convert_to_string=True)
         if siaas_aux.validate_bool_string(disable_portscanner):
             logger.warning(
-                "Portscanner is disabled in the config. Not running. Will check again in a bit ...")
+                "Portscanner is disabled as per configuration! Not running.")
             time.sleep(60)
             continue
 

@@ -100,7 +100,7 @@ def loop():
     no_comms = siaas_aux.validate_bool_string(offline_mode)
     if no_comms:
         logger.warning(
-                "Offline mode is on! No data will be transferred. If you want to change this behavior, change the configuration and restart the application.")
+                "Offline mode is on! No data will be transferred to or from the server. If you want to change this behavior, change the local configuration file and restart the application.")
 
     while valid_api and not no_comms:
 
@@ -111,7 +111,7 @@ def loop():
             config_name="silent_mode", convert_to_string=True)
         if siaas_aux.validate_bool_string(silent_mode):
             logger.warning(
-                "Silent mode is on! This means no data is sent to the server. Will check again later ...")
+                "Silent mode is on! This means no data is being sent to the server.")
         else:
             last_uploaded_dict = upload_agent_data(API_URI,
                                                    last_uploaded_dict, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd)

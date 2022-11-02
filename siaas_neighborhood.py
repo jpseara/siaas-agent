@@ -270,7 +270,7 @@ def main(interface_to_scan=None, ignore_neighborhood=False, disable_wifi_auto_di
 
     if ignore_neighborhood:
         logger.warning(
-            "Bypassing discovery of hosts in the neighborhood as per configuration. To change the behavior, set the configuration accordingly.")
+            "Bypassing discovery of hosts in the neighborhood as per configuration! Only considering manual configured hosts.")
 
     else:
 
@@ -290,7 +290,7 @@ def main(interface_to_scan=None, ignore_neighborhood=False, disable_wifi_auto_di
 
             # Skip wireless interface if configuration says so
             if interface.lower().startswith("w") and disable_wifi_auto_discovery:
-                logger.warning("Bypassing automatic discovery of hosts over Wi-Fi network '"+str(interface)+"' as per configuration.")
+                logger.warning("Bypassing automatic discovery of hosts over Wi-Fi network '"+str(interface)+"' as per configuration!")
                 continue
 
             # Skip invalid netmasks
