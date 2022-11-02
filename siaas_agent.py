@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 SIAAS_VERSION = "0.0.1"
 LOG_DIR = "log"
-
+API_PORT = 5001
 
 if __name__ == "__main__":
 
@@ -95,8 +95,9 @@ if __name__ == "__main__":
     enable_internal_api = siaas_aux.get_config_from_configs_db(
             config_name="enable_internal_api", convert_to_string=True)
     if siaas_aux.validate_bool_string(enable_internal_api):
-       app.run(debug=True, use_reloader=False, host="0.0.0.0", port="5001")
-       #serve(app, host="0.0.0.0", port="5001")
+       logger.info("Internal API is now starting on port "+str(API_PORT)+" ...")
+       app.run(debug=False, use_reloader=False, host="0.0.0.0", port=API_PORT)
+       #serve(app, host="0.0.0.0", port=API_PORT)
 
     platform.join()
     neighborhood.join()
