@@ -26,7 +26,7 @@ def merge_module_dicts(modules=""):
     """
     merged_dict = {}
     for module in sorted(modules.split(','), key=lambda x: x[0].casefold()):
-        module = module.lstrip().rstrip()
+        module = module.lstrip().rstrip().lower()
         try:
             module_dict = read_from_local_file(
                 os.path.join(sys.path[0], 'var/'+str(module)+'.db'))
@@ -255,7 +255,7 @@ def get_or_create_unique_system_id():
                     "Invalid ID, reserved for broadcast. Returning a nil UID.")
                 return "00000000-0000-0000-0000-000000000000"
             logger.debug("Reusing existing UID: "+str(content))
-            return content.split('\n')[0]
+            return content.split('\n')[0].lower()
     except:
         pass
     logger.debug(
@@ -299,7 +299,7 @@ def get_or_create_unique_system_id():
         logger.error("There was an error while writing to the local UID file: " +
                      str(e)+". Returning a nil UID.")
         return "00000000-0000-0000-0000-000000000000"
-    return new_uid
+    return new_uid.lower()
 
 
 def validate_bool_string(input_string, default_output=False):
