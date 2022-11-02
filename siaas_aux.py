@@ -123,7 +123,7 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
     """
     if config_name == None:
 
-        logger.debug("Getting configuration dictionary from local  ...")
+        logger.debug("Getting configuration dictionary from local DB ...")
         config_dict = read_from_local_file(
             local_dict)
         if len(config_dict or '') > 0:
@@ -135,13 +135,13 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
                     out_dict[k] = config_dict[k]
             return config_dict
 
-        logger.error("Couldn't get configuration dictionary from local .")
+        logger.error("Couldn't get configuration dictionary from local DB.")
         return {}
 
     else:
 
         logger.debug("Getting configuration value '" +
-                     config_name+"' from local  ...")
+                     config_name+"' from local DB ...")
         config_dict = read_from_local_file(
             local_dict)
         if len(config_dict or '') > 0:
@@ -152,7 +152,7 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
                 return value
 
         logger.debug("Couldn't get configuration named '" +
-                     config_name+"' from local . Maybe it doesn't exist.")
+                     config_name+"' from local DB. Maybe it doesn't exist.")
         return None
 
 
@@ -166,7 +166,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
     Writes the resulting dict in the  file of config.db. This means it will return True if things go fine, or False if it fails
     """
 
-    logger.debug("Writing configuration local , from local file: "+conf_file)
+    logger.debug("Writing configuration local DB, from local file: "+conf_file)
 
     config_dict = {}
 
