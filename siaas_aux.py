@@ -25,7 +25,7 @@ def merge_module_dicts(modules=""):
     Returns False if it fails. 
     """
     merged_dict = {}
-    for module in sorted(modules.split(','), key=str.casefold):
+    for module in sorted(modules.split(','), key=lambda x: x[0].casefold()):
         module = module.lstrip().rstrip()
         try:
             module_dict = read_from_local_file(
@@ -63,7 +63,7 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
     except:
         logger.error(
             "Could not merge configurations from the upstream dict.")
-    return write_to_local_file(output, dict(sorted(merged_config_dict.items(), key=str.casefold)))
+    return write_to_local_file(output, dict(sorted(merged_config_dict.items(), key=lambda x: x[0].casefold())))
 
 
 def get_request_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
@@ -189,7 +189,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
                 "Invalid line from local configuration file was ignored: "+str(line))
             continue
 
-    return write_to_local_file(output, dict(sorted(config_dict.items(), key=str.casefold)))
+    return write_to_local_file(output, dict(sorted(config_dict.items(), key=lambda x: x[0].casefold())))
 
 
 def write_to_local_file(file_to_write, data_to_insert):
