@@ -96,7 +96,7 @@ if __name__ == "__main__":
             config_name="enable_internal_api", convert_to_string=True)
     if siaas_aux.validate_bool_string(enable_internal_api):
        logger.info("Internal API is now starting on port "+str(API_PORT)+" ...")
-       app.run(debug=False, use_reloader=False, host="0.0.0.0", port=API_PORT)
+       app.run(debug=True, use_reloader=False, host="0.0.0.0", port=API_PORT)
        #serve(app, host="0.0.0.0", port=API_PORT)
 
     platform.join()
