@@ -239,8 +239,11 @@ def add_manual_hosts(manual_hosts_string=""):
                     dns_name = ""
 
                 dns_entry = ip
-                ip_mac_host[ip] = {}
-                ip_mac_host[ip]["manual_entry_address"] = host
+                if ip not in ip_mac_host.keys():
+                   ip_mac_host[ip] = {}
+                   ip_mac_host[ip]["manual_entry_addresses"] = []
+                ip_mac_host[ip]["manual_entry_addresses"].append(host)
+                ip_mac_host[ip]["manual_entry_addresses"].sort()
                 if len(dns_name) > 0:
                     ip_mac_host[ip]["domain_name"] = dns_name
                     dns_entry = ip+" ("+dns_name+")"
