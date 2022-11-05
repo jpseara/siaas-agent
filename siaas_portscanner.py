@@ -66,9 +66,9 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
     return (out_dict, total_vulns)
 
 
-def scan_per_port(target_ip, port, protocol, nmap_scripts_string=None, timeout=300):
+def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300):
 
-    logger.info("Scanning " + target_ip +
+    logger.info("Scanning " + target +
                 " at " + str(port) + "/" + protocol+" ...")
 
     scan_results_dict = {}
@@ -92,9 +92,9 @@ def scan_per_port(target_ip, port, protocol, nmap_scripts_string=None, timeout=3
         logger.warning(
             "Input timeout for port scanning is not configured or in an invalid format. Defaulting to \"300\".")
 
-    ipv = siaas_aux.is_ipv4_or_ipv6(target_ip)
+    ipv = siaas_aux.is_ipv4_or_ipv6(target)
     if ipv == None:
-        logger.error("Can't scan "+target_ip+" at " +
+        logger.error("Can't scan "+target+" at " +
                      str(port)+"/" + protocol+"+ as it is not from a valid IP protocol.")
         return (scan_results_dict, total_valid_scripts, total_vulns)
 
@@ -110,7 +110,7 @@ def scan_per_port(target_ip, port, protocol, nmap_scripts_string=None, timeout=3
                            nmap_script_uncommented+"' is invalid. Skipped.")
 
         logger.debug("Now scanning using script '"+nmap_script +
-                     "' for "+target_ip+" at " + str(port)+"/" + protocol+" ...")
+                     "' for "+target+" at " + str(port)+"/" + protocol+" ...")
 
         nmap = nmap3.Nmap()
 
@@ -123,18 +123,18 @@ def scan_per_port(target_ip, port, protocol, nmap_scripts_string=None, timeout=3
 
             scan_results_dict[nmap_script] = {}
 
-            #results = nmap.nmap_version_detection(target_ip, args="-%s -p%s:%s --script %s -Pn --script-args mincvss+5.0 --host-timeout %s" % (ipv, prot_flag, port, nmap_script, timeout))
+            #results = nmap.nmap_version_detection(target, args="-%s -p%s:%s --script %s -Pn --script-args mincvss+5.0 --host-timeout %s" % (ipv, prot_flag, port, nmap_script, timeout))
             results = nmap.nmap_version_detection(
-                target_ip, args="-%s -p%s:%s --script %s -Pn --host-timeout %s" % (ipv, prot_flag, port, nmap_script, timeout))
+                target, args="-%s -p%s:%s --script %s -Pn --host-timeout %s" % (ipv, prot_flag, port, nmap_script, timeout))
             logger.debug("Nmap raw output for vulnerability scan using script '"+nmap_script +
-                         "' in "+target_ip+" at "+str(port)+"/"+protocol+":\n"+pprint.pformat(results))
+                         "' in "+target+" at "+str(port)+"/"+protocol+":\n"+pprint.pformat(results))
 
             for t in results["task_results"]:
                 if "extrainfo" in t.keys():
                     if "timed out".casefold() in t["extrainfo"].casefold():
                         raise TimeoutError(str(timeout))
 
-            host_results = results[target_ip]
+            host_results = results[target]
             script_vulns = 0
 
             for d in host_results["ports"][0]["scripts"]:
@@ -154,30 +154,30 @@ def scan_per_port(target_ip, port, protocol, nmap_scripts_string=None, timeout=3
 
         except TimeoutError as e:
             logger.warning("Nmap timed out while scanning using script '"+nmap_script+"' for " +
-                           target_ip+" at "+str(port)+"/"+protocol+": "+str(e)+" sec. Maybe it needs to be increased?")
+                           target+" at "+str(port)+"/"+protocol+": "+str(e)+" sec. Maybe it needs to be increased?")
             continue
         except LookupError as e:
             logger.warning("Nmap returned an empty reply while scanning using script '"+nmap_script +
-                           "' in "+target_ip+" at "+str(port)+"/"+protocol+". Possible timeout, or maybe the host or port are down?")
+                           "' in "+target+" at "+str(port)+"/"+protocol+". Possible timeout, or maybe the host or port are down?")
             continue
         except Exception as e:
             logger.error("Nmap threw an invalid reply while scanning using script '" +
-                         nmap_script+"' in "+target_ip+" at "+str(port)+"/"+protocol+": "+str(e))
+                         nmap_script+"' in "+target+" at "+str(port)+"/"+protocol+": "+str(e))
             continue
 
         if script_vulns == 0:
             logger.info("Scan ended using script '" +
-                        nmap_script+"' for "+target_ip+" at "+str(port)+"/"+protocol+".")
+                        nmap_script+"' for "+target+" at "+str(port)+"/"+protocol+".")
         else:
             logger.info("Scan ended. "+str(script_vulns)+" vulnerabiltiies were found while using script '"+nmap_script +
-                        "' in "+target_ip+" at "+str(port)+"/"+protocol+".")
+                        "' in "+target+" at "+str(port)+"/"+protocol+".")
 
     return (scan_results_dict, total_valid_scripts, total_vulns)
 
 
-def get_system_info(target_ip, specific_ports=None, timeout=30):
+def get_system_info(target, specific_ports=None, timeout=30):
 
-    logger.info("Scanning " + target_ip + " for system information ...")
+    logger.info("Scanning " + target + " for system information ...")
 
     sysinfo_dict = {}
     scanned_ports = {}
@@ -189,10 +189,10 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
         logger.warning(
             "Input timeout for system information scanning is not configured or in an invalid format. Defaulting to \"600\".")
 
-    ipv = siaas_aux.is_ipv4_or_ipv6(target_ip)
+    ipv = siaas_aux.is_ipv4_or_ipv6(target)
     if ipv == None:
         logger.error("Can't get system information for " +
-                     target_ip+" as it is not from a valid IP protocol.")
+                     target+" as it is not from a valid IP protocol.")
         return (sysinfo_dict, scanned_ports)
 
     nmap = nmap3.Nmap()
@@ -203,33 +203,33 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
 
         if len(specific_ports or '') == 0:
             results = nmap.nmap_os_detection(
-                target_ip, args="-%s -sV -Pn --host-timeout %s" % (ipv, timeout))
+                target, args="-%s -sV -Pn --host-timeout %s" % (ipv, timeout))
         else:
-            logger.debug("Restricting port scan in "+target_ip +
+            logger.debug("Restricting port scan in "+target +
                          " to the configured port interval: "+specific_ports)
             results = nmap.nmap_os_detection(
-                target_ip, args="-%s -sV -Pn -p%s --host-timeout %s" % (ipv, specific_ports, timeout))
+                target, args="-%s -sV -Pn -p%s --host-timeout %s" % (ipv, specific_ports, timeout))
         logger.debug("Nmap raw output for system info scan in " +
-                     target_ip+":\n"+pprint.pformat(results))
+                     target+":\n"+pprint.pformat(results))
 
         for t in results["task_results"]:
             if "extrainfo" in t.keys():
                 if "timed out" in t["extrainfo"]:
                     raise TimeoutError(str(timeout))
 
-        host_results = results[target_ip]
+        host_results = results[target]
 
     except TimeoutError as e:
         logger.warning("Nmap timed out while grabbing system info for " +
-                       target_ip+": "+str(e)+" sec. Maybe it needs to be increased?")
+                       target+": "+str(e)+" sec. Maybe it needs to be increased?")
         return (sysinfo_dict, scanned_ports)
     except LookupError as e:
         logger.warning("Nmap returned an empty reply while grabbing system info for " +
-                       target_ip+". Possible timeout, or maybe the host is down?")
+                       target+". Possible timeout, or maybe the host is down?")
         return (sysinfo_dict, scanned_ports)
     except Exception as e:
         logger.error(
-            "Nmap returned an unknown error while grabbing system info for "+target_ip+": "+str(e))
+            "Nmap returned an unknown error while grabbing system info for "+target+": "+str(e))
         return (sysinfo_dict, scanned_ports)
 
     try:
@@ -282,16 +282,16 @@ def get_system_info(target_ip, specific_ports=None, timeout=30):
                 scanned_ports[p["portid"]+"/" +
                                p["protocol"]]["product"] = prod_name
 
-        logger.info("Service in "+target_ip+" at " +
+        logger.info("Service in "+target+" at " +
                     p["portid"]+"/"+p["protocol"]+": "+name)
 
     if len(host_results["ports"]) == 0:
-        logger.info("Found no ports/services reachable for host "+target_ip+".")
+        logger.info("Found no ports/services reachable for host "+target+".")
 
     return (sysinfo_dict, scanned_ports)
 
 
-def main(target_ip="127.0.0.1"):
+def main(target="127.0.0.1"):
 
     timeout = 15
     target_info = {}
@@ -301,7 +301,7 @@ def main(target_ip="127.0.0.1"):
 
     # Grab system information and detected ports
     system_info_output = get_system_info(
-        target_ip, specific_ports=siaas_aux.get_config_from_configs_db(config_name="target_specific_ports"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_sysinfo_timeout_sec"))
+        target, specific_ports=siaas_aux.get_config_from_configs_db(config_name="target_specific_ports"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_sysinfo_timeout_sec"))
     target_info["system_info"] = system_info_output[0]
     scanned_ports = system_info_output[1]
 
@@ -315,20 +315,20 @@ def main(target_ip="127.0.0.1"):
         target_info["scanned_ports"][port] = {}
         target_info["scanned_ports"][port]["scan_results"] = {}
         target_info["scanned_ports"][port] = scanned_ports[port]
-        target_info["scanned_ports"][port]["scan_results"], scripts_port, n_vulns_port = scan_per_port(target_ip, port.split("/")[0], port.split(
+        target_info["scanned_ports"][port]["scan_results"], scripts_port, n_vulns_port = scan_per_port(target, port.split("/")[0], port.split(
             "/")[1], nmap_scripts_string=siaas_aux.get_config_from_configs_db(config_name="nmap_scripts"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_portscan_timeout_sec"))
         total_valid_scripts.update(scripts_port)
         total_vulns += n_vulns_port
 
     logger.info("Port scanning ended for %s: %s vulnerabilities were detected, across %s ports and using %s valid Nmap scripts. You might have duplicated outputs if you use multiple scripts." % (
-        target_ip, total_vulns, total_ports, len(total_valid_scripts)))
+        target, total_vulns, total_ports, len(total_valid_scripts)))
     target_info["metadata"] = {}
     target_info["metadata"]["num_scanned_ports"] = total_ports
     target_info["metadata"]["num_valid_scripts"] = len(total_valid_scripts)
     target_info["metadata"]["total_num_vulnerabilities"] = total_vulns
     target_info["last_check"] = siaas_aux.get_now_utc_str()
 
-    return (target_ip, target_info)
+    return (target, target_info)
 
 
 def loop():
@@ -342,6 +342,7 @@ def loop():
 
         portscanner_dict = {}
         scan_results_all = {}
+        all_ips_and_domains_to_scan = []
 
         logger.debug("Loop running ...")
 
@@ -353,18 +354,32 @@ def loop():
             time.sleep(60)
             continue
 
-        hosts = siaas_aux.read_from_local_file(
+        neighborhood = siaas_aux.read_from_local_file(
             os.path.join(sys.path[0], 'var/neighborhood.db'))
-        if len(hosts or '') == 0:
+        if len(neighborhood or '') == 0:
             logger.warning(
                 "Couldn't read neighborhood data. Either it's still being populated, or no neighbors exist at the moment. Trying again ...")
             time.sleep(60)
             continue
 
+        # Not only the IPs must be scanned, but the FQDNs manually added and the discovered domain names as well
+        for neighbor in neighborhood.keys():
+            all_ips_and_domains_to_scan.append(neighbor)
+            if "domain_name" in neighborhood[neighbor].keys():
+                if len(neighborhood[neighbor]["domain_name"] or '')  > 0:
+                    if neighborhood[neighbor]["domain_name"] not in all_ips_and_domains_to_scan:
+                        all_ips_and_domains_to_scan.append(neighborhood[neighbor]["domain_name"])
+            if "manual_entry_addresses" in neighborhood[neighbor].keys():
+                for manual_entry in neighborhood[neighbor]["manual_entry_addresses"]:
+                    if len(manual_entry or '')  > 0:
+                        if manual_entry not in all_ips_and_domains_to_scan:
+                            all_ips_and_domains_to_scan.append(manual_entry)
+
+        # Creating one thread per host and launch the port scanner
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
-            for ip in hosts.keys():
-                futures.append(executor.submit(main, target_ip=ip))
+            for ip_or_domain in all_ips_and_domains_to_scan:
+                futures.append(executor.submit(main, target=ip_or_domain))
             for future in concurrent.futures.as_completed(futures):
                 scan_results_all[future.result()[0]] = (future.result()[1])
 
@@ -404,7 +419,7 @@ if __name__ == "__main__":
         target_host = "127.0.0.1"
 
     try:
-        target_ip = socket.getaddrinfo(target_host, None)[0][4][0]
+        target = socket.getaddrinfo(target_host, None)[0][4][0]
     except:
         print("Host "+target_host +
               " is invalid. It can't be pinged and neither can it be resolved. Exiting!")
@@ -412,6 +427,6 @@ if __name__ == "__main__":
 
     print('\n')
 
-    main(target_ip)
+    main(target)
 
     print('\nAll done. Bye!\n')
