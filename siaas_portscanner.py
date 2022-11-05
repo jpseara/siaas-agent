@@ -60,30 +60,30 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
                     # total_vulns+=1 # not counting raw lines as vulnerabilities as there's lots of trash in there (fingerprints, banners, etc)
                 except:
                     logger.warning(
-                        "Couldn't append line to list of vulnerabilities: "+str(clean_line))
+                        "Couldn't append line to list of results: "+str(clean_line))
         out_dict["raw_lines"] = out_list
 
     return (out_dict, total_vulns)
 
 
-def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string=None, timeout=300):
+def scan_per_port(target_ip, port, protocol, nmap_scripts_string=None, timeout=300):
 
-    logger.info("Scanning vulnerabilities for " + target_ip +
+    logger.info("Scanning " + target_ip +
                 " at " + str(port) + "/" + protocol+" ...")
 
-    vuln_dict = {}
+    scan_results_dict = {}
     total_valid_scripts = set()
     total_vulns = 0
 
     if type(nmap_scripts_string) is not str:
         logger.warning(
-            "Nmap scripts string is undefined or invalid. Bypassing vulnerability scan.")
-        return (vuln_dict, total_valid_scripts, total_vulns)
+            "Nmap scripts string is undefined or invalid. Bypassing scan.")
+        return (scan_results_dict, total_valid_scripts, total_vulns)
 
     if len(nmap_scripts_string or '') == 0:
         logger.warning(
-            "Nmap scripts string is undefined or invalid. Bypassing vulnerability scan.")
-        return (vuln_dict, total_valid_scripts, total_vulns)
+            "Nmap scripts string is undefined or invalid. Bypassing scan.")
+        return (scan_results_dict, total_valid_scripts, total_vulns)
 
     try:
         timeout = int(timeout)
@@ -94,9 +94,9 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string=None
 
     ipv = siaas_aux.is_ipv4_or_ipv6(target_ip)
     if ipv == None:
-        logger.error("Can't scan vulnerabilities for "+target_ip+" at " +
+        logger.error("Can't scan "+target_ip+" at " +
                      str(port)+"/" + protocol+"+ as it is not from a valid IP protocol.")
-        return (vuln_dict, total_valid_scripts, total_vulns)
+        return (scan_results_dict, total_valid_scripts, total_vulns)
 
     nmap_scripts_list = nmap_scripts_string.split(",")
     for nmap_script_raw in nmap_scripts_list:
@@ -121,6 +121,8 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string=None
 
         try:
 
+            scan_results_dict[nmap_script] = {}
+
             #results = nmap.nmap_version_detection(target_ip, args="-%s -p%s:%s --script %s -Pn --script-args mincvss+5.0 --host-timeout %s" % (ipv, prot_flag, port, nmap_script, timeout))
             results = nmap.nmap_version_detection(
                 target_ip, args="-%s -p%s:%s --script %s -Pn --host-timeout %s" % (ipv, prot_flag, port, nmap_script, timeout))
@@ -132,7 +134,6 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string=None
                     if "timed out".casefold() in t["extrainfo"].casefold():
                         raise TimeoutError(str(timeout))
 
-            vuln_dict[nmap_script] = {}
             host_results = results[target_ip]
             script_vulns = 0
 
@@ -143,35 +144,35 @@ def vulnerabilities_per_port(target_ip, port, protocol, nmap_scripts_string=None
                 sub_script = "main"
                 if "name" in d.keys():
                     sub_script = d["name"]
-                vuln_dict[nmap_script][sub_script], n_vulns = parse_raw_output_from_nmap_scan(
+                scan_results_dict[nmap_script][sub_script], n_vulns = parse_raw_output_from_nmap_scan(
                     sub_script, raw)
                 total_vulns += n_vulns
                 script_vulns += n_vulns
-                # vuln_dict[nmap_script]["raw"]=raw
+                # scan_results_dict[nmap_script]["raw"]=raw
 
             total_valid_scripts.add(nmap_script)
 
         except TimeoutError as e:
-            logger.warning("Nmap timed out while scanning vulnerabilities using script '"+nmap_script+"' for " +
+            logger.warning("Nmap timed out while scanning using script '"+nmap_script+"' for " +
                            target_ip+" at "+str(port)+"/"+protocol+": "+str(e)+" sec. Maybe it needs to be increased?")
-            return (vuln_dict, total_valid_scripts, total_vulns)
+            continue
         except LookupError as e:
-            logger.warning("Nmap returned an empty reply while scanning vulnerabilities using script '"+nmap_script +
+            logger.warning("Nmap returned an empty reply while scanning using script '"+nmap_script +
                            "' in "+target_ip+" at "+str(port)+"/"+protocol+". Possible timeout, or maybe the host or port are down?")
-            return (vuln_dict, total_valid_scripts, total_vulns)
+            continue
         except Exception as e:
-            logger.error("Nmap threw an invalid reply while scanning vulnerabilities using script '" +
+            logger.error("Nmap threw an invalid reply while scanning using script '" +
                          nmap_script+"' in "+target_ip+" at "+str(port)+"/"+protocol+": "+str(e))
-            return (vuln_dict, total_valid_scripts, total_vulns)
+            continue
 
         if script_vulns == 0:
-            logger.info("No vulnerabilities found using script '" +
-                        nmap_script+"' for "+target_ip+" at "+str(port)+"/"+protocol)
+            logger.info("Scan ended using script '" +
+                        nmap_script+"' for "+target_ip+" at "+str(port)+"/"+protocol+".")
         else:
-            logger.info(str(script_vulns)+" VULNERABILITIES WERE FOUND! While using script '"+nmap_script +
+            logger.info("Scan ended. "+str(script_vulns)+" vulnerabiltiies were found while using script '"+nmap_script +
                         "' in "+target_ip+" at "+str(port)+"/"+protocol+".")
 
-    return (vuln_dict, total_valid_scripts, total_vulns)
+    return (scan_results_dict, total_valid_scripts, total_vulns)
 
 
 def get_system_info(target_ip, specific_ports=None, timeout=30):
@@ -309,12 +310,12 @@ def main(target_ip="127.0.0.1"):
     total_valid_scripts = set()
     total_vulns = 0
 
-    # Scan vulnerabilities for each detected port
+    # Scanning each detected port
     for port in scanned_ports.keys():
         target_info["scanned_ports"][port] = {}
-        target_info["scanned_ports"][port]["vulnerabilities"] = {}
+        target_info["scanned_ports"][port]["scan_results"] = {}
         target_info["scanned_ports"][port] = scanned_ports[port]
-        target_info["scanned_ports"][port]["vulnerabilities"], scripts_port, n_vulns_port = vulnerabilities_per_port(target_ip, port.split("/")[0], port.split(
+        target_info["scanned_ports"][port]["scan_results"], scripts_port, n_vulns_port = scan_per_port(target_ip, port.split("/")[0], port.split(
             "/")[1], nmap_scripts_string=siaas_aux.get_config_from_configs_db(config_name="nmap_scripts"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_portscan_timeout_sec"))
         total_valid_scripts.update(scripts_port)
         total_vulns += n_vulns_port
@@ -397,7 +398,7 @@ if __name__ == "__main__":
         print("You need to be root to run this script!", file=sys.stderr)
         sys.exit(1)
 
-    target_host = input('\nEnter target to scan for vulnerable open ports: ')
+    target_host = input('\nEnter target to port scan: ')
 
     if target_host == "":
         target_host = "127.0.0.1"
