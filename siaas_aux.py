@@ -432,6 +432,11 @@ def get_all_ips_for_name(host):
     """
     ips = []
 
+    # If it's localhost return right away
+    if str(host) == "localhost":
+        ips.append("127.0.0.1")
+        return ips
+
     # Check if the host is already an IP and return it
     try:
         ipaddress.IPv4Network(host)

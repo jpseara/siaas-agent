@@ -35,8 +35,8 @@ def get_arp_ndp_known_hosts():
         arp_output = cmd.stdout.decode('utf-8')
         if cmd.returncode != 0:
             raise OSError(cmd.stderr.decode('utf-8'))
-        logger.debug("Raw 'ip neigh show' command output: " +
-                     str(arp_output.splitlines()))
+        logger.debug("Raw 'ip neigh show' command output:\n" +
+                     str(arp_output))
     except Exception as e:
         logger.error("'ip' command failed: "+str(e))
         return ip_mac_host
@@ -90,14 +90,14 @@ def get_arp_ndp_known_hosts():
 
         dns_entry = ip
         ip_mac_host[ip] = {}
-        ip_mac_host[ip]["mac_address"] = mac
         if len(dns_name) > 0:
             ip_mac_host[ip]["domain_name"] = dns_name
             dns_entry = ip+" ("+dns_name+")"
         ip_mac_host[ip]["discovery_type"] = "arp_ndp"
         ip_mac_host[ip]["ping_status"] = status
         ip_mac_host[ip]["ip_version"] = ipv
-        ip_mac_host[ip]["interface"] = interface
+        ip_mac_host[ip]["mac_address"] = mac
+        ip_mac_host[ip]["seen_on_interface"] = interface
 
         ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 
@@ -153,14 +153,14 @@ def scan_and_print_neighbors(net, interface, timeout=5):
 
         dns_entry = ip
         ip_mac_host[ip] = {}
-        ip_mac_host[ip]["mac_address"] = r.src
         if len(dns_name) > 0:
             ip_mac_host[ip]["domain_name"] = dns_name
             dns_entry = ip+" ("+dns_name+")"
         ip_mac_host[ip]["discovery_type"] = "auto"
         ip_mac_host[ip]["ping_status"] = status
         ip_mac_host[ip]["ip_version"] = ipv
-        ip_mac_host[ip]["interface"] = interface
+        ip_mac_host[ip]["mac_address"] = r.src
+        ip_mac_host[ip]["seen_on_interface"] = interface
 
         ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 
@@ -249,6 +249,8 @@ def add_manual_hosts(manual_hosts_string=""):
                 ip_mac_host[ip]["discovery_type"] = "manual"
                 ip_mac_host[ip]["ping_status"] = status
                 ip_mac_host[ip]["ip_version"] = ipv
+                ip_mac_host[ip]["mac_address"] = "N/A"
+                ip_mac_host[ip]["seen_on_interface"] = "N/A"
 
                 ip_mac_host[ip]["last_check"] = siaas_aux.get_now_utc_str()
 
@@ -264,21 +266,40 @@ def add_manual_hosts(manual_hosts_string=""):
 
 def main(interface_to_scan=None, ignore_neighborhood=False, disable_wifi_auto_discovery=False):
 
-    auto_hosts = {}
-    manual_hosts = {}
     arp_ndp_hosts = {}
+    auto_hosts = {}
+    neigh_hosts = {}
+    manual_hosts = {}
     all_hosts = {}
     auto_scanned_interfaces = 0
 
+    # Grab manually configured hosts
+    manual_hosts = add_manual_hosts(manual_hosts_string=
+        siaas_aux.get_config_from_configs_db(config_name="manual_hosts"))
+
+    # Grab known hosts by ARP/NDP
+    arp_ndp_hosts = get_arp_ndp_known_hosts()
+
+    # We probably have new information from the manually configured hosts, in our local ARP/NDP tables, in case they're local (we just tried to ping them). Let's fill it up 
+    for ip in manual_hosts.keys():
+       if ip in arp_ndp_hosts.keys():
+          if "mac_address" in arp_ndp_hosts[ip].keys():
+              manual_hosts[ip]["mac_address"] = arp_ndp_hosts[ip]["mac_address"]
+          else:
+              manual_hosts[ip].pop("mac_address", None)
+          if "seen_on_interface" in arp_ndp_hosts[ip].keys():
+              manual_hosts[ip]["seen_on_interface"] = arp_ndp_hosts[ip]["seen_on_interface"]
+          else:
+              manual_hosts[ip].pop("seen_on_interface", None)
+       else:
+          manual_hosts[ip].pop("mac_address", None)
+          manual_hosts[ip].pop("seen_on_interface", None)
+
     if ignore_neighborhood:
         logger.warning(
-            "Bypassing discovery of hosts in the neighborhood as per configuration! Only considering manual configured hosts.")
+            "Bypassing automatic discovery of hosts in the neighborhood as per configuration! Only manually configured hosts will be added to neighborhood DB.")
 
     else:
-
-        # Grab known hosts by ARP/NDP
-        arp_ndp_hosts = get_arp_ndp_known_hosts()
-
         # Grab automatically discovered hosts
         logger.info("Starting automatic neighborhood discovery ...")
         for network, netmask, _, interface, address, _ in scapy.config.conf.route.routes:
@@ -314,13 +335,11 @@ def main(interface_to_scan=None, ignore_neighborhood=False, disable_wifi_auto_di
             logger.warning(
                 "Automatic neighborhood discovery found no interfaces with a valid network configuration to work on.")
 
-    # Grab manual configured hosts
-    manual_hosts = add_manual_hosts(
-        siaas_aux.get_config_from_configs_db(config_name="manual_hosts"))
+        neigh_hosts = dict(list(arp_ndp_hosts.items()) + list(auto_hosts.items()))
 
-    # Merge all hosts (give priority to automatically found hosts in the neighborhood, as they have more info)
-    all_hosts = dict(list(manual_hosts.items()) +
-                     list(auto_hosts.items())+list(arp_ndp_hosts.items()))
+    # Merge all hosts (give priority to manually defined hosts)
+    all_hosts = dict(list(neigh_hosts.items()) +
+                     list(manual_hosts.items()))
 
     return siaas_aux.sort_ip_dict(all_hosts)
 
