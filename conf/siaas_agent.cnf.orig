@@ -25,4 +25,4 @@ nmap_sysinfo_timeout_sec = 600
 platform_loop_interval_sec = 60
 portscanner_loop_interval_sec = 60
 #silent_mode = true # the agent will download and update its configs from the server, but will not upload any data
-#target_specific_ports = 22,80,8080-8083 # when this setting is commented, only the open ports of each host will be scanned
+#target_specific_ports = 22,80,8080-8083 # when this setting is commented, all the open ports of each host will be scanned

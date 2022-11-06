@@ -430,18 +430,18 @@ def get_all_ips_for_name(host):
     If the input is already an IP address, returns it
     Returns an empty set if no IPs are found 
     """
-    ips = set()
+    ips = []
 
     # Check if the host is already an IP and return it
     try:
         ipaddress.IPv4Network(host)
-        ips.add(host)
+        ips.append(host)
         return ips
     except:
         pass
     try:
         ipaddress.IPv6Network(host)
-        ips.add(host)
+        ips.append(host)
         return ips
     except:
         pass
@@ -450,7 +450,8 @@ def get_all_ips_for_name(host):
     try:
         result = dns.resolver.resolve(host, "A")
         for ipval in result:
-            ips.add(ipval.to_text())
+            if ipval.to_text() not in ips:
+               ips.append(ipval.to_text())
     except:
         pass
 
@@ -458,11 +459,12 @@ def get_all_ips_for_name(host):
     try:
         result6 = dns.resolver.resolve(host, "AAAA")
         for ipval in result6:
-            ips.add(ipval.to_text())
+            if ipval.to_text() not in ips:
+               ips.append(ipval.to_text())
     except:
         pass
 
-    return ips
+    return sorted(ips, key=ip_sorter)
 
 
 def long2net(arg):

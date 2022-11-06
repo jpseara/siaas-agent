@@ -194,7 +194,6 @@ def add_manual_hosts(manual_hosts_string=""):
 
     for host_raw in manual_hosts_list:
 
-        all_ips = {}
         host_uncommented = host_raw.split('#')[0]
         host = host_uncommented.split('\t')[0].split('\n')[0].rstrip().lstrip()
 
