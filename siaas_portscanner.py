@@ -298,7 +298,7 @@ def get_system_info(target, specific_ports=None, timeout=30):
             if "version" in p["service"].keys():
                 prod_name += " "+p["service"]["version"]
             if "extrainfo" in p["service"].keys():
-                prod_name += " ("+p["service"]["extrainfo"]+")"
+                prod_name += " ("+p["service"]["extrainfo"].lstrip('(').rstrip(')')+")"
             if len(p["service"]["product"]) > 0:
                 scanned_ports[p["portid"]+"/" +
                                p["protocol"]]["product"] = prod_name
