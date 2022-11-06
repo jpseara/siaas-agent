@@ -137,13 +137,13 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
                     if "timed out".casefold() in t["extrainfo"].casefold():
                         raise TimeoutError(str(timeout))
 
-            got_a_valid_ip = False
+            scanned_ip = None
             for k in results.keys():
                 if siaas_aux.is_ipv4_or_ipv6(k):
                     host_results = results[k]
-                    got_a_valid_ip = True
+                    scanned_ip = k
                     break
-            if not got_a_valid_ip:
+            if not scanned_ip:
                 raise Exception("Could not find a valid IP key in the results.")
 
             script_vulns = 0
@@ -175,6 +175,8 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
             logger.error("Nmap threw an invalid reply while scanning using script '" +
                          nmap_script+"' in "+target+" at "+str(port)+"/"+protocol+": "+str(e))
             continue
+        
+        scan_results_dict[nmap_script]["scanned_ip"] = scanned_ip
 
         if script_vulns == 0:
             logger.info("Scan ended using script '" +
@@ -231,13 +233,13 @@ def get_system_info(target, specific_ports=None, timeout=30):
                 if "timed out" in t["extrainfo"]:
                     raise TimeoutError(str(timeout))
 
-        got_a_valid_ip = False
+        scanned_ip = None
         for k in results.keys():
             if siaas_aux.is_ipv4_or_ipv6(k):
                 host_results = results[k]
-                got_a_valid_ip = True
+                scanned_ip = k
                 break
-        if not got_a_valid_ip:
+        if not scanned_ip:
             raise Exception("Could not find a valid IP key in the results.")
 
     except TimeoutError as e:
@@ -272,6 +274,8 @@ def get_system_info(target, specific_ports=None, timeout=30):
         sysinfo_dict["os_type"] = host_results["osmatch"][0]["osclass"]["type"]
     except:
         pass
+    
+    sysinfo_dict["scanned_ip"] = scanned_ip
 
     for p in host_results["ports"]:
 
