@@ -10,10 +10,9 @@ app.config['JSON_SORT_KEYS'] = False
 
 
 @app.route('/', strict_slashes=False)
-@app.route('/index', strict_slashes=False)
 def index():
     output = {
-        'name': 'Sistema Inteligente para Automação de Auditorias de Segurança',
+        'name': 'Intelligent System for Automation of Security Audits (SIAAS)',
         'module': 'Agent',
         'author': 'João Pedro Seara',
         'supervisor': 'Carlos Serrão'
