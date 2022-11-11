@@ -221,7 +221,7 @@ def get_system_info(target, specific_ports=None, timeout=30):
             results = nmap.nmap_os_detection(
                 target, args="-%s -sV -Pn --host-timeout %s" % (ipv, timeout))
         else:
-            logger.debug("Restricting port scan in "+target +
+            logger.debug("Restricting system info scan in "+target +
                          " to the configured port interval: "+specific_ports)
             results = nmap.nmap_os_detection(
                 target, args="-%s -sV -Pn -p%s --host-timeout %s" % (ipv, specific_ports, timeout))
@@ -248,12 +248,37 @@ def get_system_info(target, specific_ports=None, timeout=30):
         return (sysinfo_dict, scanned_ports)
     except LookupError as e:
         logger.warning("Nmap returned an empty reply while grabbing system info for " +
-                       target+". Possible timeout, or maybe the host is down?")
+                       target+". Possible timeout, or maybe the port is down?")
         return (sysinfo_dict, scanned_ports)
     except Exception as e:
         logger.error(
             "Nmap returned an unknown error while grabbing system info for "+target+": "+str(e))
         return (sysinfo_dict, scanned_ports)
+
+    # UDP ports
+    try:
+        if len(specific_ports or '') == 0:
+            results_u = nmap.nmap_os_detection(
+                scanned_ip, args="-%s -sU --top-ports 10 -Pn --host-timeout %s" % (ipv, timeout)) # UDP is very slow when scanning ports, so let's just scan the 10 most famous ones
+        else:
+            logger.debug("Restricting UDP port scan in "+target +
+                         " to the configured port interval: "+specific_ports)
+            results_u = nmap.nmap_os_detection(
+                scanned_ip, args="-%s -sU -Pn -p%s --host-timeout %s" % (ipv, specific_ports, timeout))
+        logger.debug("Nmap raw output for UDP system info scan in " +
+                     scanned_ip+":\n"+pprint.pformat(results_u))
+
+        for t in results_u["task_results"]:
+            if "extrainfo" in t.keys():
+                if "timed out" in t["extrainfo"]:
+                    raise TimeoutError(str(timeout))
+        
+        host_results["ports"] = host_results["ports"] + results_u[scanned_ip]["ports"]
+         
+    except Exception as e:
+        logger.error(
+            "Nmap returned an error while grabbing UDP system info for "+target+": "+str(e)+". Ignoring UDP ports.")
+        pass
 
     try:
         sysinfo_dict["hostname"] = host_results["hostname"][0]["name"]
@@ -276,8 +301,13 @@ def get_system_info(target, specific_ports=None, timeout=30):
         pass
     
     sysinfo_dict["scanned_ip"] = scanned_ip
+    
+    sorted_ports = sorted(host_results["ports"], key=lambda x: int(x["portid"]))
+    for p in sorted_ports:
 
-    for p in host_results["ports"]:
+        # If we're scanning all ports, skip closed ones
+        if len(specific_ports or '') == 0 and p["state"] == "closed":
+            continue
 
         name = ""
         prod_name = ""
@@ -309,7 +339,7 @@ def get_system_info(target, specific_ports=None, timeout=30):
 
         logger.info("Service in "+target+" at " +
                     p["portid"]+"/"+p["protocol"]+": "+name)
-
+    
     if len(host_results["ports"]) == 0:
         logger.info("Found no ports/services reachable for host "+target+".")
 
