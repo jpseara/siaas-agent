@@ -258,12 +258,12 @@ def get_system_info(target, specific_ports=None, timeout=30):
     # UDP ports
     try:
         if len(specific_ports or '') == 0:
-            results_u = nmap.nmap_os_detection(
+            results_u = nmap.scan_top_ports(
                 scanned_ip, args="-%s -sU --top-ports 10 -Pn --host-timeout %s" % (ipv, timeout)) # UDP is very slow when scanning ports, so let's just scan the 10 most famous ones
         else:
             logger.debug("Restricting UDP port scan in "+target +
                          " to the configured port interval: "+specific_ports)
-            results_u = nmap.nmap_os_detection(
+            results_u = nmap.scan_top_ports(
                 scanned_ip, args="-%s -sU -Pn -p%s --host-timeout %s" % (ipv, specific_ports, timeout))
         logger.debug("Nmap raw output for UDP system info scan in " +
                      scanned_ip+":\n"+pprint.pformat(results_u))
