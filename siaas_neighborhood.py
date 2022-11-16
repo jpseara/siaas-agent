@@ -416,6 +416,6 @@ if __name__ == "__main__":
 
     print('\n')
 
-    main(interface_to_scan=interface)
+    main(interface_to_scan=interface, disable_wifi_auto_discovery=True)
 
     print('\nAll done. Bye!\n')
