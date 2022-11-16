@@ -237,7 +237,7 @@ def read_from_local_file(file_to_read):
 def get_or_create_unique_system_id():
     """
     Reads the local UID file and returns it
-    If this file does not exist or has no data, continues to generate an UID. If it has an invalid UID, it will return a nil UID
+    If this file does not exist or has no data, tries to generate an UID. If it has an invalid UID, it will return a nil UID
     Proceeds to try to generate an UID from local system data
     If this fails, generates a random one
     If all fails, returns a nil UID
@@ -262,11 +262,18 @@ def get_or_create_unique_system_id():
         "Existing UID not found. Creating a new one from system info ...")
     new_uid = ""
     try:
-        with open("/sys/class/dmi/id/board_serial", 'r') as file:
+        with open("/sys/firmware/devicetree/base/serial-number", 'r') as file: # Raspberry Pi serial
             content = file.read()
             new_uid = content.split('\n')[0]
     except:
         pass
+    if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
+        try:
+            with open("/sys/class/dmi/id/board_serial", 'r') as file:
+                content = file.read()
+                new_uid = content.split('\n')[0]
+        except:
+            pass
     if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
         try:
             with open("/sys/class/dmi/id/product_uuid", 'r') as file:
@@ -274,18 +281,18 @@ def get_or_create_unique_system_id():
                 new_uid = content.split('\n')[0]
         except:
             pass
-    if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
-        try:
-            with open("/var/lib/dbus/machine-id", 'r') as file:
-                content = file.read()
-                new_uid = content.split('\n')[0]
-        except:
-            pass
+    #if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
+    #    try:
+    #        with open("/var/lib/dbus/machine-id", 'r') as file:
+    #            content = file.read()
+    #            new_uid = content.split('\n')[0]
+    #    except:
+    #        pass
     if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
         logger.warning(
-            "Couldn't create a new UID from the system info. Creating a new one on-the-fly ...")
+            "Couldn't create a new UID from the system info. Will create a new randomized UUID for this session only!")
         try:
-            new_uid = str(uuid.UUID(int=uuid.getnode()))
+            new_uid = "temp-"+str(uuid.UUID(int=uuid.getnode()))
         except:
             logger.error(
                 "There was an error while generating a new UID. Returning a nil UID.")
@@ -297,7 +304,7 @@ def get_or_create_unique_system_id():
             logger.debug("Wrote new UID to a local file: "+new_uid)
     except Exception as e:
         logger.error("There was an error while writing to the local UID file: " +
-                     str(e)+". Returning a nil UID.")
+                     str(e) + ". Returning a nil UID.")
         return "00000000-0000-0000-0000-000000000000"
     return new_uid.lower()
 
