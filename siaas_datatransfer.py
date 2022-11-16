@@ -24,7 +24,7 @@ def download_agent_configs(api_base_uri, ignore_ssl=False, ca_bundle=None, api_u
     except:
         downloaded_configs = {}
  
-    logger.info("Agent config download process from the server finished.")
+    logger.info("Agent config download from the server finished.")
 
     siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs)
 
@@ -45,7 +45,7 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
     #        "No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
     #    return last_uploaded_dict
 
-    logger.info("Agent data upload process to the server finished.")
+    logger.info("Agent data upload to the server finished.")
 
     if not siaas_aux.post_request_to_server(api_base_uri+"/siaas-server/agents/data/"+siaas_uid, dict(current_dict), ignore_ssl=ignore_ssl, ca_bundle=ca_bundle, api_user=api_user, api_pwd=api_pwd):
         return last_uploaded_dict
