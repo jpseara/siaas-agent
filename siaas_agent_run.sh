@@ -8,6 +8,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 cd ${SCRIPT_DIR}
+rm -f ./var/uid
 
 if ! source ./venv/bin/activate 2> /dev/null
 then
