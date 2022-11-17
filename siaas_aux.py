@@ -264,7 +264,7 @@ def get_or_create_unique_system_id():
     try:
         with open("/sys/firmware/devicetree/base/serial-number", 'r') as file: # Raspberry Pi serial
             content = file.read()
-            new_uid = content.split('\n')[0]
+            new_uid = str(content.split('\n')[0].lstrip().rstrip().lstrip('\x00').rstrip('\x00'))
     except:
         pass
     if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
