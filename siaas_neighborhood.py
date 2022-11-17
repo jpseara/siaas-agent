@@ -153,7 +153,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
 
         dns_entry = ip
         ip_mac_host[ip] = {}
-        ip_mac_host[ip]["discovery_type"] = "arp_ndp"
+        ip_mac_host[ip]["discovery_type"] = "auto"
         if len(dns_name) > 0:
             ip_mac_host[ip]["domain_name"] = dns_name
             dns_entry = ip+" ("+dns_name+")"
