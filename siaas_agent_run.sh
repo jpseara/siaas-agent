@@ -16,7 +16,7 @@ then
 	source ./venv/bin/activate
 	pip3 install wheel==0.37.1
 	pip3 install -r ./requirements.txt
-	pip3 install -e git+https://github.com/jpseara/python3-nmap.git#egg=python3-nmap # forked nmap version
+	#pip3 install -e git+https://github.com/jpseara/python3-nmap.git#egg=python3-nmap # forked nmap version
 fi
 
 ./siaas_agent_refresh_nmap_scripts_repos.sh
