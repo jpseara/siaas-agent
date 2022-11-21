@@ -101,7 +101,7 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
                      str(port)+"/" + protocol+"+ as it is not from a valid IP protocol.")
         return (scan_results_dict, total_valid_scripts, total_vulns)
 
-    nmap_scripts_list = sorted(nmap_scripts_string.split(','), key=lambda x: x[0].casefold() if len(x or "")>0  else "")
+    nmap_scripts_list = sorted(set(nmap_scripts_string.split(',')), key=lambda x: x[0].casefold() if len(x or "")>0  else "")
     
     for nmap_script_raw in nmap_scripts_list:
 
