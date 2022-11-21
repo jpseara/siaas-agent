@@ -190,7 +190,7 @@ def add_manual_hosts(manual_hosts_string=""):
             "Manual hosts string is undefined or invalid. Not adding any manual host.")
         return ip_mac_host
 
-    manual_hosts_list = manual_hosts_string.split(",")
+    manual_hosts_list = manual_hosts_string.split(',')
 
     for host_raw in manual_hosts_list:
 

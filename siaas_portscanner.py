@@ -101,7 +101,7 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
                      str(port)+"/" + protocol+"+ as it is not from a valid IP protocol.")
         return (scan_results_dict, total_valid_scripts, total_vulns)
 
-    nmap_scripts_list = nmap_scripts_string.split(",")
+    nmap_scripts_list = nmap_scripts_string.split(',')
     for nmap_script_raw in nmap_scripts_list:
 
         nmap_script_uncommented = nmap_script_raw.split('#')[0]
