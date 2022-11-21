@@ -25,8 +25,8 @@ def merge_module_dicts(modules=""):
     Returns False if it fails. 
     """
     merged_dict = {}
-    for module in sorted(set(modules.split(',')), key=lambda x: x[0].casefold() if len(x or "")>0 else None):
-        module = module.lstrip().rstrip().lower()
+    for module in sorted(set(modules.lower().split(','))):
+        module = module.lstrip().rstrip()
         try:
             module_dict = read_from_local_file(
                 os.path.join(sys.path[0], 'var/'+str(module)+'.db'))
