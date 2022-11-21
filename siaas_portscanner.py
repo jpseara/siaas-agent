@@ -354,13 +354,14 @@ def main(target="localhost"):
     target_info["scanned_ports"] = {}
     system_info_output = ({}, {})
 
+    start_time = time.time()
+
     # Grab system information and detected ports
     system_info_output = get_system_info(
         target, specific_ports=siaas_aux.get_config_from_configs_db(config_name="target_specific_ports"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_sysinfo_timeout_sec"))
     target_info["system_info"] = system_info_output[0]
     scanned_ports = system_info_output[1]
 
-    # Report
     total_ports = len(scanned_ports)
     total_valid_scripts = set()
     total_vulns = 0
@@ -375,12 +376,15 @@ def main(target="localhost"):
         total_valid_scripts.update(scripts_port)
         total_vulns += n_vulns_port
 
-    logger.info("Port scanning ended for %s: %s vulnerabilities were detected, across %s ports and using %s valid Nmap scripts. You might have duplicated outputs if you use multiple scripts." % (
-        target, total_vulns, total_ports, len(total_valid_scripts)))
+    elapsed_time_sec = int(time.time() - start_time)
+
+    logger.info("Port scanning ended for %s: %s vulnerabilities were detected, across %s ports and using %s valid Nmap scripts. You might have duplicated outputs if you use multiple scripts. Elapsed time: %s seconds" % (
+        target, total_vulns, total_ports, len(total_valid_scripts), elapsed_time_sec))
     target_info["metadata"] = {}
     target_info["metadata"]["num_scanned_ports"] = total_ports
     target_info["metadata"]["num_valid_scripts"] = len(total_valid_scripts)
     target_info["metadata"]["total_num_vulnerabilities"] = total_vulns
+    target_info["metadata"]["time_taken_sec"] = elapsed_time_sec
     target_info["last_check"] = siaas_aux.get_now_utc_str()
 
     return (target, target_info)
