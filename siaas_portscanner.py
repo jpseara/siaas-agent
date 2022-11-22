@@ -28,10 +28,11 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
         return out_dict
 
     total_vulns = 0
+    total_exploits = 0
 
     if "vulners" in script_name or "vulscan" in script_name:
 
-        logger.debug("Parsing raw data using vulners/vulscan parser ...")
+        logger.debug("Parsing raw data using vulners/vulscan parser for sub-script '"+str(script_name)+"' ...")
 
         current_section = ""
         for line in raw_data.splitlines():
@@ -43,27 +44,31 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
                 else:
                     if current_section != "":
                         total_vulns += 1
-                        out_dict[current_section][clean_line.split(maxsplit=1)[0].lstrip(
-                            "[").rstrip("]")] = clean_line.split(maxsplit=1)[1].split("\t")
+                        vuln_id = clean_line.split(maxsplit=1)[0].lstrip("[").rstrip("]")
+                        content_list = clean_line.split(maxsplit=1)[1].split("\t")
+                        if "exploit" in content_list[-1].lower() or "exploit" in current_section.lower():
+                            total_exploits += 1
+                            content_list.append("siaas_exploit_tag")
+                        out_dict[current_section][vuln_id] = content_list
 
     else:
 
-        logger.debug("Parsing raw nmap data using a generic parser ...")
+        logger.debug("Parsing raw nmap data using a generic parser for sub-script '"+str(script_name)+"' ...")
 
         out_list = []
         for line in raw_data.splitlines():
             if len(line or '') > 0:
                 clean_line = line.lstrip().rstrip()
                 try:
-                    out_list.append(
-                        clean_line.lstrip().rstrip().replace("\t", " | "))
-                    # total_vulns+=1 # not counting raw lines as vulnerabilities as there's lots of trash in there (fingerprints, banners, etc)
+                    formatted_clean_line = clean_line.replace("\t", " | ").lstrip().rstrip()
+                    #total_vulns+=1 # not counting raw lines as vulnerabilities as there's lots of trash in there (fingerprints, banners, etc)
+                    out_dict[current_section][vuln_id] = content_list
                 except:
                     logger.warning(
                         "Couldn't append line to list of results: "+str(clean_line))
         out_dict["raw_lines"] = out_list
 
-    return (out_dict, total_vulns)
+    return (out_dict, total_vulns, total_exploits)
 
 
 def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300):
@@ -74,16 +79,17 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
     scan_results_dict = {}
     total_valid_scripts = set()
     total_vulns = 0
+    total_exploits = 0
 
     if type(nmap_scripts_string) is not str:
         logger.warning(
             "Nmap scripts string is undefined or invalid. Bypassing scan.")
-        return (scan_results_dict, total_valid_scripts, total_vulns)
+        return (scan_results_dict, total_valid_scripts, total_vulns, total_exploits)
 
     if len(nmap_scripts_string or '') == 0:
         logger.warning(
             "Nmap scripts string is undefined or invalid. Bypassing scan.")
-        return (scan_results_dict, total_valid_scripts, total_vulns)
+        return (scan_results_dict, total_valid_scripts, total_vulns, total_exploits)
 
     try:
         timeout = int(timeout)
@@ -99,7 +105,7 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
     if ipv == None:
         logger.error("Can't scan "+target+" at " +
                      str(port)+"/" + protocol+"+ as it is not from a valid IP protocol.")
-        return (scan_results_dict, total_valid_scripts, total_vulns)
+        return (scan_results_dict, total_valid_scripts, total_vulns, total_exploits)
 
     nmap_scripts_list = sorted(set(nmap_scripts_string.split(',')), key=lambda x: x[0].casefold() if len(x or "")>0  else "")
     
@@ -148,6 +154,7 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
                 raise Exception("Could not find a valid IP key in the results.")
 
             script_vulns = 0
+            script_exploits = 0
 
             for d in host_results["ports"][0]["scripts"]:
                 raw = ""
@@ -156,10 +163,12 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
                 sub_script = "main"
                 if "name" in d.keys():
                     sub_script = d["name"]
-                scan_results_dict[nmap_script][sub_script], n_vulns = parse_raw_output_from_nmap_scan(
+                scan_results_dict[nmap_script][sub_script], n_vulns, n_exploits = parse_raw_output_from_nmap_scan(
                     sub_script, raw)
                 total_vulns += n_vulns
+                total_exploits += n_exploits
                 script_vulns += n_vulns
+                script_exploits += n_exploits
                 # scan_results_dict[nmap_script]["raw"]=raw
 
             total_valid_scripts.add(nmap_script)
@@ -183,10 +192,9 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
             logger.info("Scan ended using script '" +
                         nmap_script+"' for "+target+" at "+str(port)+"/"+protocol+".")
         else:
-            logger.info("Scan ended. "+str(script_vulns)+" vulnerabiltiies were found while using script '"+nmap_script +
-                        "' in "+target+" at "+str(port)+"/"+protocol+".")
+            logger.info("Scan ended. "+str(script_vulns)+" vulnerabilities ("+str(script_exploits)+" confirmed exploits) were found while using script '"+nmap_script + "' in "+target+" at "+str(port)+"/"+protocol+".")
 
-    return (scan_results_dict, total_valid_scripts, total_vulns)
+    return (scan_results_dict, total_valid_scripts, total_vulns, total_exploits)
 
 
 def get_system_info(target, specific_ports=None, timeout=30):
@@ -366,25 +374,28 @@ def main(target="localhost"):
     total_ports = len(scanned_ports)
     total_valid_scripts = set()
     total_vulns = 0
+    total_exploits = 0
 
     # Scanning each detected port
     for port in scanned_ports.keys():
         target_info["scanned_ports"][port] = {}
         target_info["scanned_ports"][port]["scan_results"] = {}
         target_info["scanned_ports"][port] = scanned_ports[port]
-        target_info["scanned_ports"][port]["scan_results"], scripts_port, n_vulns_port = scan_per_port(target, port.split("/")[0], port.split(
+        target_info["scanned_ports"][port]["scan_results"], scripts_port, n_vulns_port, n_exploits_port = scan_per_port(target, port.split("/")[0], port.split(
             "/")[1], nmap_scripts_string=siaas_aux.get_config_from_configs_db(config_name="nmap_scripts"), timeout=siaas_aux.get_config_from_configs_db(config_name="nmap_portscan_timeout_sec"))
         total_valid_scripts.update(scripts_port)
         total_vulns += n_vulns_port
+        total_exploits += n_exploits_port
 
     elapsed_time_sec = int(time.time() - start_time)
 
-    logger.info("Port scanning ended for %s: %s vulnerabilities were detected, across %s ports and using %s valid Nmap scripts. You might have duplicated outputs if you use multiple scripts. Elapsed time: %s seconds" % (
-        target, total_vulns, total_ports, len(total_valid_scripts), elapsed_time_sec))
+    logger.info("Port scanning ended for %s: %s vulnerabilities were detected (%s confirmed exploits), across %s ports and using %s valid Nmap scripts. You might have duplicated outputs if you use multiple scripts. Elapsed time: %s seconds" % (
+        target, total_vulns, total_exploits, total_ports, len(total_valid_scripts), elapsed_time_sec))
     target_info["metadata"] = {}
     target_info["metadata"]["num_scanned_ports"] = total_ports
     target_info["metadata"]["num_valid_scripts"] = len(total_valid_scripts)
     target_info["metadata"]["total_num_vulnerabilities"] = total_vulns
+    target_info["metadata"]["total_num_exploits"] = total_exploits
     target_info["metadata"]["time_taken_sec"] = elapsed_time_sec
     target_info["last_check"] = siaas_aux.get_now_utc_str()
 
