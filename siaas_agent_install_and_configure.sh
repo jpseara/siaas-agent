@@ -10,7 +10,7 @@ fi
 cd ${SCRIPT_DIR}
 
 apt-get update
-apt-get install -y python3 python3-pip python3-venv git nmap
+apt-get install -y python3 python3-pip python3-venv git nmap dmidecode
 
 # SERVICE CONFIGURATION
 mkdir -p ssl

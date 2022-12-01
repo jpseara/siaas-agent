@@ -13,6 +13,7 @@ import os
 import json
 import ipaddress
 import logging
+import subprocess
 import pprint
 from datetime import datetime
 
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def main(version="N/A"):
 
-    logger.info("Grabbing hardware information for this platform ...")
+    logger.info("Grabbing all system information for this platform ...")
 
     platform = {}
 
@@ -29,7 +30,22 @@ def main(version="N/A"):
     platform["uid"] = siaas_aux.get_or_create_unique_system_id()
     platform["system_info"] = {}
 
-    # Platform
+    # Hardware
+    try:
+        platform["system_info"]["hardware"] = {}
+        if str(os.uname()[4]).lower().startswith("arm") or str(os.uname()[4]) == "aarch64":
+            platform["system_info"]["hardware"]["product_name"] = subprocess.check_output("cat /sys/firmware/devicetree/base/model", universal_newlines=True, shell=True)
+            platform["system_info"]["hardware"]["serial_number"] = subprocess.check_output("cat /sys/firmware/devicetree/base/serial_number", universal_newlines=True, shell=True)
+        else:
+            platform["system_info"]["hardware"]["manufacturer"] = subprocess.check_output("dmidecode --string system-manufacturer", universal_newlines=True, shell=True).lstrip().rstrip()
+            platform["system_info"]["hardware"]["product_name"] = subprocess.check_output("dmidecode --string system-product-name", universal_newlines=True, shell=True).lstrip().rstrip()
+            platform["system_info"]["hardware"]["version"] = subprocess.check_output("dmidecode --string system-version", universal_newlines=True, shell=True).lstrip().rstrip()
+            platform["system_info"]["hardware"]["serial_number"] = subprocess.check_output("dmidecode --string system-serial-number", universal_newlines=True, shell=True).lstrip().rstrip()
+            platform["system_info"]["hardware"]["bios_version"] = subprocess.check_output("dmidecode --string bios-version", universal_newlines=True, shell=True).lstrip().rstrip().lstrip()
+    except Exception as e:
+        logger.warning("Couldn't get all hardware information: "+str(e))
+
+    # OS and Arch
     try:
         uname = platform_mod.uname()
         platform["system_info"]["system"] = {}
@@ -40,8 +56,8 @@ def main(version="N/A"):
         platform["system_info"]["system"]["arch"] = uname.machine
         platform["system_info"]["system"]["processor"] = cpuinfo.get_cpu_info()[
             'brand_raw']
-    except:
-        logger.warning("Couldn't get platform information. Ignoring.")
+    except Exception as e:
+        logger.warning("Couldn't get all OS and architecture information: "+str(e))
 
     # CPU information
     try:
@@ -54,8 +70,8 @@ def main(version="N/A"):
             logical=True)
         cpu_freq = psutil.cpu_freq()
         platform["system_info"]["cpu"]["current_freq"] = f'{float(str(cpu_freq.current)):.2f}'+" MHz"
-    except:
-        logger.warning("Couldn't get CPU information. Ignoring.")
+    except Exception as e:
+        logger.warning("Couldn't get all CPU information: "+str(e))
 
     # Memory Information
     try:
@@ -79,8 +95,8 @@ def main(version="N/A"):
             swap.used)
         platform["system_info"]["memory"]["swap"]["free"] = siaas_aux.get_size(
             swap.free)
-    except:
-        logger.warning("Couldn't get memory information. Ignoring.")
+    except Exception as e:
+        logger.warning("Couldn't get all memory information: "+str(e))
 
     # IO and disk statistics
     try:
@@ -113,8 +129,8 @@ def main(version="N/A"):
             disk_io.read_bytes)
         platform["system_info"]["io"]["total_written"] = siaas_aux.get_size(
             disk_io.write_bytes)
-    except:
-        logger.warning("Couldn't get IO statistics. Ignoring.")
+    except Exception as e:
+        logger.warning("Couldn't get all IO information and statistics: "+str(e))
 
     # Network and network interface statistics
     try:
@@ -145,9 +161,8 @@ def main(version="N/A"):
             net_io.bytes_recv)
         platform["system_info"]["network"]["total_sent"] = siaas_aux.get_size(
             net_io.bytes_sent)
-    except:
-        logger.warning(
-            "Couldnt get network information and statistics. Ignoring.")
+    except Exception as e:
+        logger.warning("Couldn't get all network information and statistics: "+str(e))
 
     # Boot Time
     try:
@@ -155,8 +170,8 @@ def main(version="N/A"):
         bt = datetime.utcfromtimestamp(
             boot_time_timestamp).strftime('%Y-%m-%dT%H:%M:%SZ')
         platform["system_info"]["last_boot"] = str(bt)
-    except:
-        logger.warning("Couldn't grab boot time information. Ignoring.")
+    except Exception as e:
+        logger.warning("Couldn't grab boot time information: "+str(e))
 
     platform["last_check"] = siaas_aux.get_now_utc_str()
 
