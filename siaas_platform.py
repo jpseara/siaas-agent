@@ -34,8 +34,8 @@ def main(version="N/A"):
     try:
         platform["system_info"]["hardware"] = {}
         if str(os.uname()[4]).lower().startswith("arm") or str(os.uname()[4]) == "aarch64":
-            platform["system_info"]["hardware"]["product_name"] = subprocess.check_output("cat /sys/firmware/devicetree/base/model", universal_newlines=True, shell=True)
-            platform["system_info"]["hardware"]["serial_number"] = subprocess.check_output("cat /sys/firmware/devicetree/base/serial_number", universal_newlines=True, shell=True)
+            platform["system_info"]["hardware"]["product_name"] = subprocess.check_output("cat /sys/firmware/devicetree/base/model", universal_newlines=True, shell=True).lstrip().rstrip().lstrip('\x00').rstrip('\x00')
+            platform["system_info"]["hardware"]["serial_number"] = subprocess.check_output("cat /sys/firmware/devicetree/base/serial_number", universal_newlines=True, shell=True).lstrip().rstrip().lstrip('\x00').rstrip('\x00')
         else:
             platform["system_info"]["hardware"]["manufacturer"] = subprocess.check_output("dmidecode --string system-manufacturer", universal_newlines=True, shell=True).lstrip().rstrip()
             platform["system_info"]["hardware"]["product_name"] = subprocess.check_output("dmidecode --string system-product-name", universal_newlines=True, shell=True).lstrip().rstrip()
