@@ -70,9 +70,11 @@ def main(version="N/A"):
             logical=True)
         cpu_freq = psutil.cpu_freq()
         platform["system_info"]["cpu"]["current_freq"] = f'{float(str(cpu_freq.current)):.2f}'+" MHz"
+        platform["system_info"]["cpu"]["current_freq2"] = f'{float(str(cpu_freq.current))}'+" MHz"
         with open("/sys/class/thermal/thermal_zone0/temp", 'r') as file:
             current_temp = file.readline()
         platform["system_info"]["cpu"]["temperature"] = f'{float(str(current_temp)):.2f}'+" C"
+        platform["system_info"]["cpu"]["temperature2"] = f'{float(str(current_temp))}'+" C"
     except Exception as e:
         logger.warning("Couldn't get all CPU information: "+str(e))
 
