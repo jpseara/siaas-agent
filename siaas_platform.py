@@ -66,7 +66,7 @@ def main(version="N/A"):
             psutil.cpu_percent())+" %"
         platform["system_info"]["cpu"]["physical_cores"] = psutil.cpu_count(
             logical=False)
-        platform["system_info"]["cpu"]["total_cores"] = psutil.cpu_count(
+        platform["system_info"]["cpu"]["logical_cores"] = psutil.cpu_count(
             logical=True)
         cpu_freq = psutil.cpu_freq()
         platform["system_info"]["cpu"]["current_freq"] = f'{float(str(cpu_freq.current)):.2f}'+" MHz"
