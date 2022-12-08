@@ -76,10 +76,10 @@ def get_arp_ndp_known_hosts():
 
         if(ipv == "6"):
             host_up = True if os.system(
-                "ping6 -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
+                "ping6 -c 3 " + ip + "> /dev/null 2>&1") == 0 else False
         else:
             host_up = True if os.system(
-                "ping -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
+                "ping -c 3 " + ip + "> /dev/null 2>&1") == 0 else False
         if not host_up:
             status = "down"
 
@@ -142,7 +142,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
             continue
 
         host_up = True if os.system(
-            "ping -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
+            "ping -c 3 " + ip + "> /dev/null 2>&1") == 0 else False
         if not host_up:
             status = "down"
 
@@ -225,10 +225,10 @@ def add_manual_hosts(manual_hosts_string=""):
 
                 if(ipv == "6"):
                     host_up = True if os.system(
-                        "ping6 -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
+                        "ping6 -c 3 " + ip + "> /dev/null 2>&1") == 0 else False
                 else:
                     host_up = True if os.system(
-                        "ping -c 1 " + ip + "> /dev/null 2>&1") == 0 else False
+                        "ping -c 3 " + ip + "> /dev/null 2>&1") == 0 else False
                 if not host_up:
                     status = "down"
 
