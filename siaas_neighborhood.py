@@ -297,7 +297,7 @@ def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_w
 
     if disable_neighborhood_discovery:
         logger.warning(
-            "Bypassing automatic discovery of hosts in the neighborhood as per configuration! Only manually configured hosts will be added to neighborhood DB.")
+            "Bypassing discovery of hosts in the neighborhood as per configuration! Only manually configured hosts will be added to neighborhood DB.")
 
     else:
         # Grab automatically discovered hosts
