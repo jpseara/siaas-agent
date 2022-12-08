@@ -80,7 +80,7 @@ def get_request_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=No
        else:
          verify=True
     try:
-        r = requests.get(api_uri, timeout=15, verify=verify, allow_redirects=True, auth=(api_user,api_pwd))
+        r = requests.get(api_uri, timeout=60, verify=verify, allow_redirects=True, auth=(api_user,api_pwd))
     except Exception as e:
         logger.error("Error while performing a GET request to the server API: "+str(e))
         return False
@@ -107,7 +107,7 @@ def post_request_to_server(api_uri, data_to_post, ignore_ssl=False, ca_bundle=No
         else:
           verify=True
     try:
-        r = requests.post(api_uri, json=data_to_post, timeout=15, verify=verify, allow_redirects=True, auth=(api_user,api_pwd))
+        r = requests.post(api_uri, json=data_to_post, timeout=60, verify=verify, allow_redirects=True, auth=(api_user,api_pwd))
     except Exception as e:
         logger.error(
             "Error while performing a POST request to the server API: "+str(e))
