@@ -67,6 +67,9 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
 
 
 def get_request_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
+    """
+    Sends an API GET request and returns the data in a JSON format
+    """
     urllib3.disable_warnings()
     if ignore_ssl==True:
        logger.warning("SSL verification is off! This might have security implications while connecting to the server API.")
@@ -91,6 +94,9 @@ def get_request_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=No
 
 
 def post_request_to_server(api_uri, data_to_post, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
+    """
+    Sends a data dict to the API via a POST request
+    """
     urllib3.disable_warnings()
     if ignore_ssl==True:
        logger.warning("SSL verification is off! This might have security implications while connecting to the server API.")
@@ -310,6 +316,9 @@ def get_or_create_unique_system_id():
 
 
 def validate_bool_string(input_string, default_output=False):
+   """
+   Validates string format and if it's not empty and returns a boolean
+   """
    if type(default_output) is not bool:
       return None
    if default_output == False:
@@ -325,6 +334,9 @@ def validate_bool_string(input_string, default_output=False):
 
 
 def validate_string_key(string):
+    """
+    Validates the proper format of a string configuration key and returns a boolean
+    """
     pattern = "^[A-Za-z0-9_-]*$"
     if type(string) is not str:
         logger.debug(
@@ -353,6 +365,28 @@ def get_size(bytes, suffix="B"):
         if bytes < factor:
             return f"{bytes:.2f} {unit}{suffix}"
         bytes /= factor
+
+
+def convert_sec_to_pretty_format(seconds):
+   """
+   Converts a number of seconds to a pretty day/hr/min/sec format
+   """
+   time = float(seconds)
+   day = time // (24 * 3600)
+   time = time % (24 * 3600)
+   hour = time // 3600
+   time %= 3600
+   mins = time // 60
+   time %= 60
+   secs = time
+   if day != 0:
+      return "%d day %d hr %d min %d sec" % (day, hour, mins, secs)
+   if hour != 0:
+      return "%d hr %d min %d sec" % (hour, mins, secs)
+   if mins != 0:
+      return "%d min %d sec" % (mins, secs)
+   else:
+      return "%d sec" % (secs)
 
 
 def get_now_utc_str():

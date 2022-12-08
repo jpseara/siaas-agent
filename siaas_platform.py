@@ -15,7 +15,10 @@ import ipaddress
 import logging
 import subprocess
 import pprint
+import time
 from datetime import datetime
+
+start_time = time.time()
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +28,10 @@ def main(version="N/A"):
     logger.info("Grabbing all system information for this platform ...")
 
     platform = {}
-
+    
     platform["version"] = version
     platform["uid"] = siaas_aux.get_or_create_unique_system_id()
+    platform["service_uptime"] = siaas_aux.convert_sec_to_pretty_format(int(time.time() - start_time))
     platform["system_info"] = {}
 
     # Hardware
