@@ -424,6 +424,10 @@ def loop():
                 "Portscanner is disabled as per configuration! Not running.")
             time.sleep(60)
             continue
+        
+        scan_only_manual_hosts = siaas_aux.get_config_from_configs_db(
+            config_name="scan_only_manual_hosts", convert_to_string=True)
+        only_manual = siaas_aux.validate_bool_string(scan_only_manual_hosts)
 
         neighborhood = siaas_aux.read_from_local_file(
             os.path.join(sys.path[0], 'var/neighborhood.db'))
@@ -435,6 +439,9 @@ def loop():
 
         # Not only the IPs must be scanned, but the FQDNs manually added and the discovered domain names as well. We create a tuple with the IP/domain/FQDN and the raw IP where it belongs to
         for neighbor in neighborhood.keys():
+            if only_manual and neighborhood[neighbor]["discovery_type"] != "manual":
+                logger.warning("Ignoring host "+ neighbor +" as only manual configured hosts are being scanned, as per configuration! Skipping this host.")
+                continue
             if "manual_entry_addresses" not in neighborhood[neighbor].keys():
                 all_ips_and_domains_to_scan.append(neighbor)
             else:    
