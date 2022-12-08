@@ -50,7 +50,7 @@ def get_arp_ndp_known_hosts():
             if "FAILED" in fields:
                 raise ValueError("ARP/NDP entry in FAILED state.")
             ip_arp = fields[0]
-            if ip_arp.startswith("127.") or ip_arp.lower().startswith("fe80::") or ip_arp == "::1":
+            if ip_arp.startswith("127.") or ip_arp.startswith("169.") or ip_arp.lower().startswith("fe80::") or ip_arp == "::1":
                 raise ValueError(
                     "Rejecting ARP/NDP entry which is a link local address.")
             interface = fields[2]
@@ -197,7 +197,7 @@ def add_manual_hosts(manual_hosts_string=""):
         host_uncommented = host_raw.split('#')[0]
         host = host_uncommented.split('\t')[0].split('\n')[0].rstrip().lstrip()
 
-        if host.startswith("127.") or host.lower().startswith("fe80::") or host == "::1" or host.lower() == "localhost":
+        if host.startswith("127.") or host.startswith("169.") or host.lower().startswith("fe80::") or host == "::1" or host.lower() == "localhost":
             logger.warning("Manually configured host '"+host +
                            "' is invalid. No localhost hosts are allowed.")
             continue
@@ -308,7 +308,7 @@ def main(interface_to_scan=None, ignore_neighborhood=False, disable_wifi_auto_di
                 continue
 
             # Skip loopback network and default GW
-            if network == 0 or interface.lower() == 'lo' or address == '127.0.0.1' or address == '0.0.0.0' or (not interface.lower().startswith("e") and not interface.lower().startswith("w") and not interface.lower().startswith("b")):
+            if network == 0 or interface.lower() == 'lo' or address.startswith("127.") or address.startswith("169.") or address == '0.0.0.0' or (not interface.lower().startswith("e") and not interface.lower().startswith("w") and not interface.lower().startswith("b")):
                 continue
 
             # Skip wireless interface if configuration says so
