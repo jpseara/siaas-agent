@@ -66,7 +66,7 @@ def main(version="N/A"):
     # CPU information
     try:
         platform["system_info"]["cpu"] = {}
-        platform["system_info"]["cpu"]["percentage"] = str(
+        platform["system_info"]["cpu"]["load_percent"] = str(
             psutil.cpu_percent())+" %"
         platform["system_info"]["cpu"]["physical_cores"] = psutil.cpu_count(
             logical=False)
@@ -84,7 +84,7 @@ def main(version="N/A"):
     try:
         svmem = psutil.virtual_memory()
         platform["system_info"]["memory"] = {}
-        platform["system_info"]["memory"]["percentage"] = str(
+        platform["system_info"]["memory"]["usage_percent"] = str(
             svmem.percent)+" %"
         platform["system_info"]["memory"]["total"] = siaas_aux.get_size(
             svmem.total)
@@ -94,7 +94,7 @@ def main(version="N/A"):
             svmem.available)
         swap = psutil.swap_memory()
         platform["system_info"]["memory"]["swap"] = {}
-        platform["system_info"]["memory"]["swap"]["percentage"] = str(
+        platform["system_info"]["memory"]["swap"]["usage_percent"] = str(
             swap.percent)+" %"
         platform["system_info"]["memory"]["swap"]["total"] = siaas_aux.get_size(
             swap.total)
@@ -121,7 +121,7 @@ def main(version="N/A"):
                 platform["system_info"]["io"]["volumes"][partition.device]["usage"] = {}
                 try:
                     partition_usage = psutil.disk_usage(partition.mountpoint)
-                    platform["system_info"]["io"]["volumes"][partition.device]["usage"]["percentage"] = str(
+                    platform["system_info"]["io"]["volumes"][partition.device]["usage"]["usage_percent"] = str(
                         partition_usage.percent)+" %"
                     platform["system_info"]["io"]["volumes"][partition.device]["usage"]["total"] = siaas_aux.get_size(
                         partition_usage.total)
