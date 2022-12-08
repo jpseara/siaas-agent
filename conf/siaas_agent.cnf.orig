@@ -12,9 +12,9 @@ api_ssl_ca_bundle = ./ssl/siaas.crt
 # Runtime configurations (can be changed during runtime by the remote server)
 
 datatransfer_loop_interval_sec = 300
+#disable_neighborhood_discovery = true # don't perform ARP/NDP or automatic discovery
 #disable_portscanner = true # don't scan hosts information or vulnerabilities
 #disable_wifi_auto_discovery = true # don't auto scan (IP network scan) for hosts on Wi-Fi interfaces
-#ignore_neighborhood = true # consider only manually configured hosts (bypass ARP/NDP and automatic discovery)
 #manual_hosts = 109.51.61.78,sapo.pt,google.com,focal62
 neighborhood_arp_timeout_sec = 5
 neighborhood_loop_interval_sec = 60

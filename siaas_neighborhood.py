@@ -264,7 +264,7 @@ def add_manual_hosts(manual_hosts_string=""):
     return(ip_mac_host)
 
 
-def main(interface_to_scan=None, ignore_neighborhood=False, disable_wifi_auto_discovery=False):
+def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_wifi_auto_discovery=False):
 
     arp_ndp_hosts = {}
     auto_hosts = {}
@@ -295,7 +295,7 @@ def main(interface_to_scan=None, ignore_neighborhood=False, disable_wifi_auto_di
           manual_hosts[ip].pop("mac_address", None)
           manual_hosts[ip].pop("seen_on_interface", None)
 
-    if ignore_neighborhood:
+    if disable_neighborhood_discovery:
         logger.warning(
             "Bypassing automatic discovery of hosts in the neighborhood as per configuration! Only manually configured hosts will be added to neighborhood DB.")
 
@@ -357,9 +357,9 @@ def loop(interface_to_scan=None):
 
         logger.debug("Loop running ...")
 
-        ignore_neighborhood = siaas_aux.get_config_from_configs_db(
-            config_name="ignore_neighborhood", convert_to_string=True)
-        dont_neighborhood = siaas_aux.validate_bool_string(ignore_neighborhood)
+        disable_neighborhood_discovery = siaas_aux.get_config_from_configs_db(
+            config_name="disable_neighborhood_discovery", convert_to_string=True)
+        dont_neighborhood = siaas_aux.validate_bool_string(disable_neighborhood_discovery)
 
         disable_wifi_auto_discovery = siaas_aux.get_config_from_configs_db(
             config_name="disable_wifi_auto_discovery", convert_to_string=True)
@@ -367,7 +367,7 @@ def loop(interface_to_scan=None):
 
         # Creating neighborhood dict
         neighborhood_dict = main(
-            interface_to_scan=interface_to_scan, ignore_neighborhood=dont_neighborhood, disable_wifi_auto_discovery=dont_wifi)
+            interface_to_scan=interface_to_scan, disable_neighborhood_discovery=dont_neighborhood, disable_wifi_auto_discovery=dont_wifi)
 
         # Writing in local database
         siaas_aux.write_to_local_file(os.path.join(

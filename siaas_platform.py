@@ -121,7 +121,7 @@ def main(version="N/A"):
                 platform["system_info"]["io"]["volumes"][partition.device]["usage"] = {}
                 try:
                     partition_usage = psutil.disk_usage(partition.mountpoint)
-                    platform["system_info"]["io"]["volumes"][partition.device]["usage"]["usage_percent"] = str(
+                    platform["system_info"]["io"]["volumes"][partition.device]["usage"]["percent"] = str(
                         partition_usage.percent)+" %"
                     platform["system_info"]["io"]["volumes"][partition.device]["usage"]["total"] = siaas_aux.get_size(
                         partition_usage.total)
