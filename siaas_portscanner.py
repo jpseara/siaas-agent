@@ -1,6 +1,3 @@
-# Even though no original code is left, the original inspiration for this module was taken from Mohamed Ezzat's Python Vulnerability Scanner - https://mohamedaezzat.github.io/posts/vulnerabilityscanner/
-# By João Pedro Seara
-
 import siaas_aux
 import os
 import sys

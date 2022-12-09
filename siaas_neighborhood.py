@@ -1,5 +1,4 @@
-# This is a fork from Layer 2 network neighbourhood discovery tool by Benedikt Waldvogel - https://github.com/bwaldvogel/neighbourhood
-# By João Pedro Seara
+# Contains pieces of code from Layer 2 network neighbourhood discovery tool by Benedikt Waldvogel - https://github.com/bwaldvogel/neighbourhood
 
 from __future__ import absolute_import, division, print_function
 import siaas_aux
