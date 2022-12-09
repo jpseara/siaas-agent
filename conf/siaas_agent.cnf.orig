@@ -18,6 +18,7 @@ datatransfer_loop_interval_sec = 300
 #manual_hosts = 109.51.61.78,sapo.pt,google.com,focal62
 neighborhood_arp_timeout_sec = 5
 neighborhood_loop_interval_sec = 60
+#max_parallel_portscan_threads = 3
 nmap_portscan_timeout_sec = 600
 nmap_scripts = vuln # leaving this field commented means no nmap scanning script is run
 #nmap_scripts = nmap-vulners,vulscan,vuln,http-csrf,http-sherlock,http-slowloris-attack,http-vmware-path-vuln,http-passwd,http-internal-ip-disclosure,http-vuln-cve2013-0156

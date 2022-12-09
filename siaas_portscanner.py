@@ -450,8 +450,18 @@ def loop():
                         if manual_entry not in all_ips_and_domains_to_scan:
                             all_ips_and_domains_to_scan.append(manual_entry)
         
-        # Creating one thread per host and launch the port scanner
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Creating N threads per host and launch the port scanner
+        try:
+            max_threads = int(siaas_aux.get_config_from_configs_db(
+                config_name="max_parallel_portscan_threads"))
+            if max_threads < 1:
+                raise ValueError("Max number of parallel threads can't be less than 1.")
+            logger.debug("Using a fixed number of max parallel threads as per configuration: "+str(max_threads))
+        except:
+            max_threads = None
+            logger.debug(
+                "The number of parallel scanning threads is not configured or is invalid. Python will automatically manage the number of parallel threads ...")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
             futures = []
             for ip_or_domain in all_ips_and_domains_to_scan:
                 futures.append(executor.submit(main, target=ip_or_domain))
