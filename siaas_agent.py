@@ -37,8 +37,8 @@ if __name__ == "__main__":
     # Needs to be root
     if os.geteuid() != 0:
         logger.critical(
-            "\nThis script must be run as root or using sudo!\n", file=sys.stderr)
-        sys.exit(2)
+            "\nThis script must be run as root or using sudo!\n")
+        sys.exit(1)
 
     # Create local directories
     os.makedirs(os.path.join(sys.path[0], 'conf'), exist_ok=True)
@@ -74,8 +74,8 @@ if __name__ == "__main__":
     agent_uid = siaas_aux.get_or_create_unique_system_id()
     if agent_uid == "00000000-0000-0000-0000-000000000000":
         logger.critical(
-            "\nCan't proceed without an unique system ID. Aborting !\n")
-        sys.exit(3)
+            "Can't proceed without an unique system ID. Aborting !")
+        sys.exit(1)
 
     print("\nSIAAS Agent v"+SIAAS_VERSION +
           " starting ["+agent_uid+"]\n\nLogging to: "+os.path.join(sys.path[0], log_file)+"\n")
@@ -103,3 +103,5 @@ if __name__ == "__main__":
     neighborhood.join()
     portscanner.join()
     datatransfer.join()
+
+sys.exit(0)

@@ -24,11 +24,13 @@ def download_agent_configs(api_base_uri, ignore_ssl=False, ca_bundle=None, api_u
     except:
         downloaded_configs = {}
  
-    logger.info("Agent config download from the server finished.")
+    if siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs):
+       logger.info("Agent configs download finished and merged locally.")
+       return True
 
-    siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs)
-
-    return True
+    else:
+       logger.error("There was an error downloading agent configs.")
+       return False
 
 
 def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):

@@ -46,23 +46,31 @@ def merge_module_dicts(modules=""):
 def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_local.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict={}):
     """
     Merges the upstream configs to the local configs;
-    If the config disappears from the server, it reverts to the local config.
+    If the config disappears from the server, it reverts to the local config;
+    In case of errors, no changes are made, and False is returned.
     """
+    local_config_dict = {}
     merged_config_dict = {}
     delta_dict = {}
     try:
         local_config_dict = get_config_from_configs_db(local_dict=local_dict)
+        if type(upstream_dict) is not dict:
+            raise TypeError ("Upstream configs are invalid.")
         if len(upstream_dict) > 0:
+            merged_config_dict = dict(
+            list(local_config_dict.items())+list(upstream_dict.items()))
             logger.debug(
                 "The following configurations are being applied/overwritten from the server: "+str(upstream_dict))
         else:
+            merged_config_dict = dict(
+            list(local_config_dict.items()))
             logger.debug(
                 "No configurations were found in the upstream dict. Using local configurations only.")
-        merged_config_dict = dict(
-            list(local_config_dict.items())+list(upstream_dict.items()))
     except:
         logger.error(
-            "Could not merge configurations from the upstream dict.")
+            "Could not merge configurations from the upstream dict. Not doing any changes.")
+        return False
+
     return write_to_local_file(output, dict(sorted(merged_config_dict.items(), key=lambda x: x[0].casefold() if len(x or "")>0 else None)))
 
 
