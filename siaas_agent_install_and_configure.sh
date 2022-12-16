@@ -12,13 +12,20 @@ cd ${SCRIPT_DIR}
 apt-get update
 apt-get install -y python3 python3-pip python3-venv git nmap dmidecode
 
+# CRONTAB
+cat << EOF | sudo tee /etc/cron.daily/siaas-agent
+#!/bin/bash
+${SCRIPT_DIR}/siaas_agent_refresh_nmap_scripts_repos.sh
+EOF
+chmod 755 /etc/cron.daily/siaas-agent
+
 # SERVICE CONFIGURATION
 mkdir -p ssl
 cp -n conf/siaas_agent.cnf.orig conf/siaas_agent.cnf
 ln -fs ${SCRIPT_DIR}/siaas_agent_run.sh /usr/local/bin/
 ln -fs ${SCRIPT_DIR}/siaas_agent_kill.sh /usr/local/bin/
 ln -fs ${SCRIPT_DIR}/log /var/log/siaas-agent
-sudo cat << EOF | sudo tee /etc/systemd/system/siaas-agent.service
+cat << EOF | sudo tee /etc/systemd/system/siaas-agent.service
 [Unit]
 Description=SIAAS Agent
 [Service]
