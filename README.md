@@ -19,3 +19,5 @@ __
  - Logs: `tail -100f /var/log/siaas-agent/siaas-agent.log` or `tail -100f ./log/siaas-agent.log`
 
  - Generate a project archive (it is recommended to stop all processes before): `sudo ./siaas_agent_archive.sh`
+
+ - Remove: `sudo ./siaas_agent_remove.sh`
