@@ -20,5 +20,4 @@ rm -f /var/log/siaas-agent
 rm -f /etc/systemd/system/siaas-agent.service
 systemctl daemon-reload
 
-
 echo -e "\nSIAAS Agent service and configurations were removed from the system.\n"
