@@ -229,6 +229,6 @@ if __name__ == "__main__":
     print('\n')
     output = main()
     print('\nOutput is:\n')
-    pprint.pprint(output)
+    pprint.pprint(output, sort_dicts=False)
 
     print('\nAll done. Bye!\n')

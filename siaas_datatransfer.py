@@ -152,6 +152,6 @@ if __name__ == "__main__":
     api_base_uri = "https://siaas/api"
 
     pprint.pprint(siaas_aux.get_request_to_server(
-        api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1", ignore_ssl=True, api_user="siaas", api_pwd="siaas"))
+        api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1", ignore_ssl=True, api_user="siaas", api_pwd="siaas"), sort_dicts=False)
 
     print('\nAll done. Bye!\n')

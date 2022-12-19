@@ -134,7 +134,7 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
             results = nmap.nmap_version_detection(
                 target, args="-%s -p%s:%s --script %s -Pn --host-timeout %s" % (ipv, prot_flag, port, nmap_script, timeout))
             logger.debug("Nmap raw output for vulnerability scan using script '"+nmap_script +
-                         "' in "+target+" at "+str(port)+"/"+protocol+":\n"+pprint.pformat(results))
+                         "' in "+target+" at "+str(port)+"/"+protocol+":\n"+pprint.pformat(results, sort_dicts=False))
 
             for t in results["task_results"]:
                 if "extrainfo" in t.keys():
@@ -232,7 +232,7 @@ def get_system_info(target, specific_ports=None, timeout=30):
             results = nmap.nmap_os_detection(
                 target, args="-%s -sV -Pn -p%s --host-timeout %s" % (ipv, specific_ports, timeout))
         logger.debug("Nmap raw output for system info scan in " +
-                     target+":\n"+pprint.pformat(results))
+                     target+":\n"+pprint.pformat(results, sort_dicts=False))
 
         for t in results["task_results"]:
             if "extrainfo" in t.keys():
@@ -272,7 +272,7 @@ def get_system_info(target, specific_ports=None, timeout=30):
             results_u = nmap.scan_top_ports(
                 scanned_ip, args="-%s -sU -Pn -p%s --host-timeout %s" % (ipv, specific_ports, timeout))
         logger.debug("Nmap raw output for UDP system info scan in " +
-                     scanned_ip+":\n"+pprint.pformat(results_u))
+                     scanned_ip+":\n"+pprint.pformat(results_u, sort_dicts=False))
 
         for t in results_u["task_results"]:
             if "extrainfo" in t.keys():

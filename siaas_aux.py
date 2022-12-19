@@ -94,7 +94,7 @@ def get_request_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=No
         return False
     if r.status_code == 200:
         logger.debug("All data that was read from the server API:\n" +
-                     pprint.pformat(r.json()))
+                     pprint.pformat(r.json(), sort_dicts=False))
         return r.json()
     else:
         logger.error("Error getting data from the server API: "+str(r.status_code))
@@ -122,7 +122,7 @@ def post_request_to_server(api_uri, data_to_post, ignore_ssl=False, ca_bundle=No
         return False
     if r.status_code == 200:
         logger.debug("All data that was written to the server API:\n" +
-                     pprint.pformat(data_to_post))
+                     pprint.pformat(data_to_post, sort_dicts=False))
         return True
     else:
         logger.error("Error posting data to the sever API: "+str(r.status_code))
@@ -217,7 +217,7 @@ def write_to_local_file(file_to_write, data_to_insert):
         os.makedirs(os.path.dirname(os.path.join(
             sys.path[0], file_to_write)), exist_ok=True)
         logger.debug("All data that will now be written to the file:\n" +
-                     pprint.pformat(data_to_insert))
+                     pprint.pformat(data_to_insert, sort_dicts=False))
         with open(file_to_write, 'w') as file:
             file.write(json.dumps(data_to_insert))
             logger.debug("Local file write ended successfully.")
