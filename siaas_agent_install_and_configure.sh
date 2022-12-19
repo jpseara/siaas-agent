@@ -24,14 +24,12 @@ chmod 755 /etc/cron.daily/siaas-agent
 # SERVICE CONFIGURATION
 mkdir -p ssl
 cp -n conf/siaas_agent.cnf.orig conf/siaas_agent.cnf
-ln -fs ${SCRIPT_DIR}/siaas_agent_run.sh /usr/local/bin/
-ln -fs ${SCRIPT_DIR}/siaas_agent_kill.sh /usr/local/bin/
 ln -fs ${SCRIPT_DIR}/log /var/log/siaas-agent
 cat << EOF | sudo tee /etc/systemd/system/siaas-agent.service
 [Unit]
 Description=SIAAS Agent
 [Service]
-ExecStart=/usr/local/bin/siaas_agent_run.sh
+ExecStart=${SCRIPT_DIR}/siaas_agent_run.sh
 [Install]
 WantedBy=multi-user.target
 EOF
