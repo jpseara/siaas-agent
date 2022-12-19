@@ -13,7 +13,7 @@ from waitress import serve
 app = Flask(__name__)
 logger = logging.getLogger(__name__)
 
-SIAAS_VERSION = "0.0.1"
+SIAAS_VERSION = "1.0.0"
 LOG_DIR = "log"
 API_PORT = 5001
 

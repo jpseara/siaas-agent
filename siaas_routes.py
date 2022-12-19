@@ -5,6 +5,8 @@ import json
 import os
 import sys
 
+SIAAS_API = "v1"
+
 app.config['JSON_AS_ASCII'] = False
 app.config['JSON_SORT_KEYS'] = False
 
@@ -14,6 +16,7 @@ def index():
     output = {
         'name': 'Intelligent System for Automation of Security Audits (SIAAS)',
         'module': 'Agent',
+        'api': SIAAS_API,
         'author': 'João Pedro Seara',
         'supervisor': 'Carlos Serrão'
     }
