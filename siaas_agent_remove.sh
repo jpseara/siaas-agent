@@ -14,8 +14,6 @@ rm -f /etc/cron.daily/siaas-agent
 
 # SERVICE CONFIGURATION
 systemctl stop siaas-agent
-rm -f /usr/local/bin/siaas_agent_run.sh
-rm -f /usr/local/bin/siaas_agent_kill.sh
 rm -f /var/log/siaas-agent
 rm -f /etc/systemd/system/siaas-agent.service
 systemctl daemon-reload
