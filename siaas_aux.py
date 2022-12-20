@@ -125,7 +125,7 @@ def post_request_to_server(api_uri, data_to_post, ignore_ssl=False, ca_bundle=No
                      pprint.pformat(data_to_post, sort_dicts=False))
         return True
     else:
-        logger.error("Error posting data to the sever API: "+str(r.status_code))
+        logger.error("Error posting data to the server API: "+str(r.status_code))
         return False
 
 
