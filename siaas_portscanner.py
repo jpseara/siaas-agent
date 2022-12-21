@@ -187,7 +187,7 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
 
         if script_vulns == 0:
             logger.info("Scan ended using script '" +
-                        nmap_script+"' for "+target+" at "+str(port)+"/"+protocol+".")
+                        nmap_script+"' for "+target+" at "+str(port)+"/"+protocol+". No vulnerabilities found.")
         else:
             logger.info("Scan ended. "+str(script_vulns)+" vulnerabilities ("+str(script_exploits)+" confirmed exploits) were found while using script '"+nmap_script + "' in "+target+" at "+str(port)+"/"+protocol+".")
 
