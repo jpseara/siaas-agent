@@ -1,3 +1,6 @@
+# Intelligent System for Automation of Security Audits (SIAAS)
+# Agent - Platform module
+# By João Pedro Seara, 2023
 # Contains pieces of code from the post from Abdou Rockikz named "How to Get Hardware and System Information in Python" in PythonCode - https://www.thepythoncode.com/article/get-hardware-system-information-python
 
 import siaas_aux

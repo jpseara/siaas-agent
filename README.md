@@ -1,6 +1,6 @@
 # siaas-agent
 
-_Intelligent System for Automation of Security Audits (SIAAS) - Agent Module_
+_Intelligent System for Automation of Security Audits (SIAAS) - Agent_
 
 In the context of the MSc in Telecommunications and Computer Engineering, at ISCTE - Instituto Universitário de Lisboa.
 

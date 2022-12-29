@@ -1,5 +1,6 @@
-# SIAAS - Sistema Inteligente para Automação de Auditorias de Segurança
-# By João Pedro Seara
+# Intelligent System for Automation of Security Audits (SIAAS)
+# Agent
+# By João Pedro Seara, 2023
 
 import os
 import sys

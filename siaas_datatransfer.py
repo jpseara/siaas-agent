@@ -1,3 +1,7 @@
+# Intelligent System for Automation of Security Audits (SIAAS)
+# Agent - Data Transfer module
+# By João Pedro Seara, 2023
+
 import siaas_aux
 import logging
 import os
