@@ -1,10 +1,10 @@
 # Protected configurations (last for the whole run and can't be changed remotely)
 
-log_level = debug
-api_uri = https://siaas/api
+log_level = info
+api_uri = https://127.0.0.1/api
 api_user = siaas
 api_pwd = siaas
-#api_ssl_ignore_verify = true
+api_ssl_ignore_verify = true
 api_ssl_ca_bundle = ./ssl/siaas.crt
 #enable_internal_api = true
 #offline_mode = true # don't communicate with the server at all
@@ -15,16 +15,15 @@ datatransfer_loop_interval_sec = 300
 #disable_neighborhood_discovery = true # don't perform ARP/NDP or automatic discovery
 #disable_portscanner = true # don't scan hosts information or vulnerabilities
 #disable_wifi_auto_discovery = true # don't auto scan (IP network scan) for hosts on Wi-Fi interfaces
-#manual_hosts = 109.51.61.78,sapo.pt,google.com,focal62
+#manual_hosts = 109.51.61.78,sapo.pt,google.com
 neighborhood_arp_timeout_sec = 5
-neighborhood_loop_interval_sec = 60
+neighborhood_loop_interval_sec = 900
 #max_parallel_portscan_threads = 3
 nmap_portscan_timeout_sec = 600
-nmap_scripts = vuln # leaving this field commented means no nmap scanning script is run
-#nmap_scripts = nmap-vulners,vulscan,vuln,http-csrf,http-sherlock,http-slowloris-attack,http-vmware-path-vuln,http-passwd,http-internal-ip-disclosure,http-vuln-cve2013-0156
+nmap_scripts = discovery,vuln,vulscan # leaving this field commented means no nmap scanning script is run
 nmap_sysinfo_timeout_sec = 600
-platform_loop_interval_sec = 60
-portscanner_loop_interval_sec = 60
+platform_loop_interval_sec = 300
+portscanner_loop_interval_sec = 86400
 #scan_only_manual_hosts = true # only run the portscanner against manually configured hosts
 #silent_mode = true # the agent will download and update its configs from the server, but will not upload any data
 #target_specific_ports = 22,80,8080-8083 # when this setting is commented, all the open ports of each host will be scanned
