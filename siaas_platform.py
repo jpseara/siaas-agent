@@ -26,28 +26,38 @@ logger = logging.getLogger(__name__)
 
 
 def main(version="N/A"):
-
+    """
+    Main platform function (grabs all hardware information)
+    """
     logger.info("Grabbing all system information for this platform ...")
 
     platform = {}
-    
+
     platform["version"] = version
     platform["uid"] = siaas_aux.get_or_create_unique_system_id()
-    platform["service_uptime"] = siaas_aux.convert_sec_to_pretty_format(int(time.time() - start_time))
+    platform["service_uptime"] = siaas_aux.convert_sec_to_pretty_format(
+        int(time.time() - start_time))
     platform["system_info"] = {}
 
     # Hardware
     try:
         platform["system_info"]["hardware"] = {}
         if str(os.uname()[4]).lower().startswith("arm") or str(os.uname()[4]) == "aarch64":
-            platform["system_info"]["hardware"]["product_name"] = subprocess.check_output("cat /sys/firmware/devicetree/base/model", universal_newlines=True, shell=True).lstrip().rstrip().lstrip('\x00').rstrip('\x00')
-            platform["system_info"]["hardware"]["serial_number"] = subprocess.check_output("cat /sys/firmware/devicetree/base/serial-number", universal_newlines=True, shell=True).lstrip().rstrip().lstrip('\x00').rstrip('\x00')
+            platform["system_info"]["hardware"]["product_name"] = subprocess.check_output(
+                "cat /sys/firmware/devicetree/base/model", universal_newlines=True, shell=True).lstrip().rstrip().lstrip('\x00').rstrip('\x00')
+            platform["system_info"]["hardware"]["serial_number"] = subprocess.check_output(
+                "cat /sys/firmware/devicetree/base/serial-number", universal_newlines=True, shell=True).lstrip().rstrip().lstrip('\x00').rstrip('\x00')
         else:
-            platform["system_info"]["hardware"]["manufacturer"] = subprocess.check_output("dmidecode --string system-manufacturer", universal_newlines=True, shell=True).lstrip().rstrip()
-            platform["system_info"]["hardware"]["product_name"] = subprocess.check_output("dmidecode --string system-product-name", universal_newlines=True, shell=True).lstrip().rstrip()
-            platform["system_info"]["hardware"]["version"] = subprocess.check_output("dmidecode --string system-version", universal_newlines=True, shell=True).lstrip().rstrip()
-            platform["system_info"]["hardware"]["serial_number"] = subprocess.check_output("dmidecode --string system-serial-number", universal_newlines=True, shell=True).lstrip().rstrip()
-            platform["system_info"]["hardware"]["bios_version"] = subprocess.check_output("dmidecode --string bios-version", universal_newlines=True, shell=True).lstrip().rstrip().lstrip()
+            platform["system_info"]["hardware"]["manufacturer"] = subprocess.check_output(
+                "dmidecode --string system-manufacturer", universal_newlines=True, shell=True).lstrip().rstrip()
+            platform["system_info"]["hardware"]["product_name"] = subprocess.check_output(
+                "dmidecode --string system-product-name", universal_newlines=True, shell=True).lstrip().rstrip()
+            platform["system_info"]["hardware"]["version"] = subprocess.check_output(
+                "dmidecode --string system-version", universal_newlines=True, shell=True).lstrip().rstrip()
+            platform["system_info"]["hardware"]["serial_number"] = subprocess.check_output(
+                "dmidecode --string system-serial-number", universal_newlines=True, shell=True).lstrip().rstrip()
+            platform["system_info"]["hardware"]["bios_version"] = subprocess.check_output(
+                "dmidecode --string bios-version", universal_newlines=True, shell=True).lstrip().rstrip().lstrip()
     except Exception as e:
         logger.warning("Couldn't get all hardware information: "+str(e))
 
@@ -63,7 +73,8 @@ def main(version="N/A"):
         platform["system_info"]["system"]["processor"] = cpuinfo.get_cpu_info()[
             'brand_raw']
     except Exception as e:
-        logger.warning("Couldn't get all OS and architecture information: "+str(e))
+        logger.warning(
+            "Couldn't get all OS and architecture information: "+str(e))
 
     # CPU information
     try:
@@ -139,7 +150,8 @@ def main(version="N/A"):
         platform["system_info"]["io"]["total_written"] = siaas_aux.get_size(
             disk_io.write_bytes)
     except Exception as e:
-        logger.warning("Couldn't get all IO information and statistics: "+str(e))
+        logger.warning(
+            "Couldn't get all IO information and statistics: "+str(e))
 
     # Network and network interface statistics
     try:
@@ -171,7 +183,8 @@ def main(version="N/A"):
         platform["system_info"]["network"]["total_sent"] = siaas_aux.get_size(
             net_io.bytes_sent)
     except Exception as e:
-        logger.warning("Couldn't get all network information and statistics: "+str(e))
+        logger.warning(
+            "Couldn't get all network information and statistics: "+str(e))
 
     # Boot Time
     try:
@@ -188,7 +201,9 @@ def main(version="N/A"):
 
 
 def loop(version=""):
-
+    """
+    Main Platform module loop (calls main function)
+    """
     # Initializing the platform local DB
     os.makedirs(os.path.join(sys.path[0], 'var'), exist_ok=True)
     siaas_aux.write_to_local_file(

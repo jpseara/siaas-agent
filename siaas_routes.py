@@ -17,6 +17,9 @@ app.config['JSON_SORT_KEYS'] = False
 
 @app.route('/', strict_slashes=False)
 def index():
+    """
+    Agent API route - index
+    """
     output = {
         'name': 'Intelligent System for Automation of Security Audits (SIAAS)',
         'module': 'Agent',
@@ -36,6 +39,9 @@ def index():
 
 @app.route('/siaas-agent', methods=['GET'], strict_slashes=False)
 def siaas_agent():
+    """
+    Agent API route - agent information
+    """
     module = request.args.get('module', default='*', type=str)
     all_existing_modules = "platform,neighborhood,portscanner,config"
     for m in module.split(','):

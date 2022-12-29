@@ -14,7 +14,10 @@ logger = logging.getLogger(__name__)
 
 
 def download_agent_configs(api_base_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
-
+    """
+    Downloads agent configs and merges with local configs
+    Returns True if all OK; False if anything failed
+    """
     logger.info("Downloading agent configs from the server ...")
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
@@ -27,18 +30,21 @@ def download_agent_configs(api_base_uri, ignore_ssl=False, ca_bundle=None, api_u
 
     except:
         downloaded_configs = {}
- 
+
     if siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs):
-       logger.info("Agent configs download finished and merged locally.")
-       return True
+        logger.info("Agent configs download finished and merged locally.")
+        return True
 
     else:
-       logger.error("There was an error downloading agent configs.")
-       return False
+        logger.error("There was an error downloading agent configs.")
+        return False
 
 
 def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
-
+    """
+    Uploads agent configs, after connecting to the server's API
+    Returns True if all OK; False if anything failed
+    """
     logger.debug("Uploading agent data to the server ...")
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
@@ -60,17 +66,19 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
 
 
 def loop():
-
+    """
+    Data Transfer module loop (calls the download and upload functions)
+    """
     last_uploaded_dict = {}
     last_downloaded_dict = {}
 
     # Generate global variables from the configuration file
     config_dict = siaas_aux.get_config_from_configs_db(convert_to_string=True)
-    API_URI=None
-    API_USER=None
-    API_PWD=None
-    API_SSL_IGNORE_VERIFY=None
-    API_SSL_CA_BUNDLE=None
+    API_URI = None
+    API_USER = None
+    API_PWD = None
+    API_SSL_IGNORE_VERIFY = None
+    API_SSL_CA_BUNDLE = None
     for config_name in config_dict.keys():
         if config_name.upper() == "API_URI":
             API_URI = config_dict[config_name]
@@ -106,7 +114,7 @@ def loop():
     no_comms = siaas_aux.validate_bool_string(offline_mode)
     if no_comms:
         logger.warning(
-                "Offline mode is on! No data will be transferred to or from the server. If you want to change this behavior, change the local configuration file and restart the application.")
+            "Offline mode is on! No data will be transferred to or from the server. If you want to change this behavior, change the local configuration file and restart the application.")
 
     while valid_api and not no_comms:
 
@@ -123,7 +131,8 @@ def loop():
                                                    last_uploaded_dict, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd)
 
         # Download agent data
-        download_agent_configs(API_URI, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd)
+        download_agent_configs(API_URI, ssl_ignore_verify,
+                               ssl_ca_bundle, api_user, api_pwd)
 
         # Sleep before next loop
         try:

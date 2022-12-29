@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 
 def merge_module_dicts(modules=""):
     """
-    Grabs all local DBs (dicts) from the module list and concatenates them;
-    Returns False if it fails. 
+    Grabs all local DBs (dicts) from the module list and concatenates them
+    Returns False if it fails
     """
     merged_dict = {}
     for module in sorted(set(modules.lower().split(','))):
@@ -41,7 +41,7 @@ def merge_module_dicts(modules=""):
                     list(merged_dict.items())+list(next_dict_to_merge.items()))
         except:
             logger.error("Couldn't merge dict: " +
-                           str(next_dict_to_merge))
+                         str(next_dict_to_merge))
             return False
 
     return merged_dict
@@ -49,9 +49,9 @@ def merge_module_dicts(modules=""):
 
 def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_local.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict={}):
     """
-    Merges the upstream configs to the local configs;
-    If the config disappears from the server, it reverts to the local config;
-    In case of errors, no changes are made, and False is returned.
+    Merges the upstream configs to the local configs
+    If the config disappears from the server, it reverts to the local config
+    In case of errors, no changes are made, and False is returned
     """
     local_config_dict = {}
     merged_config_dict = {}
@@ -59,15 +59,15 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
     try:
         local_config_dict = get_config_from_configs_db(local_dict=local_dict)
         if type(upstream_dict) is not dict:
-            raise TypeError ("Upstream configs are invalid.")
+            raise TypeError("Upstream configs are invalid.")
         if len(upstream_dict) > 0:
             merged_config_dict = dict(
-            list(local_config_dict.items())+list(upstream_dict.items()))
+                list(local_config_dict.items())+list(upstream_dict.items()))
             logger.debug(
                 "The following configurations are being applied/overwritten from the server: "+str(upstream_dict))
         else:
             merged_config_dict = dict(
-            list(local_config_dict.items()))
+                list(local_config_dict.items()))
             logger.debug(
                 "No configurations were found in the upstream dict. Using local configurations only.")
     except:
@@ -75,7 +75,7 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
             "Could not merge configurations from the upstream dict. Not doing any changes.")
         return False
 
-    return write_to_local_file(output, dict(sorted(merged_config_dict.items(), key=lambda x: x[0].casefold() if len(x or "")>0 else None)))
+    return write_to_local_file(output, dict(sorted(merged_config_dict.items(), key=lambda x: x[0].casefold() if len(x or "") > 0 else None)))
 
 
 def get_request_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
@@ -83,25 +83,29 @@ def get_request_to_server(api_uri, ignore_ssl=False, ca_bundle=None, api_user=No
     Sends an API GET request and returns the data in a JSON format
     """
     urllib3.disable_warnings()
-    if ignore_ssl==True:
-       logger.warning("SSL verification is off! This might have security implications while connecting to the server API.")
-       verify=False
+    if ignore_ssl == True:
+        logger.warning(
+            "SSL verification is off! This might have security implications while connecting to the server API.")
+        verify = False
     else:
-       if len(ca_bundle or '')>0:
-         verify=ca_bundle
-       else:
-         verify=True
+        if len(ca_bundle or '') > 0:
+            verify = ca_bundle
+        else:
+            verify = True
     try:
-        r = requests.get(api_uri, timeout=60, verify=verify, allow_redirects=True, auth=(api_user,api_pwd))
+        r = requests.get(api_uri, timeout=60, verify=verify,
+                         allow_redirects=True, auth=(api_user, api_pwd))
     except Exception as e:
-        logger.error("Error while performing a GET request to the server API: "+str(e))
+        logger.error(
+            "Error while performing a GET request to the server API: "+str(e))
         return False
     if r.status_code == 200:
         logger.debug("All data that was read from the server API:\n" +
                      pprint.pformat(r.json(), sort_dicts=False))
         return r.json()
     else:
-        logger.error("Error getting data from the server API: "+str(r.status_code))
+        logger.error("Error getting data from the server API: " +
+                     str(r.status_code))
         return False
 
 
@@ -110,16 +114,18 @@ def post_request_to_server(api_uri, data_to_post, ignore_ssl=False, ca_bundle=No
     Sends a data dict to the API via a POST request
     """
     urllib3.disable_warnings()
-    if ignore_ssl==True:
-       logger.warning("SSL verification is off! This might have security implications while connecting to the server API.")
-       verify=False
+    if ignore_ssl == True:
+        logger.warning(
+            "SSL verification is off! This might have security implications while connecting to the server API.")
+        verify = False
     else:
-        if len(ca_bundle or '')>0:
-          verify=ca_bundle
+        if len(ca_bundle or '') > 0:
+            verify = ca_bundle
         else:
-          verify=True
+            verify = True
     try:
-        r = requests.post(api_uri, json=data_to_post, timeout=60, verify=verify, allow_redirects=True, auth=(api_user,api_pwd))
+        r = requests.post(api_uri, json=data_to_post, timeout=60,
+                          verify=verify, allow_redirects=True, auth=(api_user, api_pwd))
     except Exception as e:
         logger.error(
             "Error while performing a POST request to the server API: "+str(e))
@@ -129,7 +135,8 @@ def post_request_to_server(api_uri, data_to_post, ignore_ssl=False, ca_bundle=No
                      pprint.pformat(data_to_post, sort_dicts=False))
         return True
     else:
-        logger.error("Error posting data to the server API: "+str(r.status_code))
+        logger.error("Error posting data to the server API: " +
+                     str(r.status_code))
         return False
 
 
@@ -179,7 +186,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
     Writes the configuration  (dict) from the config file. If the file is empty or does not exist, returns False
     It will strip all characters after '#', and then strip the spaces from the beginning or end of the resulting string. If the resulting string is empty, it will ignore it
     Then, it will grab the string before the first "=" as the config key, and after it as the actual value
-    The config key has its spaces removed from beginning or end, and all " and ' are removed.
+    The config key has its spaces removed from beginning or end, and all " and ' are removed
     The actual value is just stripped of spaces from the beginning and the end
     Writes the resulting dict in the  file of config.db. This means it will return True if things go fine, or False if it fails
     """
@@ -207,7 +214,7 @@ def write_config_db_from_conf_file(conf_file=os.path.join(sys.path[0], 'conf/sia
                 "Invalid line from local configuration file was ignored: "+str(line))
             continue
 
-    return write_to_local_file(output, dict(sorted(config_dict.items(), key=lambda x: x[0].casefold() if len(x or "")>0 else None)))
+    return write_to_local_file(output, dict(sorted(config_dict.items(), key=lambda x: x[0].casefold() if len(x or "") > 0 else None)))
 
 
 def write_to_local_file(file_to_write, data_to_insert):
@@ -280,26 +287,29 @@ def get_or_create_unique_system_id():
         "Existing UID not found. Creating a new one from system info ...")
     new_uid = ""
     try:
-        with open("/sys/firmware/devicetree/base/serial-number", 'r') as file: # Raspberry Pi serial
+        with open("/sys/firmware/devicetree/base/serial-number", 'r') as file:  # Raspberry Pi serial
             content = file.read()
-            new_uid = str(content.split('\n')[0].lstrip().rstrip().lstrip('\x00').rstrip('\x00'))
+            new_uid = str(content.split('\n')[0].lstrip(
+            ).rstrip().lstrip('\x00').rstrip('\x00'))
     except:
         pass
     if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
         try:
             with open("/sys/class/dmi/id/board_serial", 'r') as file:
                 content = file.read()
-                new_uid = str(content.split('\n')[0].lstrip().rstrip().lstrip('\x00').rstrip('\x00'))
+                new_uid = str(content.split('\n')[0].lstrip(
+                ).rstrip().lstrip('\x00').rstrip('\x00'))
         except:
             pass
     if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
         try:
             with open("/sys/class/dmi/id/product_uuid", 'r') as file:
                 content = file.read()
-                new_uid = str(content.split('\n')[0].lstrip().rstrip().lstrip('\x00').rstrip('\x00'))
+                new_uid = str(content.split('\n')[0].lstrip(
+                ).rstrip().lstrip('\x00').rstrip('\x00'))
         except:
             pass
-    #if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
+    # if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
     #    try:
     #        with open("/var/lib/dbus/machine-id", 'r') as file:
     #            content = file.read()
@@ -328,21 +338,21 @@ def get_or_create_unique_system_id():
 
 
 def validate_bool_string(input_string, default_output=False):
-   """
-   Validates string format and if it's not empty and returns a boolean
-   """
-   if type(default_output) is not bool:
-      return None
-   if default_output == False:
-      if len(input_string or '') > 0:
-          if input_string.lower() == "true":
-              return True
-      return False
-   if default_output == True:
-      if len(input_string or '') > 0:
-          if input_string.lower() == "false":
-              return False
-      return True
+    """
+    Validates string format and if it's not empty and returns a boolean
+    """
+    if type(default_output) is not bool:
+        return None
+    if default_output == False:
+        if len(input_string or '') > 0:
+            if input_string.lower() == "true":
+                return True
+        return False
+    if default_output == True:
+        if len(input_string or '') > 0:
+            if input_string.lower() == "false":
+                return False
+        return True
 
 
 def validate_string_key(string):
@@ -380,25 +390,25 @@ def get_size(bytes, suffix="B"):
 
 
 def convert_sec_to_pretty_format(seconds):
-   """
-   Converts a number of seconds to a pretty day/hr/min/sec format
-   """
-   time = float(seconds)
-   day = time // (24 * 3600)
-   time = time % (24 * 3600)
-   hour = time // 3600
-   time %= 3600
-   mins = time // 60
-   time %= 60
-   secs = time
-   if day != 0:
-      return "%d day %d hr %d min %d sec" % (day, hour, mins, secs)
-   if hour != 0:
-      return "%d hr %d min %d sec" % (hour, mins, secs)
-   if mins != 0:
-      return "%d min %d sec" % (mins, secs)
-   else:
-      return "%d sec" % (secs)
+    """
+    Converts a number of seconds to a pretty day/hr/min/sec format
+    """
+    time = float(seconds)
+    day = time // (24 * 3600)
+    time = time % (24 * 3600)
+    hour = time // 3600
+    time %= 3600
+    mins = time // 60
+    time %= 60
+    secs = time
+    if day != 0:
+        return "%d day %d hr %d min %d sec" % (day, hour, mins, secs)
+    if hour != 0:
+        return "%d hr %d min %d sec" % (hour, mins, secs)
+    if mins != 0:
+        return "%d min %d sec" % (mins, secs)
+    else:
+        return "%d sec" % (secs)
 
 
 def get_now_utc_str():
@@ -410,7 +420,7 @@ def get_now_utc_str():
 
 def get_now_utc_obj():
     """
-    Returns an ISO date obj
+    Returns an ISO date object
     """
     return datetime.strptime(datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'), '%Y-%m-%dT%H:%M:%SZ')
 
@@ -509,7 +519,7 @@ def get_all_ips_for_name(host):
         result = dns.resolver.resolve(host, "A")
         for ipval in result:
             if ipval.to_text() not in ips:
-               ips.append(ipval.to_text())
+                ips.append(ipval.to_text())
     except:
         pass
 
@@ -518,7 +528,7 @@ def get_all_ips_for_name(host):
         result6 = dns.resolver.resolve(host, "AAAA")
         for ipval in result6:
             if ipval.to_text() not in ips:
-               ips.append(ipval.to_text())
+                ips.append(ipval.to_text())
     except:
         pass
 

@@ -60,7 +60,8 @@ if __name__ == "__main__":
 
     # Define logging level according to user config
     os.makedirs(os.path.join(sys.path[0], LOG_DIR), exist_ok=True)
-    log_file = os.path.join(os.path.join(sys.path[0], LOG_DIR), "siaas-agent.log")
+    log_file = os.path.join(os.path.join(
+        sys.path[0], LOG_DIR), "siaas-agent.log")
     log_level = siaas_aux.get_config_from_configs_db(config_name="log_level")
     for handler in logging.root.handlers[:]:
         logging.root.removeHandler(handler)
@@ -94,11 +95,12 @@ if __name__ == "__main__":
     datatransfer.start()
 
     enable_internal_api = siaas_aux.get_config_from_configs_db(
-            config_name="enable_internal_api", convert_to_string=True)
+        config_name="enable_internal_api", convert_to_string=True)
     if siaas_aux.validate_bool_string(enable_internal_api):
-       logger.info("Internal API is now starting on port "+str(API_PORT)+" ...")
-       app.run(debug=True, use_reloader=False, host="0.0.0.0", port=API_PORT)
-       #serve(app, host="0.0.0.0", port=API_PORT)
+        logger.info("Internal API is now starting on port " +
+                    str(API_PORT)+" ...")
+        app.run(debug=True, use_reloader=False, host="0.0.0.0", port=API_PORT)
+        #serve(app, host="0.0.0.0", port=API_PORT)
 
     platform.join()
     neighborhood.join()

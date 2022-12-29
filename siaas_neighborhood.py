@@ -26,7 +26,10 @@ logger = logging.getLogger(__name__)
 
 
 def get_arp_ndp_known_hosts():
-
+    """
+    Grabs a list neighborhood host from the local ARP/NDP tables
+    Returns a dict with the findings, or an empty dict if nothing is found
+    """
     logger.info("Grabbing known hosts from local ARP/NDP tables ...")
 
     ip_mac_host = {}
@@ -114,7 +117,10 @@ def get_arp_ndp_known_hosts():
 
 
 def scan_and_print_neighbors(net, interface, timeout=5):
-
+    """
+    Finds neighborhood hosts in the same IPv4 range of the network interfaces
+    Returns a dict with the findings, or an empty dict if nothing is found
+    """
     logger.info("Arping %s in the neighborhood of '%s' ..." % (net, interface))
 
     ip_mac_host = {}
@@ -177,7 +183,10 @@ def scan_and_print_neighbors(net, interface, timeout=5):
 
 
 def add_manual_hosts(manual_hosts_string=""):
-
+    """
+    Grabs the configured manual hosts and tries to ping and get the related information from these hosts
+    Returns a dict with the findings, or an empty dict if nothing is found
+    """
     logger.info("Starting host discovery for manually configured entries ...")
 
     ip_mac_host = {}
@@ -192,7 +201,8 @@ def add_manual_hosts(manual_hosts_string=""):
             "Manual hosts string is undefined or invalid. Not adding any manual host.")
         return ip_mac_host
 
-    manual_hosts_list = sorted(set(manual_hosts_string.split(',')), key=siaas_aux.ip_sorter)
+    manual_hosts_list = sorted(
+        set(manual_hosts_string.split(',')), key=siaas_aux.ip_sorter)
 
     for host_raw in manual_hosts_list:
 
@@ -241,9 +251,9 @@ def add_manual_hosts(manual_hosts_string=""):
 
                 dns_entry = ip
                 if ip not in ip_mac_host.keys():
-                   ip_mac_host[ip] = {}
-                   ip_mac_host[ip]["discovery_type"] = "manual"
-                   ip_mac_host[ip]["manual_entry_addresses"] = []
+                    ip_mac_host[ip] = {}
+                    ip_mac_host[ip]["discovery_type"] = "manual"
+                    ip_mac_host[ip]["manual_entry_addresses"] = []
                 ip_mac_host[ip]["manual_entry_addresses"].append(host)
                 ip_mac_host[ip]["manual_entry_addresses"].sort()
                 if len(dns_name) > 0:
@@ -267,7 +277,9 @@ def add_manual_hosts(manual_hosts_string=""):
 
 
 def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_wifi_auto_discovery=False):
-
+    """
+    Main neighborhood host finding logic (ARP/NDP + Subnet range finding + Manual hosts
+    """
     arp_ndp_hosts = {}
     auto_hosts = {}
     neigh_hosts = {}
@@ -276,26 +288,26 @@ def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_w
     auto_scanned_interfaces = 0
 
     # Grab manually configured hosts
-    manual_hosts = add_manual_hosts(manual_hosts_string=
-        siaas_aux.get_config_from_configs_db(config_name="manual_hosts"))
+    manual_hosts = add_manual_hosts(
+        manual_hosts_string=siaas_aux.get_config_from_configs_db(config_name="manual_hosts"))
 
     # Grab known hosts by ARP/NDP
     arp_ndp_hosts = get_arp_ndp_known_hosts()
 
-    # We probably have new information from the manually configured hosts, in our local ARP/NDP tables, in case they're local (we just tried to ping them). Let's fill it up 
+    # We probably have new information from the manually configured hosts, in our local ARP/NDP tables, in case they're local (we just tried to ping them). Let's fill it up
     for ip in manual_hosts.keys():
-       if ip in arp_ndp_hosts.keys():
-          if "mac_address" in arp_ndp_hosts[ip].keys():
-              manual_hosts[ip]["mac_address"] = arp_ndp_hosts[ip]["mac_address"]
-          else:
-              manual_hosts[ip].pop("mac_address", None)
-          if "seen_on_interface" in arp_ndp_hosts[ip].keys():
-              manual_hosts[ip]["seen_on_interface"] = arp_ndp_hosts[ip]["seen_on_interface"]
-          else:
-              manual_hosts[ip].pop("seen_on_interface", None)
-       else:
-          manual_hosts[ip].pop("mac_address", None)
-          manual_hosts[ip].pop("seen_on_interface", None)
+        if ip in arp_ndp_hosts.keys():
+            if "mac_address" in arp_ndp_hosts[ip].keys():
+                manual_hosts[ip]["mac_address"] = arp_ndp_hosts[ip]["mac_address"]
+            else:
+                manual_hosts[ip].pop("mac_address", None)
+            if "seen_on_interface" in arp_ndp_hosts[ip].keys():
+                manual_hosts[ip]["seen_on_interface"] = arp_ndp_hosts[ip]["seen_on_interface"]
+            else:
+                manual_hosts[ip].pop("seen_on_interface", None)
+        else:
+            manual_hosts[ip].pop("mac_address", None)
+            manual_hosts[ip].pop("seen_on_interface", None)
 
     if disable_neighborhood_discovery:
         logger.warning(
@@ -315,7 +327,8 @@ def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_w
 
             # Skip wireless interface if configuration says so
             if interface.lower().startswith("w") and disable_wifi_auto_discovery:
-                logger.warning("Bypassing automatic discovery of hosts over Wi-Fi network '"+str(interface)+"' as per configuration!")
+                logger.warning("Bypassing automatic discovery of hosts over Wi-Fi network '" +
+                               str(interface)+"' as per configuration!")
                 continue
 
             # Skip invalid netmasks
@@ -337,7 +350,8 @@ def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_w
             logger.warning(
                 "Automatic neighborhood discovery found no interfaces with a valid network configuration to work on.")
 
-        neigh_hosts = dict(list(arp_ndp_hosts.items()) + list(auto_hosts.items()))
+        neigh_hosts = dict(list(arp_ndp_hosts.items()) +
+                           list(auto_hosts.items()))
 
     # Merge all hosts (give priority to manually defined hosts)
     all_hosts = dict(list(neigh_hosts.items()) +
@@ -347,7 +361,9 @@ def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_w
 
 
 def loop(interface_to_scan=None):
-
+    """
+    Neighborhood module loop (calls main neighborhood host finding function)
+    """
     # Initializing the neighborhood local DB
     os.makedirs(os.path.join(sys.path[0], 'var'), exist_ok=True)
     siaas_aux.write_to_local_file(os.path.join(
@@ -361,7 +377,8 @@ def loop(interface_to_scan=None):
 
         disable_neighborhood_discovery = siaas_aux.get_config_from_configs_db(
             config_name="disable_neighborhood_discovery", convert_to_string=True)
-        dont_neighborhood = siaas_aux.validate_bool_string(disable_neighborhood_discovery)
+        dont_neighborhood = siaas_aux.validate_bool_string(
+            disable_neighborhood_discovery)
 
         disable_wifi_auto_discovery = siaas_aux.get_config_from_configs_db(
             config_name="disable_wifi_auto_discovery", convert_to_string=True)
