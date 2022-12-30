@@ -16,7 +16,6 @@ datatransfer_loop_interval_sec = 300
 #disable_portscanner = true # don't scan hosts information or vulnerabilities
 #disable_wifi_auto_discovery = true # don't auto scan (IP network scan) for hosts on Wi-Fi interfaces
 #manual_hosts = 109.51.61.78,sapo.pt,google.com
-neighborhood_arp_timeout_sec = 5
 neighborhood_loop_interval_sec = 900
 #max_parallel_portscan_threads = 3
 nmap_portscan_timeout_sec = 600
