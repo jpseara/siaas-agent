@@ -82,7 +82,7 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
     return (out_dict, total_vulns, total_exploits)
 
 
-def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300):
+def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=600):
     """"
     Receives a target host, port, protocol, and a list of nmap scripts and scans this specific port
     Returns a tuple with the findings dict, number of valid scripts run, number of vulnerabilities, and number of exploits found
@@ -109,9 +109,9 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
     try:
         timeout = int(timeout)
     except:
-        timeout = 300
+        timeout = 600
         logger.warning(
-            "Input timeout for port scanning is not configured or in an invalid format. Defaulting to \"300\".")
+            "Input timeout for port scanning is not configured or in an invalid format. Using 10 minutes by default.")
 
     try:
         ipv = siaas_aux.is_ipv4_or_ipv6(
@@ -216,7 +216,7 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=300)
     return (scan_results_dict, total_valid_scripts, total_vulns, total_exploits)
 
 
-def get_system_info(target, specific_ports=None, timeout=30):
+def get_system_info(target, specific_ports=None, timeout=600):
     """
     Gets a target host and an eventual list of specific ports
     Grabs OS info and the status and services running in the ports
@@ -232,7 +232,7 @@ def get_system_info(target, specific_ports=None, timeout=30):
     except:
         timeout = 600
         logger.warning(
-            "Input timeout for system information scanning is not configured or in an invalid format. Defaulting to \"600\".")
+            "Input timeout for system information scanning is not configured or in an invalid format. Using 10 minutes by default.")
 
     try:
         ipv = siaas_aux.is_ipv4_or_ipv6(
@@ -518,8 +518,8 @@ def loop():
             time.sleep(sleep_time)
         except:
             logger.debug(
-                "The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
-            time.sleep(60)
+                "The interval loop time is not configured or is invalid. Sleeping now for 1 day by default ...")
+            time.sleep(86400)
 
 
 if __name__ == "__main__":

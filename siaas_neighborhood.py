@@ -401,8 +401,8 @@ def loop(interface_to_scan=None):
             time.sleep(sleep_time)
         except:
             logger.debug(
-                "The interval loop time is not configured or is invalid. Sleeping now for 60 seconds by default ...")
-            time.sleep(60)
+                "The interval loop time is not configured or is invalid. Sleeping now for 15 minutes by default ...")
+            time.sleep(900)
 
 
 if __name__ == "__main__":
