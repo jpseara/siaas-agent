@@ -63,8 +63,8 @@ if __name__ == "__main__":
     log_file = os.path.join(os.path.join(
         sys.path[0], LOG_DIR), "siaas-agent.log")
     log_level = siaas_aux.get_config_from_configs_db(config_name="log_level")
-    for handler in logging.root.handlers[:]:
-        logging.root.removeHandler(handler)
+    while len(logging.root.handlers) > 0:
+        logging.root.removeHandler(logging.root.handlers[-1])
     try:
         logging.basicConfig(handlers=[RotatingFileHandler(os.path.join(sys.path[0], log_file), maxBytes=10240000, backupCount=5)],
                             format='%(asctime)s.%(msecs)03d %(levelname)-5s %(filename)s [%(processName)s|%(threadName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=eval("logging."+log_level.upper()))
