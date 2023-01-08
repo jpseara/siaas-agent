@@ -24,7 +24,7 @@ chmod 755 /etc/cron.daily/siaas-agent
 # SERVICE CONFIGURATION
 mkdir -p ssl
 cp -n conf/siaas_agent.cnf.orig conf/siaas_agent.cnf
-ln -fs ${SCRIPT_DIR}/log /var/log/siaas-agent
+ln -fsT ${SCRIPT_DIR}/log /var/log/siaas-agent
 cat << EOF | sudo tee /etc/systemd/system/siaas-agent.service
 [Unit]
 Description=SIAAS Agent
