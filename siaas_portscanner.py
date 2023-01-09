@@ -44,7 +44,7 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
         current_section = ""
         for line in raw_data.splitlines():
             if len(line or '') > 0:
-                clean_line = line.lstrip().rstrip()
+                clean_line = line.strip()
                 if clean_line.endswith(":"):
                     current_section = clean_line.rstrip(":")
                     out_dict[current_section] = {}
@@ -68,10 +68,10 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
         out_list = []
         for line in raw_data.splitlines():
             if len(line or '') > 0:
-                clean_line = line.lstrip().rstrip()
+                clean_line = line.strip()
                 try:
                     formatted_clean_line = clean_line.replace(
-                        "\t", " | ").lstrip().rstrip()
+                        "\t", " | ").strip()
                     # total_vulns+=1 # not counting raw lines as vulnerabilities as there's lots of trash in there (fingerprints, banners, etc)
                     out_list.append(formatted_clean_line)
                 except:
@@ -130,7 +130,7 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=600)
 
         nmap_script_uncommented = nmap_script_raw.split('#')[0]
         nmap_script = nmap_script_uncommented.split(
-            '\t')[0].split('\n')[0].rstrip().lstrip()
+            '\t')[0].split('\n')[0].strip()
 
         if len(nmap_script_uncommented) > 0 and len(nmap_script) == 0:
             logger.warning("Nmap script '" +

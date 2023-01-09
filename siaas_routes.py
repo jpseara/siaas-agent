@@ -45,7 +45,7 @@ def siaas_agent():
     module = request.args.get('module', default='*', type=str)
     all_existing_modules = "platform,neighborhood,portscanner,config"
     for m in module.split(','):
-        if m.lstrip().rstrip() == "*":
+        if m.strip() == "*":
             module = all_existing_modules
     output = siaas_aux.merge_module_dicts(module)
     if type(output) == bool and output == False:

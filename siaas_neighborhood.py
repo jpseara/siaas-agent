@@ -207,7 +207,7 @@ def add_manual_hosts(manual_hosts_string=""):
     for host_raw in manual_hosts_list:
 
         host_uncommented = host_raw.split('#')[0]
-        host = host_uncommented.split('\t')[0].split('\n')[0].rstrip().lstrip()
+        host = host_uncommented.split('\t')[0].split('\n')[0].strip()
 
         if host.startswith("127.") or host.startswith("169.") or host.lower().startswith("fe80::") or host == "::1" or host.lower() == "localhost":
             logger.warning("Manually configured host '"+host +

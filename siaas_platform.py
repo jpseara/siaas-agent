@@ -44,20 +44,20 @@ def main(version="N/A"):
         platform["system_info"]["hardware"] = {}
         if str(os.uname()[4]).lower().startswith("arm") or str(os.uname()[4]) == "aarch64":
             platform["system_info"]["hardware"]["product_name"] = subprocess.check_output(
-                "cat /sys/firmware/devicetree/base/model", universal_newlines=True, shell=True).lstrip().rstrip().lstrip('\x00').rstrip('\x00')
+                "cat /sys/firmware/devicetree/base/model", universal_newlines=True, shell=True).strip().strip('\x00')
             platform["system_info"]["hardware"]["serial_number"] = subprocess.check_output(
-                "cat /sys/firmware/devicetree/base/serial-number", universal_newlines=True, shell=True).lstrip().rstrip().lstrip('\x00').rstrip('\x00')
+                "cat /sys/firmware/devicetree/base/serial-number", universal_newlines=True, shell=True).strip().strip('\x00')
         else:
             platform["system_info"]["hardware"]["manufacturer"] = subprocess.check_output(
-                "dmidecode --string system-manufacturer", universal_newlines=True, shell=True).lstrip().rstrip()
+                "dmidecode --string system-manufacturer", universal_newlines=True, shell=True).strip()
             platform["system_info"]["hardware"]["product_name"] = subprocess.check_output(
-                "dmidecode --string system-product-name", universal_newlines=True, shell=True).lstrip().rstrip()
+                "dmidecode --string system-product-name", universal_newlines=True, shell=True).strip()
             platform["system_info"]["hardware"]["version"] = subprocess.check_output(
-                "dmidecode --string system-version", universal_newlines=True, shell=True).lstrip().rstrip()
+                "dmidecode --string system-version", universal_newlines=True, shell=True).strip()
             platform["system_info"]["hardware"]["serial_number"] = subprocess.check_output(
-                "dmidecode --string system-serial-number", universal_newlines=True, shell=True).lstrip().rstrip()
+                "dmidecode --string system-serial-number", universal_newlines=True, shell=True).strip()
             platform["system_info"]["hardware"]["bios_version"] = subprocess.check_output(
-                "dmidecode --string bios-version", universal_newlines=True, shell=True).lstrip().rstrip().lstrip()
+                "dmidecode --string bios-version", universal_newlines=True, shell=True).strip()
     except Exception as e:
         logger.warning("Couldn't get all hardware information: "+str(e))
 
