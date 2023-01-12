@@ -197,6 +197,8 @@ def main(version="N/A"):
 
     platform["last_check"] = siaas_aux.get_now_utc_str()
 
+    logger.info("Done grabbing system information for this platform.")
+
     return platform
 
 

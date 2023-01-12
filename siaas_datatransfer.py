@@ -45,7 +45,7 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
     Uploads agent configs, after connecting to the server's API
     Returns True if all OK; False if anything failed
     """
-    logger.debug("Uploading agent data to the server ...")
+    logger.info("Uploading agent data to the server ...")
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()
 
