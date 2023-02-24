@@ -87,6 +87,8 @@ def main(version="N/A"):
             logical=True)
         cpu_freq = psutil.cpu_freq()
         platform["system_info"]["cpu"]["current_freq"] = f'{float(str(cpu_freq.current)):.2f}'+" MHz"
+        if float(str(cpu_freq.max)) > 0:
+            platform["system_info"]["cpu"]["max_freq"] = f'{float(str(cpu_freq.max)):.2f}'+" MHz"
         with open("/sys/class/thermal/thermal_zone0/temp", 'r') as file:
             current_temp = file.readline()
         platform["system_info"]["cpu"]["temp"] = f'{(float(str(current_temp))/1000):.2f}'+" C"
