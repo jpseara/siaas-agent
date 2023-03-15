@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
     """
     Gets the Nmap raw output and parses it
-    If the data is from vulners/vulscan, it uses a speciallized parsers which tags exploits as well
+    If the data is from vulners/vulscan, it uses a specialized parser which tags exploits as well
     Otherwise, it uses a generic parser
     Returns a tuple with the findings dict, total number of vulnerabilities, and total number of exploits
     """
@@ -45,16 +45,17 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
         for line in raw_data.splitlines():
             if len(line or '') > 0:
                 clean_line = line.strip()
-                if clean_line.endswith(":"):
+                if clean_line.endswith(":"):  # section header
                     current_section = clean_line.rstrip(":")
                     out_dict[current_section] = {}
-                else:
+                else:  # vulnerability within the section
                     if current_section != "":
                         total_vulns += 1
                         vuln_id = clean_line.split(maxsplit=1)[
                             0].lstrip("[").rstrip("]")
                         content_list = clean_line.split(
                             maxsplit=1)[1].split("\t")
+                        # check if it's an exploit
                         if "exploit" in content_list[-1].lower() or "exploit" in current_section.lower():
                             total_exploits += 1
                             content_list.append("siaas_exploit_tag")
