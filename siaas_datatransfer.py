@@ -130,7 +130,7 @@ def loop():
             last_uploaded_dict = upload_agent_data(API_URI,
                                                    last_uploaded_dict, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd)
 
-        # Download agent data
+        # Download agent configs
         download_agent_configs(API_URI, ssl_ignore_verify,
                                ssl_ca_bundle, api_user, api_pwd)
 

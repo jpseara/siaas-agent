@@ -49,17 +49,22 @@ def merge_module_dicts(modules=""):
 
 def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_local.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict={}):
     """
-    Merges the upstream configs to the local configs
+    Merges the upstream configs to the local configs, after removing protected configurations from the upstream configs
     If the config disappears from the server, it reverts to the local config
     In case of errors, no changes are made, and False is returned
     """
     local_config_dict = {}
     merged_config_dict = {}
     delta_dict = {}
+    protected_configs = ["log_level", "api_uri", "api_user", "api_pwd", "api_ssl_ignore_verify", "api_ssl_ca_bundle", "enable_internal_api", "offline_mode"]
     try:
         local_config_dict = get_config_from_configs_db(local_dict=local_dict)
         if type(upstream_dict) is not dict:
             raise TypeError("Upstream configs are invalid.")
+        for p in protected_configs: # remove any protected configs from upstream dict
+            for k in upstream_dict.keys():
+                if p.lower().strip() == k.lower().strip():
+                    upstream_dict.pop(k, None)
         if len(upstream_dict) > 0:
             merged_config_dict = dict(
                 list(local_config_dict.items())+list(upstream_dict.items()))
