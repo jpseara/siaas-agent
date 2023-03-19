@@ -62,9 +62,9 @@ def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config
         if type(upstream_dict) is not dict:
             raise TypeError("Upstream configs are invalid.")
         for p in protected_configs: # remove any protected configs from upstream dict
-            for k in upstream_dict.keys():
+            for k in upstream_dict.copy().keys():
                 if p.lower().strip() == k.lower().strip():
-                    upstream_dict.pop(k, None)
+                    del(upstream_dict[k])
         if len(upstream_dict) > 0:
             merged_config_dict = dict(
                 list(local_config_dict.items())+list(upstream_dict.items()))
