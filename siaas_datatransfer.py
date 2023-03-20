@@ -55,8 +55,7 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
     try:  # anonymize passwords before sending them
         for k in current_dict["config"].keys():
             if k.endswith("_pwd") or k.endswith("_passwd") or k.endswith("_password"):
-                current_dict["config"][k] = '*' * \
-                    len(current_dict["config"][k])
+                current_dict["config"][k] = '*' * 8
     except:
         pass
 
