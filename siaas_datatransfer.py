@@ -42,7 +42,7 @@ def download_agent_configs(api_base_uri, ignore_ssl=False, ca_bundle=None, api_u
 
 def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
     """
-    Uploads agent configs, after connecting to the server's API
+    Uploads agent configs (with passwords anonymized), after connecting to the server's API
     Returns True if all OK; False if anything failed
     """
     logger.info("Uploading agent data to the server ...")
@@ -51,6 +51,14 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
 
     all_modules = "platform,neighborhood,portscanner,config"
     current_dict = siaas_aux.merge_module_dicts(all_modules)
+
+    try:  # anonymize passwords before sending them
+        for k in current_dict["config"].keys():
+            if k.endswith("_pwd") or k.endswith("_passwd") or k.endswith("_password"):
+                current_dict["config"][k] = '*' * \
+                    len(current_dict["config"][k])
+    except:
+        pass
 
     # if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict) == 0:
     #    logger.info(
