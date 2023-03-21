@@ -1,28 +1,28 @@
 # Protected configurations (last for the whole run and can't be changed remotely)
 
-log_level = info
-api_uri = https://127.0.0.1/api
-api_user = siaas
-api_pwd = siaas
-api_ssl_ignore_verify = true
-api_ssl_ca_bundle = ./ssl/siaas.crt
-#enable_internal_api = true
-#offline_mode = true # don't communicate with the server at all
+log_level = info # (Default: info)
+api_uri = https://127.0.0.1/api # (Default: None)
+api_user = siaas # (Default: None)
+api_pwd = siaas # (Default: None)
+api_ssl_ignore_verify = true # (Default: None)
+api_ssl_ca_bundle = ./ssl/siaas.crt # (Default: None)
+#enable_internal_api = true # (Default: false)
+#offline_mode = true # don't communicate with the server at all (Default: false)
 
-# Runtime configurations (can be changed during runtime by the remote server)
+# Runtime configurations (can be changed during runtime from published configurations in the server)
 
-datatransfer_loop_interval_sec = 300
-#disable_neighborhood_discovery = true # don't perform ARP/NDP or automatic discovery
-#disable_portscanner = true # don't scan hosts information or vulnerabilities
-#disable_wifi_auto_discovery = true # don't auto scan (IP network scan) for hosts on Wi-Fi interfaces
-#manual_hosts = 109.51.61.78,sapo.pt,google.com
-neighborhood_loop_interval_sec = 900
-#max_parallel_portscan_threads = 3
-nmap_portscan_timeout_sec = 600
-nmap_scripts = vuln # leaving this field commented means no nmap scanning script is run. Options: auth,broadcast,brute,default,discovery,dos,exploit,external,fuzzer,intrusive,malware,nmap-vulners,safe,version,vuln,vulscan
-nmap_sysinfo_timeout_sec = 600
-platform_loop_interval_sec = 300
-portscanner_loop_interval_sec = 86400
-#scan_only_manual_hosts = true # only run the portscanner against manually configured hosts
-#silent_mode = true # the agent will download and update its configs from the server, but will not upload any data
-#target_specific_ports = 22,80,8080-8083 # when this setting is commented, all the open ports of each host will be scanned
+datatransfer_loop_interval_sec = 300 # (Default: 300)
+#disable_neighborhood_discovery = true # don't perform ARP/NDP or automatic discovery (Default: false)
+#disable_portscanner = true # don't scan hosts information or vulnerabilities (Default: false)
+#disable_wifi_auto_discovery = true # don't auto scan hosts in the IP network on Wi-Fi interfaces (Default: false)
+#manual_hosts = 109.51.61.78,sapo.pt,google.com # (Default: None)
+neighborhood_loop_interval_sec = 900 # (Default: 900)
+#max_parallel_portscan_threads = 3 # leaving commented means the number of threads is automatically handled (Default: None)
+nmap_portscan_timeout_sec = 600 # (Default: 600)
+nmap_scripts = vuln # leaving commented means no nmap scanning script is run. Options: auth,broadcast,brute,default,discovery,dos,exploit,external,fuzzer,intrusive,malware,nmap-vulners,safe,version,vuln,vulscan (Default: None)
+nmap_sysinfo_timeout_sec = 600 # (Default: 600)
+platform_loop_interval_sec = 300 # (Default: 300)
+portscanner_loop_interval_sec = 86400 # (Default: 86400)
+#scan_only_manual_hosts = true # only run the portscanner against manually configured hosts (Default: false)
+#silent_mode = true # the agent will download and update its configs from the server, but will not upload any data (Default: false)
+#target_specific_ports = 22,80,8080-8083 # when this setting is commented, all the open ports of each host will be scanned (Default: None)
