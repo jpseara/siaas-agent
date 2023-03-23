@@ -20,6 +20,7 @@ def index():
     """
     Agent API route - index
     """
+    ret_code = 200
     output = {
         'name': 'Intelligent System for Automation of Security Audits (SIAAS)',
         'module': 'Agent',
@@ -34,7 +35,7 @@ def index():
             'total_entries': len(output),
             'time': siaas_aux.get_now_utc_str()
         }
-    )
+    ), ret_code
 
 
 @app.route('/siaas-agent', methods=['GET'], strict_slashes=False)
@@ -42,6 +43,7 @@ def siaas_agent():
     """
     Agent API route - agent information
     """
+    ret_code = 200
     module = request.args.get('module', default='*', type=str)
     all_existing_modules = "platform,neighborhood,portscanner,config"
     for m in module.split(','):
@@ -50,6 +52,7 @@ def siaas_agent():
     output = siaas_aux.merge_module_dicts(module)
     if type(output) == bool and output == False:
         status = "failure"
+        ret_code = 500
         output = {}
     else:
         status = "success"
@@ -66,4 +69,4 @@ def siaas_agent():
             'total_entries': len(output),
             'time': siaas_aux.get_now_utc_str()
         }
-    )
+    ), ret_code
