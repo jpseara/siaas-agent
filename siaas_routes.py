@@ -20,6 +20,10 @@ def index():
     """
     Agent API route - index
     """
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
     ret_code = 200
     output = {
         'name': 'Intelligent System for Automation of Security Audits (SIAAS)',
@@ -43,6 +47,10 @@ def siaas_agent():
     """
     Agent API route - agent information
     """
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
     ret_code = 200
     module = request.args.get('module', default='*', type=str)
     all_existing_modules = "platform,neighborhood,portscanner,config"
