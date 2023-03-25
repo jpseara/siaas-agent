@@ -55,6 +55,7 @@ def get_arp_ndp_known_hosts():
             if "FAILED" in fields:
                 raise ValueError("ARP/NDP entry in FAILED state.")
             ip_arp = fields[0]
+            # filter localhosts and filter any IPv6 address that's not global unicast to avoid reserved ranges which sometimes are filled with automatically generated random addresses
             if ip_arp.startswith("127.") or ip_arp.startswith("169.") or ip_arp == "::1" or (":" in ip_arp and (len(ip_arp.split(':')[0]) != 4 or (ip_arp.split(':')[0][0] != '2' and ip_arp.split(':')[0][0] != '3'))):
                 raise ValueError(
                     "Rejecting ARP/NDP entry due to being a reserved or link local address.")
@@ -209,6 +210,7 @@ def add_manual_hosts(manual_hosts_string=""):
         host_uncommented = host_raw.split('#')[0]
         host = host_uncommented.split('\t')[0].split('\n')[0].strip()
 
+        # filter localhosts and filter any IPv6 address that's not global unicast to avoid reserved ranges which sometimes are filled with automatically generated random addresses
         if host.startswith("127.") or host.startswith("169.") or host == "::1" or (":" in host and (len(host.split(':')[0]) != 4 or (host.split(':')[0][0] != '2' and host.split(':')[0][0] != '3'))) or host.lower() == "localhost":
             logger.warning("Manually configured host '"+host +
                            "' is invalid. No localhost or reserved IP entries are allowed.")
@@ -322,6 +324,7 @@ def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_w
                 continue
 
             # Skip loopback network and default GW
+            # avoid local addresses and any other interfaces that are not ethernet/wifi/bond
             if network == 0 or interface.lower() == 'lo' or address.startswith("127.") or address.startswith("169.") or address == '0.0.0.0' or (not interface.lower().startswith("e") and not interface.lower().startswith("w") and not interface.lower().startswith("b")):
                 continue
 
