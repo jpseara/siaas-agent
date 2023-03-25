@@ -13,6 +13,43 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
+def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None, silent=False):
+    """
+    Uploads agent data (with passwords anonymized), after connecting to the server's API
+    If silent mode is on, only uploads configs
+    Returns True if all OK; False if anything failed
+    """
+    logger.info("Uploading agent data to the server ...")
+
+    siaas_uid = siaas_aux.get_or_create_unique_system_id()
+
+    all_modules = "platform,neighborhood,portscanner,config"
+
+    if silent:
+        all_modules = "config"
+
+    current_dict = siaas_aux.merge_module_dicts(all_modules)
+
+    try:  # anonymize passwords before sending them
+        for k in current_dict["config"].keys():
+            if k.endswith("_pwd") or k.endswith("_passwd") or k.endswith("_password"):
+                current_dict["config"][k] = '*' * 8
+    except:
+        pass
+
+    # if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict) == 0:
+    #    logger.info(
+    #        "No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
+    #    return last_uploaded_dict
+
+    logger.info("Agent data upload to the server finished.")
+
+    if not siaas_aux.post_request_to_server(api_base_uri+"/siaas-server/agents/data/"+siaas_uid, dict(current_dict), ignore_ssl=ignore_ssl, ca_bundle=ca_bundle, api_user=api_user, api_pwd=api_pwd):
+        return last_uploaded_dict
+
+    return current_dict
+
+
 def download_agent_configs(api_base_uri, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
     """
     Downloads agent configs and merges with local configs
@@ -38,38 +75,6 @@ def download_agent_configs(api_base_uri, ignore_ssl=False, ca_bundle=None, api_u
     else:
         logger.error("There was an error downloading agent configs.")
         return False
-
-
-def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None):
-    """
-    Uploads agent configs (with passwords anonymized), after connecting to the server's API
-    Returns True if all OK; False if anything failed
-    """
-    logger.info("Uploading agent data to the server ...")
-
-    siaas_uid = siaas_aux.get_or_create_unique_system_id()
-
-    all_modules = "platform,neighborhood,portscanner,config"
-    current_dict = siaas_aux.merge_module_dicts(all_modules)
-
-    try:  # anonymize passwords before sending them
-        for k in current_dict["config"].keys():
-            if k.endswith("_pwd") or k.endswith("_passwd") or k.endswith("_password"):
-                current_dict["config"][k] = '*' * 8
-    except:
-        pass
-
-    # if (str(current_dict) == str(last_uploaded_dict)) or len(current_dict) == 0:
-    #    logger.info(
-    #        "No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
-    #    return last_uploaded_dict
-
-    logger.info("Agent data upload to the server finished.")
-
-    if not siaas_aux.post_request_to_server(api_base_uri+"/siaas-server/agents/data/"+siaas_uid, dict(current_dict), ignore_ssl=ignore_ssl, ca_bundle=ca_bundle, api_user=api_user, api_pwd=api_pwd):
-        return last_uploaded_dict
-
-    return current_dict
 
 
 def loop():
@@ -127,19 +132,19 @@ def loop():
 
         logger.debug("Loop running ...")
 
-        # Upload agent data
-        silent_mode = siaas_aux.get_config_from_configs_db(
-            config_name="silent_mode", convert_to_string=True)
-        if siaas_aux.validate_bool_string(silent_mode):
-            logger.warning(
-                "Silent mode is on! This means no data is being sent to the server.")
-        else:
-            last_uploaded_dict = upload_agent_data(API_URI,
-                                                   last_uploaded_dict, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd)
-
         # Download agent configs
         download_agent_configs(API_URI, ssl_ignore_verify,
                                ssl_ca_bundle, api_user, api_pwd)
+
+        # Upload agent data
+        silent_mode = siaas_aux.get_config_from_configs_db(
+            config_name="silent_mode", convert_to_string=True)
+        silent = siaas_aux.validate_bool_string(silent_mode)
+        if silent:
+            logger.warning(
+                "Silent mode is on! This means only config-related data is being sent to the server.")
+        last_uploaded_dict = upload_agent_data(API_URI,
+                                               last_uploaded_dict, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd, silent)
 
         # Sleep before next loop
         try:
