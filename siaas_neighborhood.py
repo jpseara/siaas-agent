@@ -55,9 +55,9 @@ def get_arp_ndp_known_hosts():
             if "FAILED" in fields:
                 raise ValueError("ARP/NDP entry in FAILED state.")
             ip_arp = fields[0]
-            if ip_arp.startswith("127.") or ip_arp.startswith("169.") or ip_arp.lower().startswith("fe80::") or ip_arp == "::1":
+            if ip_arp.startswith("127.") or ip_arp.startswith("169.") or ip_arp == "::1" or (":" in ip_arp and (len(ip_arp.split(':')[0]) != 4 or (ip_arp.split(':')[0][0] != '2' and ip_arp.split(':')[0][0] != '3'))):
                 raise ValueError(
-                    "Rejecting ARP/NDP entry which is a link local address.")
+                    "Rejecting ARP/NDP entry due to being a reserved or link local address.")
             interface = fields[2]
             if interface.lower() == "lo" or (not interface.lower().startswith("e") and not interface.lower().startswith("w") and not interface.lower().startswith("b")):
                 raise ValueError(
@@ -209,9 +209,9 @@ def add_manual_hosts(manual_hosts_string=""):
         host_uncommented = host_raw.split('#')[0]
         host = host_uncommented.split('\t')[0].split('\n')[0].strip()
 
-        if host.startswith("127.") or host.startswith("169.") or host.lower().startswith("fe80::") or host == "::1" or host.lower() == "localhost":
+        if host.startswith("127.") or host.startswith("169.") or host == "::1" or (":" in host and (len(host.split(':')[0]) != 4 or (host.split(':')[0][0] != '2' and host.split(':')[0][0] != '3'))) or host.lower() == "localhost":
             logger.warning("Manually configured host '"+host +
-                           "' is invalid. No localhost hosts are allowed.")
+                           "' is invalid. No localhost or reserved IP entries are allowed.")
             continue
 
         if len(host) > 0:
