@@ -5,6 +5,7 @@
 import os
 import sys
 import logging
+import time
 import multiprocessing_logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask, jsonify, render_template
@@ -96,6 +97,8 @@ if __name__ == "__main__":
     platform.start()
     neighborhood.start()
     portscanner.start()
+    # give the processes some time to grab some data on first run
+    time.sleep(60)
     datatransfer.start()
 
     enable_internal_api = siaas_aux.get_config_from_configs_db(
