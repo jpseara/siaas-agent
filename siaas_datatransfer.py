@@ -26,7 +26,7 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
     all_modules = "platform,neighborhood,portscanner,config"
 
     if silent:
-        all_modules = "config"
+        all_modules = "config,platform"
 
     current_dict = siaas_aux.merge_module_dicts(all_modules)
 
@@ -155,8 +155,8 @@ def loop():
             time.sleep(sleep_time)
         except:
             logger.debug(
-                "The interval loop time is not configured or is invalid. Sleeping now for 5 minutes by default ...")
-            time.sleep(300)
+                "The interval loop time is not configured or is invalid. Sleeping now for 1 hour by default ...")
+            time.sleep(3600)
 
 
 if __name__ == "__main__":

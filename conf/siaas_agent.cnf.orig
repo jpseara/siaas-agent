@@ -11,7 +11,7 @@ api_ssl_ca_bundle = ./ssl/siaas.crt # (Default: None)
 
 # Runtime configurations (can be changed during runtime from published configurations in the server)
 
-#datatransfer_loop_interval_sec = 300 # (Default: 300)
+#datatransfer_loop_interval_sec = 3600 # (Default: 3600)
 #disable_neighborhood_discovery = true # don't perform ARP/NDP or automatic discovery (Default: false)
 #disable_portscanner = true # don't scan hosts information or vulnerabilities (Default: false)
 #disable_wifi_auto_discovery = true # don't auto scan hosts in the IP network on Wi-Fi interfaces (Default: false)
@@ -24,5 +24,5 @@ nmap_scripts = vuln # if commented no nmap scanning script is run. Options: auth
 #portscanner_loop_interval_sec = 86400 # (Default: 86400)
 #portscanner_max_parallel_workers = 1 # leaving commented means the number of workers is automatically handled (Default: None)
 #scan_only_manual_hosts = true # only run the portscanner against manually configured hosts (Default: false)
-#silent_mode = true # the agent will download configs from the server, but will not upload any data (Default: false)
+#silent_mode = true # the agent will only upload configuration and status data (noNeighborhood or Portscanner data is uploaded to the server) (Default: false)
 #target_specific_ports = 22,80,8080-8083 # when this setting is commented, all the open ports of each host will be scanned (Default: None)
