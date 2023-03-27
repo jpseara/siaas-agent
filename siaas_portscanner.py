@@ -496,8 +496,8 @@ def loop():
             max_workers = None
             logger.debug(
                 "The number of maximum parallel port scanning workers is not configured or is invalid. Python will automatically manage this number ...")
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+        # with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = []
             for ip_or_domain in all_ips_and_domains_to_scan:
                 futures.append(executor.submit(main, target=ip_or_domain))
