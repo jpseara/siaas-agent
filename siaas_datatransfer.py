@@ -34,11 +34,14 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
 
     # create empty keys if they are not in the dict (we want to avoid miss keys in order to keep API consistency on the server side)
     current_dict = {}
-    for m in sorted(all_modules.lower().split(',')):
-        if m in current_dict_temp.keys():
-            current_dict[m] = current_dict_temp[m]
-        else:
-            current_dict[m] = {}
+    if modules_to_send != all_modules:
+        for m in sorted(all_modules.lower().split(',')):
+            if m in current_dict_temp.keys():
+                current_dict[m] = current_dict_temp[m]
+            else:
+                current_dict[m] = {}
+    else:
+        current_dict = current_dict_temp
 
     try:  # anonymize passwords before sending them
         for k in current_dict["config"].keys():
@@ -146,6 +149,8 @@ def loop():
         # Download agent configs
         download_agent_configs(API_URI, ssl_ignore_verify,
                                ssl_ca_bundle, api_user, api_pwd)
+
+        time.sleep(3)  # avoid flooding the API
 
         # Upload agent data
         silent_mode = siaas_aux.get_config_from_configs_db(

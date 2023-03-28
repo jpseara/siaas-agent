@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
     platform.start()
     # give the platform module some seconds to grab system info
-    time.sleep(15)
+    time.sleep(10)
     datatransfer.start()
     # give the datatransfer module some seconds to grab published configurations on first run
     time.sleep(15)
