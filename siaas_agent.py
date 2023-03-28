@@ -47,6 +47,12 @@ if __name__ == "__main__":
     os.makedirs(os.path.join(sys.path[0], 'tmp'), exist_ok=True)
     os.makedirs(os.path.join(sys.path[0], 'var'), exist_ok=True)
 
+    # Deleting any existing databases leftovers
+    old_dbs = os.listdir(os.path.join(sys.path[0], 'var/'))
+    for db in old_dbs:
+        if db.endswith(".db"):
+            os.remove(os.path.join(sys.path[0], 'var/'+db))
+
     # Initializing local databases for configurations
     siaas_aux.write_to_local_file(
         os.path.join(sys.path[0], 'var/config.db'), {})
@@ -94,13 +100,18 @@ if __name__ == "__main__":
     neighborhood = Process(target=siaas_neighborhood.loop, args=())
     portscanner = Process(target=siaas_portscanner.loop, args=())
     datatransfer = Process(target=siaas_datatransfer.loop, args=())
+
     platform.start()
+    # give the platform module some seconds to grab system info
+    time.sleep(15)
+    datatransfer.start()
+    # give the datatransfer module some seconds to grab published configurations on first run
+    time.sleep(15)
     neighborhood.start()
     portscanner.start()
-    # give the processes some time to grab some data on first run
-    time.sleep(60)
-    datatransfer.start()
 
+    # give the modules some time to start before launching the local API
+    time.sleep(5)
     enable_internal_api = siaas_aux.get_config_from_configs_db(
         config_name="enable_internal_api", convert_to_string=True)
     if siaas_aux.validate_bool_string(enable_internal_api):

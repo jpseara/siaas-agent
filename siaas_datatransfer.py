@@ -26,9 +26,16 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
     all_modules = "platform,neighborhood,portscanner,config"
 
     if silent:
-        all_modules = "config,platform"
+        modules_to_send = "platform,config"
+    else:
+        modules_to_send = all_modules
 
-    current_dict = siaas_aux.merge_module_dicts(all_modules)
+    current_dict = siaas_aux.merge_module_dicts(modules_to_send)
+
+    # create empty keys if they are not in the dict (useful for silent mode and first runs)
+    for k in all_modules.split(','):
+        if k not in current_dict.keys():
+            current_dict[k] = {}
 
     try:  # anonymize passwords before sending them
         for k in current_dict["config"].keys():
