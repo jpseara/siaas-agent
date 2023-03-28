@@ -260,7 +260,7 @@ def read_from_local_file(file_to_read):
                 pass
             return content
     except Exception as e:
-        logger.error("There was an error reading from local file " +
+        logger.error("There was an error while reading from local file " +
                      file_to_read+": "+str(e))
         return None
 

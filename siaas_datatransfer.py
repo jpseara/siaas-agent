@@ -13,10 +13,10 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
-def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None, silent=False):
+def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None, silent=False, first_run=False):
     """
     Uploads agent data (with passwords anonymized), after connecting to the server's API
-    If silent mode is on, only uploads configs
+    If silent mode is on, or first run, only uploads configs and platform data
     Returns True if all OK; False if anything failed
     """
     logger.info("Uploading agent data to the server ...")
@@ -25,7 +25,7 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
 
     all_modules = "platform,neighborhood,portscanner,config"
 
-    if silent:
+    if silent or first_run:
         modules_to_send = "platform,config"
     else:
         modules_to_send = all_modules
@@ -138,6 +138,7 @@ def loop():
         logger.warning(
             "Offline mode is on! No data will be transferred to or from the server. If you want to change this behavior, change the local configuration file and restart the application.")
 
+    first_run = True
     while valid_api and not no_comms:
 
         logger.debug("Loop running ...")
@@ -154,7 +155,9 @@ def loop():
             logger.warning(
                 "Silent mode is on! This means only config-related data is being sent to the server.")
         last_uploaded_dict = upload_agent_data(API_URI,
-                                               last_uploaded_dict, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd, silent)
+                                               last_uploaded_dict, ssl_ignore_verify, ssl_ca_bundle, api_user, api_pwd, silent, first_run)
+
+        first_run = False
 
         # Sleep before next loop
         try:
