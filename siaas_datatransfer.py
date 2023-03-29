@@ -55,11 +55,12 @@ def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_
     #        "No changes were detected in local databases, so there's nothing to upload to the remote DB server. Will check again later ...")
     #    return last_uploaded_dict
 
-    logger.info("Agent data upload to the server finished.")
-
     if not siaas_aux.post_request_to_server(api_base_uri+"/siaas-server/agents/data/"+siaas_uid, dict(current_dict), ignore_ssl=ignore_ssl, ca_bundle=ca_bundle, api_user=api_user, api_pwd=api_pwd):
+        logger.error(
+            "There was a failure while uploading agent data (maybe the server is down or unreachable?).")
         return last_uploaded_dict
 
+    logger.info("Agent data upload to the server finished.")
     return current_dict
 
 
@@ -75,18 +76,22 @@ def download_agent_configs(api_base_uri, ignore_ssl=False, ca_bundle=None, api_u
     downloaded_configs_raw = siaas_aux.get_request_to_server(
         api_base_uri+"/siaas-server/agents/configs/"+siaas_uid+"?merge_broadcast=1", ignore_ssl=ignore_ssl, ca_bundle=ca_bundle, api_user=api_user, api_pwd=api_pwd)
 
-    try:
-        downloaded_configs = downloaded_configs_raw["output"][siaas_uid]
+    if type(downloaded_configs_raw) == bool and downloaded_configs_raw == False:
+        logger.error(
+            "There was a failure while downloading agent configs (maybe the server is down or unreachable?). The current configuration is kept.")
+        return False
 
+    try:
+        # check if a configuration dict for this uid was received
+        downloaded_configs = downloaded_configs_raw["output"][siaas_uid]
     except:
         downloaded_configs = {}
 
     if siaas_aux.merge_configs_from_upstream(upstream_dict=downloaded_configs):
         logger.info("Agent configs download finished and merged locally.")
         return True
-
     else:
-        logger.error("There was an error downloading agent configs.")
+        logger.error("There was an error merging downloaded agent configs.")
         return False
 
 
