@@ -421,12 +421,12 @@ def main(target="localhost"):
 
     logger.info("Port scanning ended for %s: %s vulnerabilities were detected (%s confirmed exploits), across %s ports and using %s valid Nmap scripts. You might have duplicated outputs if you use multiple scripts. Elapsed time: %s seconds" % (
         target, total_vulns, total_exploits, total_ports, len(total_valid_scripts), elapsed_time_sec))
-    target_info["metadata"] = {}
-    target_info["metadata"]["num_scanned_ports"] = total_ports
-    target_info["metadata"]["num_valid_scripts"] = len(total_valid_scripts)
-    target_info["metadata"]["total_num_vulnerabilities"] = total_vulns
-    target_info["metadata"]["total_num_exploits"] = total_exploits
-    target_info["metadata"]["time_taken_sec"] = elapsed_time_sec
+    target_info["stats"] = {}
+    target_info["stats"]["num_scanned_ports"] = total_ports
+    target_info["stats"]["num_valid_scripts"] = len(total_valid_scripts)
+    target_info["stats"]["total_num_vulnerabilities"] = total_vulns
+    target_info["stats"]["total_num_exploits"] = total_exploits
+    target_info["stats"]["time_taken_sec"] = elapsed_time_sec
     target_info["last_check"] = siaas_aux.get_now_utc_str()
 
     return (target, target_info)
