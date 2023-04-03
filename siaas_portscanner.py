@@ -473,7 +473,7 @@ def loop():
         for neighbor in neighborhood.keys():
             if only_manual and neighborhood[neighbor]["discovery_type"] != "manual":
                 logger.warning("Ignoring host " + neighbor +
-                               " as only manual configured hosts are being scanned, as per configuration! Skipping this host.")
+                               " as only manual configured hosts are being scanned, as per configuration!")
                 continue
             if "manual_entry_addresses" not in neighborhood[neighbor].keys():
                 all_ips_and_domains_to_scan.append(neighbor)
