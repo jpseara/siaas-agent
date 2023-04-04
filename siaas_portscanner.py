@@ -55,8 +55,8 @@ def parse_raw_output_from_nmap_scan(script_name="generic", raw_data=""):
                             0].lstrip("[").rstrip("]")
                         content_list = clean_line.split(
                             maxsplit=1)[1].split("\t")
-                        # check if it's an exploit
-                        if "exploit" in content_list[-1].lower() or "exploit" in current_section.lower():
+                        # check if it's an exploit (check section name, vulnerability name, and vulnerability description contents)
+                        if "exploit" in current_section.lower() or "exploit" in str(vuln_id).lower() or "exploit" in str(content_list).lower():
                             total_exploits += 1
                             content_list.append("siaas_exploit_tag")
                         out_dict[current_section][vuln_id] = content_list
