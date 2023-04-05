@@ -8,7 +8,7 @@ By João Pedro Seara, supervised by teacher Carlos Serrão (PhD), 2023
 
 __
 
-**Instructions (tested on Ubuntu 20.04 "Focal", Ubuntu 22.04 "Jammy", and Raspberry Pi OS 11 "Bullseye")**
+**Instructions (tested on Ubuntu 20.04 "Focal", Ubuntu 22.04 "Jammy", Debian 11 "Bullseye", and Raspberry Pi OS 11 "Bullseye")**
 
  - Install and configure: `sudo ./siaas_agent_install_and_configure.sh`
 
