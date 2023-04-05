@@ -9,8 +9,9 @@ fi
 
 cd ${SCRIPT_DIR}
 
+# INSTALL PACKAGES
 apt-get update
-apt-get install -y python3 python3-pip python3-venv git nmap dmidecode
+apt-get install -y python3 python3-pip python3-venv git nmap dmidecode || exit 1
 
 # CRONTAB
 cat << EOF | sudo tee /etc/cron.daily/siaas-agent
