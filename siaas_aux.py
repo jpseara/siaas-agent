@@ -236,7 +236,7 @@ def write_to_local_file(file_to_write, data_to_insert):
         logger.debug("All data that will now be written to the file:\n" +
                      pprint.pformat(data_to_insert, sort_dicts=False))
         with open(file_to_write, 'w') as file:
-            file.write(json.dumps(data_to_insert))
+            file.write(json.dumps(data_to_insert, sort_keys=False))
             logger.debug("Local file write ended successfully.")
             return True
     except Exception as e:
