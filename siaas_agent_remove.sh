@@ -9,11 +9,12 @@ fi
 
 cd ${SCRIPT_DIR}
 
+systemctl stop siaas-agent
+
 # CRONTAB
 rm -f /etc/cron.daily/siaas-agent
 
 # SERVICE CONFIGURATION
-systemctl stop siaas-agent
 rm -f /var/log/siaas-agent
 rm -f /etc/systemd/system/siaas-agent.service
 systemctl daemon-reload
