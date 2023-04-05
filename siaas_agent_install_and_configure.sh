@@ -11,10 +11,10 @@ cd ${SCRIPT_DIR}
 
 # INSTALL PACKAGES
 apt-get update
-apt-get install -y python3 python3-pip python3-venv git nmap dmidecode || exit 1
+apt-get install -y python3 python3-pip python3-venv git nmap dmidecode ca-certificates || exit 1
 
 # CRONTAB
-cat << EOF | sudo tee /etc/cron.daily/siaas-agent
+cat << EOF | tee /etc/cron.daily/siaas-agent
 #!/bin/bash
 echo "Starting SIAAS Agent cronjob: "\$(date) > /tmp/siaas_agent_last_cronjob
 ${SCRIPT_DIR}/siaas_agent_refresh_nmap_scripts_repos.sh | tee -a /tmp/siaas_agent_last_cronjob
@@ -26,7 +26,7 @@ chmod 755 /etc/cron.daily/siaas-agent
 mkdir -p ssl
 cp -n conf/siaas_agent.cnf.orig conf/siaas_agent.cnf
 ln -fsT ${SCRIPT_DIR}/log /var/log/siaas-agent
-cat << EOF | sudo tee /etc/systemd/system/siaas-agent.service
+cat << EOF | tee /etc/systemd/system/siaas-agent.service
 [Unit]
 Description=SIAAS Agent
 [Service]
