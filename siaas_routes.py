@@ -30,7 +30,8 @@ def index():
         'module': 'Agent',
         'api': SIAAS_API,
         'author': 'João Pedro Seara',
-        'supervisor': 'Carlos Serrão'
+        'supervisor': 'Carlos Serrão',
+        'docs': request.url_root.rstrip('/')+"/docs"
     }
     return jsonify(
         {
