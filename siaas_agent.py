@@ -9,6 +9,7 @@ import time
 import multiprocessing_logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask, jsonify, render_template
+from flask_swagger_ui import get_swaggerui_blueprint
 from multiprocessing import Process, Value, Manager, Lock
 from waitress import serve
 
@@ -18,6 +19,9 @@ logger = logging.getLogger(__name__)
 SIAAS_VERSION = "1.0.0"
 LOG_DIR = "log"
 API_PORT = 5001
+SWAGGER_URL = "/docs"  # route for exposing Swagger UI
+SWAGGER_JSON_URL = "/static/swagger_siaas_agent.json"
+SWAGGER_APP_NAME = "SIAAS Agent"
 
 if __name__ == "__main__":
 
@@ -117,6 +121,8 @@ if __name__ == "__main__":
     if siaas_aux.validate_bool_string(enable_internal_api):
         logger.info("Internal API is now starting on port " +
                     str(API_PORT)+" ...")
+        app.register_blueprint(get_swaggerui_blueprint(SWAGGER_URL, SWAGGER_JSON_URL, config={
+                               'app_name': SWAGGER_APP_NAME}), url_prefix=SWAGGER_URL)
         app.run(debug=True, use_reloader=False, host="0.0.0.0", port=API_PORT)
         #serve(app, host="0.0.0.0", port=API_PORT)
 

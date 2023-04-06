@@ -1,0 +1,51 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "SIAAS Local API",
+    "description": "API running in the SIAAS Agent for read-only purposes."
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "index"
+        ],
+        "description": "Shows API information.",
+        "responses": {
+          "200": {
+            "description": "Success."
+          }
+        }
+      }
+    },
+    "/siaas-agent": {
+      "get": {
+        "tags": [
+          "siaas-agent"
+        ],
+        "description": "Shows the data collected by the agent.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "module",
+            "required": false,
+            "description": "Filters specific modules (accepts a comma-separated list).",
+            "schema": {
+              "type": "string",
+              "example": "platform,neighborhood,portscanner,config"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "500": {
+            "description": "Bad input or server error."
+          }
+        }
+      }
+    }
+  }
+}
