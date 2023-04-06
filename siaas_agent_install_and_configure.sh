@@ -7,6 +7,9 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
 cd ${SCRIPT_DIR}
 
 # INSTALL PACKAGES
