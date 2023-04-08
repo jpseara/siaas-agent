@@ -157,6 +157,9 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
         logger.debug("Getting configuration dictionary from local DB ...")
         config_dict = read_from_local_file(
             local_dict)
+        if not isinstance(config_dict, dict):
+            logger.error("Configuration dictionary from the local DB is not in a valid format. Returning nothing.")
+            return {}
         if len(config_dict or '') > 0:
             out_dict = {}
             for k in config_dict.keys():
@@ -175,6 +178,9 @@ def get_config_from_configs_db(local_dict=os.path.join(sys.path[0], 'var/config.
                      config_name+"' from local DB ...")
         config_dict = read_from_local_file(
             local_dict)
+        if not isinstance(config_dict, dict):
+            logger.error("Configuration dictionary from the local DB is not in a valid format. Returning nothing.")
+            return None
         if len(config_dict or '') > 0:
             if config_name in config_dict.keys():
                 value = config_dict[config_name]

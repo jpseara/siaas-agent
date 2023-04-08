@@ -22,7 +22,7 @@ paths:
       description: "Shows module and configuration data from the local DBs"
       parameters:
         - name: module
-          description: "Filters specific modules (accepts multiple values, comma-separated)"
+          description: "Filters specific modules (accepts multiple comma-separated values)"
           in: query
           explode: false
           required: false
