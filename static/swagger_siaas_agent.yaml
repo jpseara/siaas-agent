@@ -2,14 +2,14 @@ openapi: 3.0.3
 info:
   version: 1.0.0
   title: "SIAAS Local API"
-  description: "API running in the SIAAS Agent for read-only purposes"
+  description: "Local API running in the SIAAS Agent"
 
 paths:
   /:
     get:
       tags:
         - "index"
-      summary: "API information"
+      summary: "Local API information"
       description: "Shows details about the local API running in the agent"
       responses:
         '200':
@@ -22,18 +22,18 @@ paths:
       description: "Shows module and configuration data from the local DBs"
       parameters:
         - name: module
+          description: "Filters specific modules (accepts multiple values, comma-separated)"
           in: query
           explode: false
           required: false
-          description: "Filters specific modules (accepts multiple values, comma-separated)"
           allowReserved: true
           schema:
             type: array
             items:
               type: string
               enum: ["platform","neighborhood","portscanner","config","*"]
-            default: "*"
-          #example: "portscanner,neighborhood" # comment to avoid: https://github.com/swagger-api/swagger-ui/issues/5776
+            default: ["*"]
+          #example: ["neighborhood","portscanner"] # comment to avoid: https://github.com/swagger-api/swagger-ui/issues/5776
       responses:
         '200':
           description: "Success"
