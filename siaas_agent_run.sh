@@ -10,16 +10,13 @@ fi
 cd ${SCRIPT_DIR}
 rm -f ./var/uid
 
+# Reinstall venv if for some reason it disappeared
 if ! source ./venv/bin/activate 2> /dev/null
 then
-	python3 -m venv ./venv
-	source ./venv/bin/activate
-	pip3 install wheel==0.37.1
-	pip3 install -r ./requirements.txt
-	pip3 install -U certifi # update CA certificates
-	#pip3 install -e git+https://github.com/jpseara/python3-nmap.git#egg=python3-nmap # forked nmap version
+	./siaas_agent_venv_setup.sh
 fi
 
+# Try to refresh Nmap scripts on startup
 ./siaas_agent_refresh_nmap_scripts_repos.sh
 
 source ./venv/bin/activate

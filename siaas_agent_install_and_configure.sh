@@ -40,4 +40,9 @@ EOF
 systemctl daemon-reload
 systemctl enable siaas-agent
 
+# INITIALIZE
+sudo rm -rf ${SCRIPT_DIR}/venv
+${SCRIPT_DIR}/siaas_agent_venv_setup.sh
+${SCRIPT_DIR}/siaas_agent_refresh_nmap_scripts_repos.sh
+
 echo -e "\nSIAAS Agent will be started on boot.\n\nTo start (or restart) manually right now: sudo systemctl [start/restart] siaas-agent\n"
