@@ -32,6 +32,8 @@ ln -fsT ${SCRIPT_DIR}/log /var/log/siaas-agent
 cat << EOF | tee /etc/systemd/system/siaas-agent.service
 [Unit]
 Description=SIAAS Agent
+# if SIAAS Server is installed (AIO setup), let it start first
+After=siaas-server.service
 
 [Service]
 ExecStart=${SCRIPT_DIR}/siaas_agent_run.sh
