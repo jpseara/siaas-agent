@@ -32,8 +32,11 @@ ln -fsT ${SCRIPT_DIR}/log /var/log/siaas-agent
 cat << EOF | tee /etc/systemd/system/siaas-agent.service
 [Unit]
 Description=SIAAS Agent
+
 [Service]
 ExecStart=${SCRIPT_DIR}/siaas_agent_run.sh
+Restart=on-failure
+
 [Install]
 WantedBy=multi-user.target
 EOF
