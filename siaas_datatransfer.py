@@ -8,17 +8,20 @@ import os
 import sys
 import pprint
 import time
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 
-def upload_agent_data(api_base_uri, last_uploaded_dict={}, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None, silent=False, first_run=False):
+def upload_agent_data(api_base_uri, last_uploaded_dict=None, ignore_ssl=False, ca_bundle=None, api_user=None, api_pwd=None, silent=False, first_run=False):
     """
     Uploads agent data (with passwords anonymized), after connecting to the server's API
     If silent mode is on, or first run, only uploads configs and platform data
     Returns True if all OK; False if anything failed
     """
+
+    if last_uploaded_dict == None:
+        last_uploaded_dict = {}
+
     logger.info("Uploading agent data to the server ...")
 
     siaas_uid = siaas_aux.get_or_create_unique_system_id()

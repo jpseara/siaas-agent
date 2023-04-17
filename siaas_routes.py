@@ -3,11 +3,8 @@
 # By João Pedro Seara, 2023
 
 from __main__ import app
-from flask import jsonify, request, abort
+from flask import jsonify, request
 import siaas_aux
-import json
-import os
-import sys
 
 SIAAS_API = "v1"
 

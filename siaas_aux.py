@@ -6,6 +6,7 @@ import ipaddress
 import scapy.config
 import scapy.layers.l2
 import scapy.route
+import scapy.utils
 import math
 import dns.resolver
 import pprint
@@ -18,7 +19,6 @@ import requests
 import urllib3
 import json
 from datetime import datetime
-from urllib.parse import quote_plus
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +30,12 @@ def merge_module_dicts(modules=""):
     """
     merged_dict = {}
     for module in sorted(set(modules.lower().split(','))):
+        next_dict_to_merge = {}
         module = module.strip()
         try:
             module_dict = read_from_local_file(
                 os.path.join(sys.path[0], 'var/'+str(module)+'.db'))
             if module_dict != None:
-                next_dict_to_merge = {}
                 next_dict_to_merge[module] = module_dict
                 merged_dict = dict(
                     list(merged_dict.items())+list(next_dict_to_merge.items()))
@@ -47,12 +47,16 @@ def merge_module_dicts(modules=""):
     return merged_dict
 
 
-def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_local.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict={}):
+def merge_configs_from_upstream(local_dict=os.path.join(sys.path[0], 'var/config_local.db'), output=os.path.join(sys.path[0], 'var/config.db'), upstream_dict=None):
     """
     Merges the upstream configs to the local configs, after removing protected configurations from the upstream configs
     If the config disappears from the server, it reverts to the local config
     In case of errors, no changes are made, and False is returned
     """
+
+    if upstream_dict == None:
+        upstream_dict = {}
+
     local_config_dict = {}
     merged_config_dict = {}
     delta_dict = {}
@@ -496,8 +500,8 @@ def get_ipv6_cidr(mask):
                 break
             count += bitCount.index(int(w, 16))
     except:
-        return None
         logger.warning("Bad IPv6 netmask: "+mask)
+        return None
     return count
 
 

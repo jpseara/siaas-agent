@@ -7,13 +7,8 @@ import os
 import sys
 import logging
 import time
-import json
 import nmap3
-import re
 import concurrent.futures
-import subprocess
-import socket
-import ipaddress
 import pprint
 
 logger = logging.getLogger(__name__)
@@ -163,6 +158,7 @@ def scan_per_port(target, port, protocol, nmap_scripts_string=None, timeout=600)
                         raise TimeoutError(str(timeout))
 
             scanned_ip = None
+            host_results = {}
             for k in results.keys():
                 if siaas_aux.is_ipv4_or_ipv6(k):
                     host_results = results[k]
@@ -268,6 +264,7 @@ def get_system_info(target, specific_ports=None, timeout=600):
                     raise TimeoutError(str(timeout))
 
         scanned_ip = None
+        host_results = {}
         for k in results.keys():
             if siaas_aux.is_ipv4_or_ipv6(k):
                 host_results = results[k]

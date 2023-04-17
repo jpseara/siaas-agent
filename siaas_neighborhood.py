@@ -11,16 +11,10 @@ import scapy.layers.l2
 import scapy.route
 import socket
 import subprocess
-import math
-import errno
 import os
 import getopt
 import sys
 import time
-import json
-import dns.resolver
-import ipaddress
-import pprint
 
 logger = logging.getLogger(__name__)
 
@@ -146,7 +140,7 @@ def scan_and_print_neighbors(net, interface, timeout=5):
         try:
             ip = socket.getaddrinfo(r.psrc, None)[0][4][0]
         except:
-            logger.warning("The automatically found host "+host +
+            logger.warning("The automatically found host " + r.psrc +
                            " in the neighborhood of '"+interface+"' can't be resolved. Skipped.")
             continue
 

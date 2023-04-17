@@ -16,6 +16,7 @@ cd ${SCRIPT_DIR}
 ./venv/bin/pip3 freeze > ./requirements.txt
 chmod 664 ./requirements.txt
 rm -rf ./__pycache__
+rm -rf ./.idea
 rm -rf ./log
 rm -rf ./tmp
 rm -rf ./var

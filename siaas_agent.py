@@ -8,9 +8,9 @@ import logging
 import time
 import multiprocessing_logging
 from logging.handlers import RotatingFileHandler
-from flask import Flask, jsonify, render_template
+from flask import Flask
 from flask_swagger_ui import get_swaggerui_blueprint
-from multiprocessing import Process, Value, Manager, Lock
+from multiprocessing import Process
 from waitress import serve
 
 app = Flask(__name__)

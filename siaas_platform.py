@@ -7,12 +7,8 @@ import siaas_aux
 import psutil
 import platform as platform_mod
 import cpuinfo
-import socket
-import re
-import time
 import sys
 import os
-import json
 import ipaddress
 import logging
 import subprocess
