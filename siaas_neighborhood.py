@@ -111,7 +111,7 @@ def get_arp_ndp_known_hosts():
     return ip_mac_host
 
 
-def scan_and_print_neighbors(net, interface, timeout=5):
+def discover_subnet_neighbors(net, interface, timeout=5):
     """
     Finds neighborhood hosts in the same IPv4 range of the network interfaces
     Returns a dict with the findings, or an empty dict if nothing is found
@@ -337,7 +337,7 @@ def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_w
 
             if int(mask) > 16:
                 auto_hosts = dict(list(auto_hosts.items(
-                ))+list(scan_and_print_neighbors(net, interface).items()))
+                ))+list(discover_subnet_neighbors(net, interface).items()))
                 auto_scanned_interfaces += 1
             else:
                 logger.warning("Skipping network "+net +
