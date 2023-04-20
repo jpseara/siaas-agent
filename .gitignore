@@ -32,6 +32,7 @@ share/python-wheels/
 MANIFEST
 *.swp
 siaas_env*
+siaas_db_backup_*
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
