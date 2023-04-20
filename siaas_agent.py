@@ -11,7 +11,6 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask_swagger_ui import get_swaggerui_blueprint
 from multiprocessing import Process
-from waitress import serve
 
 app = Flask(__name__)
 logger = logging.getLogger(__name__)
@@ -124,7 +123,6 @@ if __name__ == "__main__":
         app.register_blueprint(get_swaggerui_blueprint(SWAGGER_URL, SWAGGER_JSON_URL, config={
                                'app_name': SWAGGER_APP_NAME}), url_prefix=SWAGGER_URL)
         app.run(debug=True, use_reloader=False, host="0.0.0.0", port=API_PORT)
-        #serve(app, host="0.0.0.0", port=API_PORT)
 
     platform.join()
     neighborhood.join()
