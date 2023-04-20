@@ -24,6 +24,7 @@ var/
 conf/*.cnf
 ssl/
 wheels/
+dump/
 pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
