@@ -311,7 +311,7 @@ def get_or_create_unique_system_id():
             ).strip('\x00'))
     except:
         pass
-    if len(new_uid or '') < 5:
+    if len(new_uid or '') < 5:  # minimum number of characters, to avoid DB duplication
         try:
             with open("/sys/class/dmi/id/board_serial", 'r') as file:
                 content = file.read()
