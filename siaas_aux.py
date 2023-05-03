@@ -311,7 +311,7 @@ def get_or_create_unique_system_id():
             ).strip('\x00'))
     except:
         pass
-    if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
+    if len(new_uid or '') < 5:
         try:
             with open("/sys/class/dmi/id/board_serial", 'r') as file:
                 content = file.read()
@@ -319,7 +319,7 @@ def get_or_create_unique_system_id():
                 ).strip('\x00'))
         except:
             pass
-    if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
+    if len(new_uid or '') < 5:
         try:
             with open("/sys/class/dmi/id/product_uuid", 'r') as file:
                 content = file.read()
@@ -327,14 +327,14 @@ def get_or_create_unique_system_id():
                 ).strip('\x00'))
         except:
             pass
-    # if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
+    # if len(new_uid or '') < 5:
     #    try:
     #        with open("/var/lib/dbus/machine-id", 'r') as file:
     #            content = file.read()
     #            new_uid = str(content.split('\n')[0].strip().strip('\x00'))
     #    except:
     #        pass
-    if len(new_uid or '') == 0 or new_uid.upper() == "N/A":
+    if len(new_uid or '') < 5:
         logger.warning(
             "Couldn't create a new UID from the system info. Will create a new randomized UUID for this session only!")
         try:
