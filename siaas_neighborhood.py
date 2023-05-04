@@ -274,7 +274,7 @@ def add_manual_hosts(manual_hosts_string=""):
 
 def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_wifi_auto_discovery=False):
     """
-    Main neighborhood host finding logic (ARP/NDP + Subnet range finding + Manual hosts
+    Main neighborhood host finding logic (ARP/NDP + subnet range arping (if IPv4 and subnet mask > 16) + manual hosts)
     """
     arp_ndp_hosts = {}
     auto_hosts = {}
@@ -340,7 +340,7 @@ def main(interface_to_scan=None, disable_neighborhood_discovery=False, disable_w
                 ))+list(discover_subnet_neighbors(net, interface).items()))
                 auto_scanned_interfaces += 1
             else:
-                logger.warning("Skipping network "+net +
+                logger.warning("Skipping network " + net +
                                " as the subnet size is too big.")
 
         if auto_scanned_interfaces == 0:
