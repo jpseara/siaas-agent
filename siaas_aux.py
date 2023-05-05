@@ -307,24 +307,21 @@ def get_or_create_unique_system_id():
     try:
         with open("/sys/firmware/devicetree/base/serial-number", 'r') as file:  # Raspberry Pi serial
             content = file.read()
-            new_uid = str(content.split('\n')[0].strip(
-            ).strip('\x00'))
+            new_uid = str(content.split('\n')[0].strip().strip('\x00'))
     except:
         pass
     if len(new_uid or '') < 5:  # minimum number of characters, to avoid DB duplication
         try:
             with open("/sys/class/dmi/id/board_serial", 'r') as file:
                 content = file.read()
-                new_uid = str(content.split('\n')[0].strip(
-                ).strip('\x00'))
+                new_uid = str(content.split('\n')[0].strip().strip('\x00'))
         except:
             pass
     if len(new_uid or '') < 5:
         try:
             with open("/sys/class/dmi/id/product_uuid", 'r') as file:
                 content = file.read()
-                new_uid = str(content.split('\n')[0].strip(
-                ).strip('\x00'))
+                new_uid = str(content.split('\n')[0].strip().strip('\x00'))
         except:
             pass
     # if len(new_uid or '') < 5:
