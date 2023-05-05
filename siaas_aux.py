@@ -333,7 +333,7 @@ def get_or_create_unique_system_id():
     #        pass
     if len(new_uid or '') < 5:
         logger.warning(
-            "Couldn't create a new UID from the system info. Will create a new randomized UUID for this session only!")
+            "Couldn't create a new UID from the system info. Will create a new randomized UID for this session only!")
         try:
             new_uid = "temp-"+str(uuid.UUID(int=uuid.getnode()))
         except:
