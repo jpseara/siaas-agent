@@ -205,10 +205,10 @@ def add_manual_hosts(manual_hosts_string=""):
         host = host_uncommented.split('\t')[0].split('\n')[0].strip()
 
         # filter localhosts and filter any IPv6 address that's not global unicast to avoid reserved ranges which sometimes are filled with automatically generated random addresses
-        if (siaas_aux.is_ipv4_or_ipv6(host) and (host.startswith("127.") or host.startswith("169.") or host == "::1" or (":" in host and (len(host.split(':')[0]) != 4 or (host.split(':')[0][0] != '2' and host.split(':')[0][0] != '3'))))) or host.lower() == "localhost":
-            logger.warning("Manually configured host '"+host +
-                           "' is invalid. No localhost or reserved IP entries are allowed.")
-            continue
+        # if (siaas_aux.is_ipv4_or_ipv6(host) and (host.startswith("127.") or host.startswith("169.") or host == "::1" or (":" in host and (len(host.split(':')[0]) != 4 or (host.split(':')[0][0] != '2' and host.split(':')[0][0] != '3'))))) or host.lower() == "localhost":
+        #    logger.warning("Manually configured host '"+host +
+        #                   "' is invalid. No localhost or reserved IP entries are allowed.")
+        #    continue
 
         if len(host) > 0:
 
