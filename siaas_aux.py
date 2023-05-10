@@ -324,13 +324,13 @@ def get_or_create_unique_system_id():
                 new_uid = str(content.split('\n')[0].strip().strip('\x00'))
         except:
             pass
-    # if len(new_uid or '') < 5:
-    #    try:
-    #        with open("/var/lib/dbus/machine-id", 'r') as file:
-    #            content = file.read()
-    #            new_uid = str(content.split('\n')[0].strip().strip('\x00'))
-    #    except:
-    #        pass
+    if len(new_uid or '') < 5:
+        try:
+            with open("/var/lib/dbus/machine-id", 'r') as file:
+                content = file.read()
+                new_uid = str(content.split('\n')[0].strip().strip('\x00'))
+        except:
+            pass
     if len(new_uid or '') < 5:
         logger.warning(
             "Couldn't create a new UID from the system info. Will create a new randomized UID for this session only!")
