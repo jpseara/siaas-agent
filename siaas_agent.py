@@ -121,7 +121,7 @@ if __name__ == "__main__":
         logger.info("Internal API is now starting on port " +
                     str(API_PORT)+" ...")
         app.register_blueprint(get_swaggerui_blueprint(SWAGGER_URL, SWAGGER_JSON_URL, config={
-                               'app_name': SWAGGER_APP_NAME}), url_prefix=SWAGGER_URL)
+                               'app_name': SWAGGER_APP_NAME, 'validatorUrl': 'none'}), url_prefix=SWAGGER_URL)
         app.run(debug=True, use_reloader=False, host="0.0.0.0", port=API_PORT)
 
     platform.join()
