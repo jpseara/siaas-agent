@@ -1,6 +1,6 @@
 # Intelligent System for Automation of Security Audits (SIAAS)
 # Agent - Auxiliary functions
-# By João Pedro Seara, 2023
+# By João Pedro Seara, 2022-2024
 
 import ipaddress
 import scapy.config

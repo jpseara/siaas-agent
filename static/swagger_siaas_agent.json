@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "title": "SIAAS Local API",
     "description": "Local API running in the SIAAS Agent"
   },

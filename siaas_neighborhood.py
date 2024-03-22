@@ -1,6 +1,6 @@
 # Intelligent System for Automation of Security Audits (SIAAS)
 # Agent - Neighborhood module
-# By João Pedro Seara, 2023
+# By João Pedro Seara, 2022-2024
 # Contains pieces of code from Layer 2 network neighbourhood discovery tool by Benedikt Waldvogel - https://github.com/bwaldvogel/neighbourhood
 
 from __future__ import absolute_import, division, print_function
