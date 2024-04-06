@@ -365,6 +365,8 @@ def loop(interface_to_scan=None):
     os.makedirs(os.path.join(sys.path[0], 'var'), exist_ok=True)
     siaas_aux.write_to_local_file(os.path.join(
         sys.path[0], 'var/neighborhood.db'), {})
+    os.chmod(os.path.join(sys.path[0], 'var/neighborhood.db'), os.stat(
+        os.path.join(sys.path[0], 'var/neighborhood.db')).st_mode & ~0o007)
 
     while True:
 

@@ -59,8 +59,12 @@ if __name__ == "__main__":
     # Initializing local databases for configurations
     siaas_aux.write_to_local_file(
         os.path.join(sys.path[0], 'var/config.db'), {})
+    os.chmod(os.path.join(sys.path[0], 'var/config.db'), os.stat(
+        os.path.join(sys.path[0], 'var/config.db')).st_mode & ~0o007)
     siaas_aux.write_to_local_file(os.path.join(
         sys.path[0], 'var/config_local.db'), {})
+    os.chmod(os.path.join(sys.path[0], 'var/config_local.db'), os.stat(
+        os.path.join(sys.path[0], 'var/config_local.db')).st_mode & ~0o007)
 
     # Read local configuration file and insert in local databases
     siaas_aux.write_config_db_from_conf_file(

@@ -208,6 +208,8 @@ def loop(version=""):
     os.makedirs(os.path.join(sys.path[0], 'var'), exist_ok=True)
     siaas_aux.write_to_local_file(
         os.path.join(sys.path[0], 'var/platform.db'), {})
+    os.chmod(os.path.join(sys.path[0], 'var/platform.db'), os.stat(
+        os.path.join(sys.path[0], 'var/platform.db')).st_mode & ~0o007)
 
     while True:
 
